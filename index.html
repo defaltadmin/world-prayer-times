@@ -490,14 +490,14 @@
 
     <!-- PRAYER LEGEND -->
     <div class="legend">
-        <div class="legend-item"><div class="legend-dot fajr"></div>Fajr</div>
-        <div class="legend-item"><div class="legend-dot sunrise"></div>Sunrise</div>
-        <div class="legend-item"><div class="legend-dot dhuhr"></div>Dhuhr</div>
-        <div class="legend-item"><div class="legend-dot asr"></div>Asr</div>
-        <div class="legend-item"><div class="legend-dot maghrib"></div>Maghrib</div>
-        <div class="legend-item"><div class="legend-dot isha"></div>Isha</div>
-        <div class="legend-item"><div class="legend-dot now"></div>NOW</div>
-        <div class="legend-item"><div class="legend-dot safe"></div>Selection</div>
+        <div class="legend-item"><div class="legend-dot fajr"></div><span id="lg-fajr">Fajr</span></div>
+        <div class="legend-item"><div class="legend-dot sunrise"></div><span id="lg-sunrise">Sunrise</span></div>
+        <div class="legend-item"><div class="legend-dot dhuhr"></div><span id="lg-dhuhr">Dhuhr</span></div>
+        <div class="legend-item"><div class="legend-dot asr"></div><span id="lg-asr">Asr</span></div>
+        <div class="legend-item"><div class="legend-dot maghrib"></div><span id="lg-maghrib">Maghrib</span></div>
+        <div class="legend-item"><div class="legend-dot isha"></div><span id="lg-isha">Isha</span></div>
+        <div class="legend-item"><div class="legend-dot now"></div><span id="lg-now">NOW</span></div>
+        <div class="legend-item"><div class="legend-dot safe"></div><span id="lg-sel">Selection</span></div>
     </div>
 
     <!-- RULER -->
@@ -726,9 +726,10 @@ let alarm=localStorage.getItem('wp_a')||'ting';
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 
 /* ── i18n ───────────────────────────────────────── */
-const i18n={en:{safe:'Safe Window',conflict:'Conflict',next:'Next:',noClass:'No upcoming classes',nextClass:'Next class:'},
-    ar:{safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:'}};
+const i18n={en:{safe:'Safe Window',conflict:'Conflict',next:'Next:',noClass:'No upcoming classes',nextClass:'Next class:',sunrise:'Sunrise',now:'NOW',selection:'Selection'},
+    ar:{safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:',sunrise:'شروق',now:'الآن',selection:'التحديد'}};
 const t=k=>i18n[lang]?.[k]||i18n.en[k]||k;
+function updateLegend(){const n=PRAYER_NAMES[lang];$('#lg-fajr').textContent=n.Fajr;$('#lg-dhuhr').textContent=n.Dhuhr;$('#lg-asr').textContent=n.Asr;$('#lg-maghrib').textContent=n.Maghrib;$('#lg-isha').textContent=n.Isha;$('#lg-sunrise').textContent=t('sunrise');$('#lg-now').textContent=t('now');$('#lg-sel').textContent=t('selection');}
 const PRAYER_NAMES={en:{Fajr:'Fajr',Dhuhr:'Dhuhr',Asr:'Asr',Maghrib:'Maghrib',Isha:'Isha'},ar:{Fajr:'فجر',Dhuhr:'ظهر',Asr:'عصر',Maghrib:'مغرب',Isha:'عشاء'}};
 function toast(msg){const el=document.createElement('div');el.textContent=msg;el.className='toast';el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:8px;font-size:0.8rem;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.35);pointer-events:none;';document.body.appendChild(el);setTimeout(()=>el.remove(),2500);}
 
@@ -990,7 +991,7 @@ $('#theme-btn').onclick=()=>{dark=!dark;document.documentElement.setAttribute('d
 $('#theme-btn').textContent=dark?'Dark':'Light';
 $('#fmt-btn').onclick=()=>{h24=!h24;localStorage.setItem('wp_24',h24?'1':'0');$('#fmt-btn').textContent=h24?'12h':'24h';renderRuler();updateSel();renderAll();};
 $('#fmt-btn').textContent=h24?'12h':'24h';
-$('#lang-sel').onchange=function(){lang=this.value;localStorage.setItem('wp_l',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';checkConflicts();updateClsCountdown();};
+$('#lang-sel').onchange=function(){lang=this.value;localStorage.setItem('wp_l',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';checkConflicts();updateClsCountdown();updateLegend();};
 $('#lang-sel').value=lang;
 
 /* ── Share ──────────────────────────────────────── */
@@ -1067,19 +1068,17 @@ async function detectUser(){
         const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
         userCity={id:'user',name:'You',tz,lat:51.51,lng:-0.13,method:3,isUser:true};
     }
-    mOffset=getOff(userCity.tz);localStorage.setItem('wp_u',JSON.stringify({id:userCity.id,name:userCity.name,tz:userCity.tz,method:userCity.method,isUser:userCity.isUser}));
+    mOffset=getOff(userCity.tz);localStorage.setItem('wp_u',JSON.stringify({id:userCity.id,name:userCity.name,tz:userCity.tz,lat:Math.round(userCity.lat*10)/10,lng:Math.round(userCity.lng*10)/10,method:userCity.method,isUser:userCity.isUser}));
 }
 
 /* ── Live clocks ────────────────────────────────── */
 function tickClocks(){
     $$('.city-clock').forEach(el=>{const tz=el.dataset.tz;if(tz)el.textContent=new Date().toLocaleTimeString('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!h24});});
     updateNow();
-    const d=$('#header-date');if(d){
-        const greg=new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
-        let hijri='';try{hijri=' · '+new Date().toLocaleDateString('en-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'});}catch{}
-        d.textContent=greg+hijri;
-    }
+    updateHeaderDate();
 }
+let _lastDateStr='';
+function updateHeaderDate(){const today=new Date().toISOString().slice(0,10);if(today===_lastDateStr)return;_lastDateStr=today;const greg=new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});let hijri='';try{hijri=' · '+new Date().toLocaleDateString('en-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'});}catch{};const d=$('#header-date');if(d)d.textContent=greg+hijri;}
 async function updateCD(){
     if(!userCity)return;const pd=await fetchPrayer(userCity);const now=new Date();
     const ls=now.toLocaleString('en-US',{timeZone:userCity.tz});const ld=new Date(ls);
@@ -1179,7 +1178,7 @@ document.addEventListener('keydown',e=>{
 let bgTimer;window.addEventListener('resize',()=>{clearTimeout(bgTimer);bgTimer=setTimeout(drawBG,150);});
 
 detectUser().then(()=>{
-    renderRuler();renderAll();updateSel();updateEnrolled();
+    renderRuler();renderAll();updateSel();updateEnrolled();updateLegend();
     setInterval(tickClocks,1000);
     setInterval(updateCD,10000);
     setInterval(()=>{cache={};renderAll();},30*60*1000);
