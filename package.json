@@ -4,10 +4,13 @@
   "description": "Coordinate prayer times across cities worldwide with visual timeline and conflict detection",
   "private": true,
   "scripts": {
-    "dev": "npx wrangler pages dev .",
-    "deploy": "npx wrangler pages deploy ."
+    "dev": "wrangler pages dev .",
+    "deploy": "wrangler pages deploy . --project-name world-prayer-times",
+    "deploy:prod": "wrangler pages deploy . --project-name world-prayer-times --branch main"
   },
   "keywords": ["prayer-times", "salah", "islam", "coordinator"],
-  "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
 }
