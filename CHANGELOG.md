@@ -2,6 +2,29 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.5.0] – 2026-06-15
+
+### Security
+- **CSP headers** — Content-Security-Policy added to _headers
+- **Geolocation privacy** — Only timezone stored, not coordinates
+- **iCal memory leak** — Blob URLs now revoked after download
+- **Service worker** — API responses no longer cached permanently
+
+### Fixed
+- **Touch listeners** — Fixed passive flag syntax for iOS/Android
+- **hour12 inversion** — Clock now shows correct 12h/24h format
+- **compCls day bug** — getUTCDay() replaced with getDay()
+- **Notification icon** — Now shows app icon instead of manifest.json
+
+### Added
+- **Toast system** — Non-intrusive feedback for share, export, etc.
+- **Arabic prayer names** — فجر، ظهر، عصر، مغرب، عشاء when lang=ar
+- **Hijri date** — Shows Islamic calendar date in header
+- **Keyboard control** — Arrow keys move selection, [ ] resize
+- **Canvas debounce** — Resize handler debounced to 150ms
+- **SEO meta tags** — Open Graph and Twitter card tags
+- **Performance** — Countdown updated every 10s instead of every 1s
+
 ## [1.4.0] – 2026-06-15
 
 ### Added

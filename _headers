@@ -2,13 +2,14 @@
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: geolocation=(self)
+  Permissions-Policy: geolocation=(self), notifications=(self)
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com; img-src 'self' data: blob:; worker-src 'self';
 
 /*.html
-  Cache-Control: no-cache
+  Cache-Control: no-cache, must-revalidate
 
-/*.css
-  Cache-Control: max-age=31536000
+/sw.js
+  Cache-Control: no-cache, must-revalidate
 
-/*.js
-  Cache-Control: max-age=31536000
+/manifest.json
+  Cache-Control: no-cache, must-revalidate

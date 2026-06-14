@@ -9,6 +9,14 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0f1e'/%3E%3Ccircle cx='50' cy='35' r='12' fill='none' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 v-28' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 l18 20 H32z' fill='%2338bdf8' opacity='0.3'/%3E%3Cpath d='M25 67 Q50 55 75 67' fill='none' stroke='%2338bdf8' stroke-width='2'/%3E%3C/svg%3E">
     <link rel="manifest" href="manifest.json">
 
+<!-- Add after existing meta tags -->
+    <meta property="og:title" content="Prayer Times – Coordinate Salah Across Cities">
+    <meta property="og:description" content="Visual timeline to find safe meeting windows that don't conflict with prayer times for Muslims worldwide.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://prayer.mscarabia.com">
+    <meta name="twitter:card" content="summary">
+    <link rel="canonical" href="https://prayer.mscarabia.com">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -682,6 +690,8 @@ const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 const i18n={en:{safe:'Safe Window',conflict:'Conflict',next:'Next:',noClass:'No upcoming classes',nextClass:'Next class:'},
     ar:{safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:'}};
 const t=k=>i18n[lang]?.[k]||i18n.en[k]||k;
+const PRAYER_NAMES={en:{Fajr:'Fajr',Dhuhr:'Dhuhr',Asr:'Asr',Maghrib:'Maghrib',Isha:'Isha'},ar:{Fajr:'فجر',Dhuhr:'ظهر',Asr:'عصر',Maghrib:'مغرب',Isha:'عشاء'}};
+function toast(msg){const el=document.createElement('div');el.textContent=msg;el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:8px;font-size:0.8rem;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.35);pointer-events:none;';document.body.appendChild(el);setTimeout(()=>el.remove(),2500);}
 
 /* ── Time utils ─────────────────────────────────── */
 function getOff(tz){const n=new Date(),u=new Date(n.toLocaleString('en-US',{timeZone:'UTC'})),t=new Date(n.toLocaleString('en-US',{timeZone:tz}));return(t-u)/36e5;}
@@ -722,7 +732,7 @@ async function renderRow(city){
     const lbl=document.createElement('div');
     lbl.className='city-label';lbl.style.position='relative';
     const now=new Date();
-    const lt=now.toLocaleTimeString('en-US',{timeZone:city.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:h24});
+    const lt=now.toLocaleTimeString('en-US',{timeZone:city.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!h24});
     const sign=pd.off>=0?'+':'';
     lbl.innerHTML=`<span class="city-name">${city.isUser?'<svg width="10" height="10" viewBox="0 0 24 24" fill="#38bdf8" style="vertical-align:middle;margin-right:2px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>':''}${city.name}${city.isUser?'<span class="you-badge">YOU</span>':''}</span>
     <span class="city-clock" data-tz="${city.tz}">${lt}</span>
@@ -750,7 +760,7 @@ async function renderRow(city){
         const b=document.createElement('div');
         b.className=`prayer-block ${name.toLowerCase()}`;
         b.style.left=pct(m)+'%';b.style.width=pct(Math.max(durHours,0.2))+'%';
-        b.textContent=name;b.title=`${name}: ${fmtH(m)} – ${fmtH(m+durHours)} (local ${fmtH(localStart)})`;
+        b.textContent=PRAYER_NAMES[lang]?.[name]||name;b.title=`${name}: ${fmtH(m)} – ${fmtH(m+durHours)} (local ${fmtH(localStart)})`;
         b.onclick=e=>{e.stopPropagation();selStart=m-selDur/2;updateSel();checkConflicts();};
         strip.appendChild(b);
     });
@@ -850,11 +860,11 @@ updateSel();checkConflicts();e.preventDefault();}
 function endD(){if(!dragging)return;dragging=resL=resR=false;$('#sel').classList.remove('dragging');document.body.style.cursor='';selStart=Math.round(selStart*2)/2;selDur=Math.round(selDur*2)/2;setStart(selStart);updateSel();checkConflicts();}
 function setStart(h){selStart=clamp(h,0,24-selDur);}
 
-$('#sel').onmousedown=e=>startD(e);$('#sel').ontouchstart=e=>startD(e),{passive:false};
-$('#rz-l').onmousedown=e=>startD(e,true,false);$('#rz-l').ontouchstart=e=>startD(e,true,false),{passive:false};
-$('#rz-r').onmousedown=e=>startD(e,false,true);$('#rz-r').ontouchstart=e=>startD(e,false,true),{passive:false};
-document.onmousemove=moveD;document.ontouchmove=moveD,{passive:false};
-document.onmouseup=endD;document.ontouchend=endD;
+$('#sel').onmousedown=e=>startD(e);$('#sel').addEventListener('touchstart',e=>startD(e),{passive:false});
+$('#rz-l').onmousedown=e=>startD(e,true,false);$('#rz-l').addEventListener('touchstart',e=>startD(e,true,false),{passive:false});
+$('#rz-r').onmousedown=e=>startD(e,false,true);$('#rz-r').addEventListener('touchstart',e=>startD(e,false,true),{passive:false});
+document.onmousemove=moveD;document.addEventListener('touchmove',moveD,{passive:false});
+document.onmouseup=endD;document.addEventListener('touchend',endD);
 
 $('#ruler').onclick=e=>{const r=$('#ruler').getBoundingClientRect();selStart=hrs(((e.clientX-r.left)/r.width)*100)-selDur/2;updateSel();checkConflicts();};
 $('#tl-scroll').onscroll=()=>{$('#ruler-scroll').scrollLeft=$('#tl-scroll').scrollLeft;};
@@ -865,7 +875,7 @@ function compCls(cls){
     const[h,m]=cls.start.split(':').map(Number),[eh,em]=cls.end.split(':').map(Number);
     const dur=(eh+em/60)-(h+m/60);const now=new Date();
     const bn=new Date(now.toLocaleString('en-US',{timeZone:'Europe/London'}));
-    let d=cls.day-bn.getUTCDay();if(d<0)d+=7;
+    let d=cls.day-bn.getDay();if(d<0)d+=7;
     const cd=new Date(Date.UTC(bn.getUTCFullYear(),bn.getUTCMonth(),bn.getUTCDate()+d,h,m));
     return{utcStart:cd.getUTCHours()+cd.getUTCMinutes()/60,utcEnd:cd.getUTCHours()+cd.getUTCMinutes()/60+dur,ts:cd.getTime(),subject:cls.subject,teacher:cls.teacher};
 }
@@ -951,7 +961,7 @@ function genShareLink(){
     if(lang==='ar')p.set('lang','ar');
     return`${window.location.origin}${window.location.pathname}?${p.toString()}`;
 }
-$('#btn-share').onclick=async()=>{try{await navigator.clipboard.writeText(genShareLink());const b=$('#btn-share');b.style.color='var(--accent)';setTimeout(()=>b.style.color='',1500);}catch(e){window.prompt('Share link:',genShareLink());}};
+$('#btn-share').onclick=async()=>{try{await navigator.clipboard.writeText(genShareLink());toast('Link copied!');}catch(e){window.prompt('Share link:',genShareLink());}};
 $('#btn-ical').onclick=()=>exportICal();
 function normCity(s){return s.toLowerCase().replace(/[^a-z0-9]/g,'');}
 function loadFromURL(){
@@ -969,13 +979,16 @@ function loadFromURL(){
 /* ── iCal Export ─────────────────────────────────── */
 function fmtICal(d){return d.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';}
 function exportICal(){
-    const now=new Date();const pad=n=>String(n).padStart(2,'0');
+    const now=new Date();
     const start=new Date(now);start.setHours(Math.floor(selStart),Math.round((selStart%1)*60),0);
     const end=new Date(now);end.setHours(Math.floor(selStart+selDur),Math.round(((selStart+selDur)%1)*60),0);
     const cityNames=cities.map(c=>c.name).join(', ');
-    const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Prayer Times//EN\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nSUMMARY:Safe Meeting Window (No Salah Conflict)\nDTSTART:${fmtICal(start)}\nDTEND:${fmtICal(end)}\nDESCRIPTION:Coordinated safe time across: ${cityNames}\nUID:${Date.now()}@prayer.mscarabia.com\nEND:VEVENT\nEND:VCALENDAR`;
+    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Prayer Times//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT','SUMMARY:Safe Meeting Window (No Salah Conflict)',`DTSTART:${fmtICal(start)}`,`DTEND:${fmtICal(end)}`,`DESCRIPTION:Coordinated safe time across: ${cityNames}`,`UID:${Date.now()}@prayer.mscarabia.com`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
     const blob=new Blob([ics],{type:'text/calendar'});
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`prayer-safe-${now.toISOString().slice(0,10)}.ics`;a.click();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=`prayer-safe-${now.toISOString().slice(0,10)}.ics`;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 /* ── Course panel ───────────────────────────────── */
@@ -1015,15 +1028,18 @@ async function detectUser(){
         const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
         userCity={id:'user',name:'You',tz,lat:51.51,lng:-0.13,method:3,isUser:true};
     }
-    mOffset=getOff(userCity.tz);localStorage.setItem('wp_u',JSON.stringify(userCity));
+    mOffset=getOff(userCity.tz);localStorage.setItem('wp_u',JSON.stringify({id:userCity.id,name:userCity.name,tz:userCity.tz,method:userCity.method,isUser:userCity.isUser}));
 }
 
 /* ── Live clocks ────────────────────────────────── */
 function tickClocks(){
-    $$('.city-clock').forEach(el=>{const tz=el.dataset.tz;if(tz)el.textContent=new Date().toLocaleTimeString('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:h24});});
+    $$('.city-clock').forEach(el=>{const tz=el.dataset.tz;if(tz)el.textContent=new Date().toLocaleTimeString('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!h24});});
     updateNow();
-    const d=$('#header-date');if(d)d.textContent=new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
-    updateCD();
+    const d=$('#header-date');if(d){
+        const greg=new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+        let hijri='';try{hijri=' · '+new Date().toLocaleDateString('en-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'});}catch{}
+        d.textContent=greg+hijri;
+    }
 }
 async function updateCD(){
     if(!userCity)return;const pd=await fetchPrayer(userCity);const now=new Date();
@@ -1101,7 +1117,7 @@ function schedulePrayerNotifs(){
         ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name=>{
             const pt=pd.loc[name];if(!pt||pt<lh)return;
             const ms=(pt-lh)*3600000-300000;// 5 min before
-            if(ms>0)setTimeout(()=>{if(notifEnabled)new Notification(`${name} Prayer Time`,{body:`Time for ${name} prayer`,icon:'/manifest.json'});},ms);
+            if(ms>0)setTimeout(()=>{if(notifEnabled)new Notification(`${PRAYER_NAMES[lang]?.[name]||name} Prayer`,{body:`Time for ${name} prayer`,icon:'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' rx=\'20\' fill=\'%23091117\'/%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'12\' fill=\'none\' stroke=\'%232dd4bf\' stroke-width=\'3\'/%3E%3Cpath d=\'M50 47 v-28\' stroke=\'%232dd4bf\' stroke-width=\'3\'/%3E%3C/svg%3E'});},ms);
         });
     });
 }
@@ -1109,9 +1125,24 @@ function schedulePrayerNotifs(){
 // Service Worker
 if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
+// Keyboard control for selection bar
+document.addEventListener('keydown',e=>{
+    if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;
+    const step=e.shiftKey?1:0.5;let changed=false;
+    if(e.key==='ArrowRight'){selStart=clamp(selStart+step,0,24-selDur);changed=true;}
+    else if(e.key==='ArrowLeft'){selStart=clamp(selStart-step,0,24-selDur);changed=true;}
+    else if(e.key===']'){selDur=clamp(selDur+step,0.5,24-selStart);changed=true;}
+    else if(e.key==='['){selDur=clamp(selDur-step,0.5,24-selStart);changed=true;}
+    if(changed){e.preventDefault();updateSel();checkConflicts();}
+});
+
+// Canvas resize debounce
+let bgTimer;window.addEventListener('resize',()=>{clearTimeout(bgTimer);bgTimer=setTimeout(drawBG,150);});
+
 detectUser().then(()=>{
     renderRuler();renderAll();updateSel();updateEnrolled();
     setInterval(tickClocks,1000);
+    setInterval(updateCD,10000);
     setInterval(()=>{cache={};renderAll();},30*60*1000);
     setTimeout(()=>{if(notifEnabled)schedulePrayerNotifs();},2000);
     // Hide loader
