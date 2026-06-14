@@ -7,6 +7,7 @@
     <meta name="description" content="Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.">
     <meta name="theme-color" content="#0a0f1e">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0f1e'/%3E%3Ccircle cx='50' cy='35' r='12' fill='none' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 v-28' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 l18 20 H32z' fill='%2338bdf8' opacity='0.3'/%3E%3Cpath d='M25 67 Q50 55 75 67' fill='none' stroke='%2338bdf8' stroke-width='2'/%3E%3C/svg%3E">
+    <link rel="manifest" href="manifest.json">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -419,6 +420,9 @@
             <button class="icon-btn" id="btn-course" title="Course info">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             </button>
+            <button class="icon-btn" id="btn-share" title="Share link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
             <button class="icon-btn" id="btn-settings" title="Settings">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
@@ -629,7 +633,6 @@ const POOL=[...CITIES,
     {id:'jakarta',name:'Jakarta',tz:'Asia/Jakarta',lat:-6.21,lng:106.85,method:3},
     {id:'singapore',name:'Singapore',tz:'Asia/Singapore',lat:1.35,lng:103.82,method:3},
     {id:'karachi',name:'Karachi',tz:'Asia/Karachi',lat:24.86,lng:67.01,method:2},
-    {id:'istanbul',name:'Istanbul',tz:'Europe/Istanbul',lat:41.01,lng:28.98,method:3},
 ];
 const CLASSES=[
     {day:4,start:'14:30',end:'15:30',subject:'Fique',teacher:'Aakif'},
@@ -717,13 +720,30 @@ async function renderRow(city){
     strip.style.cssText='flex:1;position:relative;background:var(--surface);';
     ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name=>{
         const u=pd.utc[name];if(u===undefined)return;
-        const m=toMaster(u),b=document.createElement('div');
+        const m=toMaster(u);
+        const localStart=pd.loc[name];
+        let localEnd=pd.loc[name+'End'];
+        if(!localEnd&&pd.loc[name+'Minutes'])localEnd=localStart+pd.loc[name+'Minutes']/60;
+        if(!localEnd){
+            const durMap={Fajr:0.33,Dhuhr:0.25,Asr:0.25,Maghrib:0.2,Isha:0.3};
+            localEnd=localStart+(durMap[name]||0.25);
+        }
+        const durHours=localEnd-localStart;
+        const b=document.createElement('div');
         b.className=`prayer-block ${name.toLowerCase()}`;
-        b.style.left=pct(m)+'%';b.style.width=pct(0.5)+'%';
-        b.textContent=name;b.title=`${name}: ${fmtH(m)} (local ${fmtH(pd.loc[name])})`;
+        b.style.left=pct(m)+'%';b.style.width=pct(Math.max(durHours,0.2))+'%';
+        b.textContent=name;b.title=`${name}: ${fmtH(m)} – ${fmtH(m+durHours)} (local ${fmtH(localStart)})`;
         b.onclick=e=>{e.stopPropagation();selStart=m-selDur/2;updateSel();checkConflicts();};
         strip.appendChild(b);
     });
+    // Sunrise marker
+    if(pd.utc.Sunrise!==undefined){
+        const srM=toMaster(pd.utc.Sunrise);
+        const sr=document.createElement('div');
+        sr.style.cssText=`position:absolute;left:${pct(srM)}%;width:1.5px;top:0;bottom:0;background:rgba(251,191,36,0.5);z-index:1;pointer-events:none;`;
+        sr.title=`Sunrise: ${fmtH(srM)}`;
+        strip.appendChild(sr);
+    }
     enrolled.forEach(cls=>{
         const ms=toMaster(cls.utcStart),me=toMaster(cls.utcEnd);
         const ev=document.createElement('div');ev.className='class-ev';
@@ -742,7 +762,25 @@ async function renderAll(){
     updateOverlayH();updateNow();updateSel();checkConflicts();renderToggles();
 }
 function updateOverlayH(){const h=$('#rows').offsetHeight;if(h>0)$('#sel').style.height=h+'px';}
-function updateNow(){const n=new Date(),uH=n.getUTCHours()+n.getUTCMinutes()/60+n.getUTCSeconds()/3600;const m=toMaster(uH);$('#now-line').style.left=pct(m)+'%';$('#your-time').textContent=fmtH(m);}
+let scrolledToNow=false;
+function scrollToNow(){
+    if(scrolledToNow)return;
+    const n=new Date(),uH=n.getUTCHours()+n.getUTCMinutes()/60+n.getUTCSeconds()/3600;
+    const m=toMaster(uH);const pctVal=(m/24)*100;
+    const scroll=$('#tl-scroll');const inner=$('#tl-inner');
+    if(!scroll||!inner)return;
+    const viewW=scroll.clientWidth;const innerW=inner.offsetWidth;
+    const targetPx=(pctVal/100)*innerW;
+    const scrollTarget=Math.max(0,Math.min(targetPx-viewW*0.4,innerW-viewW));
+    scroll.scrollTo({left:scrollTarget,behavior:'smooth'});
+    scrolledToNow=true;
+}
+function updateNow(){
+    const n=new Date(),uH=n.getUTCHours()+n.getUTCMinutes()/60+n.getUTCSeconds()/3600;
+    const m=toMaster(uH);const p=pct(m);
+    $('#now-line').style.left=p+'%';$('#your-time').textContent=fmtH(m);
+    if(!scrolledToNow)setTimeout(scrollToNow,500);
+}
 function updateSel(){$('#sel').style.left=pct(selStart)+'%';$('#sel').style.width=pct(selDur)+'%';$('#sel-display').textContent=`${fmtH(selStart)} – ${fmtH(selStart+selDur)} (${selDur.toFixed(1)}h)`;}
 const PRAYER_DUR={Fajr:0.4,Dhuhr:0.3,Asr:0.3,Maghrib:0.25,Isha:0.35};
 function checkConflicts(){
@@ -861,6 +899,24 @@ $('#fmt-btn').textContent=h24?'12h':'24h';
 $('#lang-sel').onchange=function(){lang=this.value;localStorage.setItem('wp_l',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';checkConflicts();updateClsCountdown();};
 $('#lang-sel').value=lang;
 
+/* ── Share ──────────────────────────────────────── */
+function genShareLink(){
+    const ids=cities.map(c=>c.id).join(',');
+    const p=new URLSearchParams({cities:ids,start:selStart.toFixed(2),dur:selDur.toFixed(2),lang:lang});
+    return`${window.location.origin}${window.location.pathname}?${p.toString()}`;
+}
+$('#btn-share').onclick=()=>{navigator.clipboard.writeText(genShareLink()).then(()=>{const b=$('#btn-share');b.classList.add('active');setTimeout(()=>b.classList.remove('active'),1500);});};
+function loadFromURL(){
+    const p=new URLSearchParams(window.location.search);
+    if(p.has('cities')){
+        const ids=p.get('cities').split(',');
+        cities=ids.map(id=>POOL.find(c=>c.id===id)).filter(Boolean).map(c=>({...c}));
+    }
+    if(p.has('start'))selStart=parseFloat(p.get('start'))||9;
+    if(p.has('dur'))selDur=parseFloat(p.get('dur'))||1;
+    if(p.has('lang')){lang=p.get('lang');localStorage.setItem('wp_l',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';$('#lang-sel').value=lang;}
+}
+
 /* ── Course panel ───────────────────────────────── */
 $('#btn-course').onclick=()=>{$('#course-panel').classList.add('open');$('#panel-bg').classList.add('open');};
 $('#close-panel').onclick=$('#panel-bg').onclick=()=>{$('#course-panel').classList.remove('open');$('#panel-bg').classList.remove('open');};
@@ -950,6 +1006,7 @@ h24=localStorage.getItem('wp_24')==='1';
 lang=localStorage.getItem('wp_l')||'en';
 document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
 $('#lang-sel').value=lang;
+loadFromURL();
 
 detectUser().then(()=>{
     renderRuler();renderAll();updateSel();updateEnrolled();
