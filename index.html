@@ -153,13 +153,13 @@
         .city-row.user-row { background: rgba(56,189,248,0.03); border-left: 3px solid var(--accent); }
         .city-label {
             width: var(--label-w); min-width: var(--label-w); flex-shrink: 0;
-            padding: 5px 10px; display: flex; flex-direction: column; justify-content: center;
+            padding: 6px 12px; display: flex; flex-direction: column; justify-content: center;
             border-right: 1px solid var(--border); background: var(--card);
-            position: sticky; left: 0; z-index: 2; gap: 1px;
+            position: sticky; left: 0; z-index: 2; gap: 3px; overflow: hidden;
         }
-        .city-name { font-weight: 600; font-size: 0.8rem; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .city-clock { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted); }
-        .city-offset { font-size: 0.5rem; color: #64748b; }
+        .city-name { font-weight: 600; font-size: 0.82rem; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+        .city-clock { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--muted); line-height: 1.2; }
+        .city-offset { font-size: 0.52rem; color: #64748b; line-height: 1.2; }
         .you-badge {
             font-size: 0.5rem; background: rgba(56,189,248,0.15); color: var(--accent);
             padding: 1px 5px; border-radius: 8px; margin-left: 4px; font-weight: 700;
@@ -373,10 +373,11 @@
         .chime-btn:hover { background: rgba(56,189,248,0.1); border-color: var(--accent); }
 
         @media (max-width: 768px) {
-            :root { --label-w: 100px; --tl-min: 700px; }
-            .city-label { padding: 4px 6px; }
-            .city-name { font-size: 0.7rem; }
+            :root { --label-w: 110px; --tl-min: 700px; }
+            .city-label { padding: 5px 8px; }
+            .city-name { font-size: 0.72rem; }
             .city-clock { font-size: 0.65rem; }
+            .city-offset { font-size: 0.48rem; }
             .header { padding: 6px 10px; }
             .status-bar { padding: 5px 10px; font-size: 0.7rem; }
             .panel { width: 100%; }
@@ -646,7 +647,7 @@ const CLASSES=[
 ];
 
 /* ── State ──────────────────────────────────────── */
-let cities=[...CITIES], cache={}, selStart=10, selDur=1;
+let cities=[...CITIES], cache={}, selStart=9, selDur=1;
 let dragging=false, resL=false, resR=false, dragX=0, dragSL=0, dragSD=0;
 let h24=false, dark=true, userCity=null, mOffset=0;
 let enrolled=JSON.parse(localStorage.getItem('wp_e')||'[]');
@@ -741,6 +742,7 @@ async function renderAll(){
 function updateOverlayH(){const h=$('#rows').offsetHeight;if(h>0)$('#sel').style.height=h+'px';}
 function updateNow(){const n=new Date(),uH=n.getUTCHours()+n.getUTCMinutes()/60+n.getUTCSeconds()/3600;const m=toMaster(uH);$('#now-line').style.left=pct(m)+'%';$('#your-time').textContent=fmtH(m);}
 function updateSel(){$('#sel').style.left=pct(selStart)+'%';$('#sel').style.width=pct(selDur)+'%';$('#sel-display').textContent=`${fmtH(selStart)} – ${fmtH(selStart+selDur)} (${selDur.toFixed(1)}h)`;}
+const PRAYER_DUR={Fajr:0.4,Dhuhr:0.3,Asr:0.3,Maghrib:0.25,Isha:0.35};
 function checkConflicts(){
     const s=selStart,e=s+selDur;let cf=[];
     const ids=new Set([...cities.map(c=>c.id),userCity?.id].filter(Boolean));
@@ -750,7 +752,8 @@ function checkConflicts(){
         const pd=cache[`${city.id}-${dk}`];if(!pd)continue;
         ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name=>{
             const u=pd.utc[name];if(u===undefined)return;
-            const m=toMaster(u);if(m<e&&m+0.5>s)cf.push({city:city.name,prayer:name});
+            const m=toMaster(u);const dur=PRAYER_DUR[name]||0.3;
+            if(m<e&&m+dur>s)cf.push({city:city.name,prayer:name});
         });
     }
     const b=$('#status-badge'),txt=$('#status-text');
@@ -822,9 +825,17 @@ setInterval(updateClsCountdown,1000);
 /* ── Alarm ──────────────────────────────────────── */
 function playAlarm(){
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const s={ting:[800,.1,1e3,.1],chime:[600,.15,800,.15,1e3,.2],bell:[500,.2,700,.2,900,.3]};
+    const s={
+        ting:[880,.08,0,.02,1100,.12],
+        chime:[523,.1,0,.03,659,.1,0,.03,784,.15],
+        bell:[440,.06,0,.02,554,.08,0,.02,659,.12]
+    };
     const p=s[alarm]||s.ting;let t=ctx.currentTime;
-    for(let i=0;i<p.length;i+=2){const o=ctx.createOscillator();o.type='sine';o.frequency.setValueAtTime(p[i],t);o.connect(ctx.destination);o.start(t);o.stop(t+p[i+1]);t+=p[i+1]+.05;}
+    for(let i=0;i<p.length;i+=2){
+        if(p[i]===0){t+=p[i+1];continue;}
+        const o=ctx.createOscillator();o.type='sine';o.frequency.setValueAtTime(p[i],t);
+        o.connect(ctx.destination);o.start(t);o.stop(t+p[i+1]);t+=p[i+1]+.02;
+    }
 }
 setInterval(()=>{const now=Date.now();enrolled.forEach(c=>{const{ts}=compCls(c);if(Math.abs(now-ts)<3e4&&!c.alarmFired){c.alarmFired=true;playAlarm();setTimeout(()=>c.alarmFired=false,12e4);}});},15000);
 $('#alarm-sel').onchange=function(){alarm=this.value;localStorage.setItem('wp_a',alarm);};
