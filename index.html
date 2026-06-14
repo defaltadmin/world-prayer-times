@@ -434,6 +434,9 @@
             <button class="icon-btn" id="btn-ical" title="Export to calendar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
             </button>
+            <button class="icon-btn" id="btn-notify" title="Prayer notifications">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </button>
             <button class="icon-btn" id="btn-settings" title="Settings">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
@@ -666,6 +669,7 @@ const CLASSES=[
 ];
 
 /* ── State ──────────────────────────────────────── */
+const STORAGE_CITIES='wp_cities_v1';
 let cities=[...CITIES], cache={}, selStart=9, selDur=1;
 let dragging=false, resL=false, resR=false, dragX=0, dragSL=0, dragSD=0;
 let h24=false, dark=true, userCity=null, mOffset=0;
@@ -764,6 +768,15 @@ async function renderRow(city){
         ev.style.left=pct(ms)+'%';ev.style.width=pct(me-ms)+'%';
         ev.textContent=cls.subject;strip.appendChild(ev);
     });
+    // Qibla indicator
+    if(city.lat&&city.lng){
+        const qDeg=calculateQibla(city.lat,city.lng);
+        const qb=document.createElement('div');
+        qb.style.cssText=`position:absolute;right:8px;top:50%;transform:translateY(-50%) rotate(${qDeg}deg);font-size:14px;opacity:0.5;z-index:1;pointer-events:none;`;
+        qb.title=`Qibla: ${Math.round(qDeg)}°`;
+        qb.innerHTML='🧭';
+        lbl.appendChild(qb);
+    }
     row.appendChild(strip);return row;
 }
 
@@ -977,7 +990,10 @@ function renderPopular(){
     $('#popular-chips').innerHTML=POOL.filter(c=>!ex.has(c.id)).slice(0,8).map(c=>`<span class="chip" data-id="${c.id}">+ ${c.name}</span>`).join('');
     $$('#popular-chips .chip').forEach(ch=>ch.onclick=()=>{const city=POOL.find(c=>c.id===ch.dataset.id);if(city)addCity(city);});
 }
-function addCity(city){if(cities.find(c=>c.id===city.id))return;cities.push({...city});cache={};renderAll();closeM('#m-addcity');}
+function saveCities(){localStorage.setItem(STORAGE_CITIES,JSON.stringify(cities.map(c=>c.id)));}
+function loadSavedCities(){const s=localStorage.getItem(STORAGE_CITIES);if(s){const ids=JSON.parse(s);cities=ids.map(id=>POOL.find(c=>c.id===id)||CITIES.find(c=>c.id===id)).filter(Boolean);if(!cities.length)cities=[...CITIES];}else cities=[...CITIES];}
+function addCity(city){if(cities.find(c=>c.id===city.id))return;cities.push({...city});saveCities();cache={};renderAll();closeM('#m-addcity');}
+function calculateQibla(lat,lng){const mLat=21.4225,mLng=39.8262,dLng=mLng-lng;return(Math.atan2(Math.sin(dLng*Math.PI/180)*Math.cos(mLat*Math.PI/180),Math.cos(lat*Math.PI/180)*Math.sin(mLat*Math.PI/180)-Math.sin(lat*Math.PI/180)*Math.cos(mLat*Math.PI/180)*Math.cos(dLng*Math.PI/180))*180/Math.PI+360)%360;}
 $('#city-search').oninput=()=>{
     const q=$('#city-search').value.toLowerCase(),sr=$('#search-results');
     if(q.length<2){sr.innerHTML='';return;}
@@ -985,7 +1001,7 @@ $('#city-search').oninput=()=>{
     sr.innerHTML=POOL.filter(c=>!ex.has(c.id)&&c.name.toLowerCase().includes(q)).map(c=>`<div class="search-item" data-id="${c.id}"><span>${c.name}</span><span class="plus">+</span></div>`).join('');
     $$('#search-results .search-item').forEach(el=>el.onclick=()=>{const city=POOL.find(c=>c.id===el.dataset.id);if(city)addCity(city);});
 };
-$('#rows').onclick=e=>{const b=e.target.closest('.remove-btn');if(b&&cities.length>1){cities=cities.filter(c=>c.id!==b.dataset.id);cache={};renderAll();}};
+$('#rows').onclick=e=>{const b=e.target.closest('.remove-btn');if(b&&cities.length>1){cities=cities.filter(c=>c.id!==b.dataset.id);saveCities();cache={};renderAll();}};
 
 /* ── User location ──────────────────────────────── */
 async function detectUser(){
@@ -1064,11 +1080,40 @@ lang=localStorage.getItem('wp_l')||'en';
 document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
 $('#lang-sel').value=lang;
 loadFromURL();
+loadSavedCities();
+
+// Notifications
+let notifEnabled=localStorage.getItem('wp_notif')==='1';
+$('#btn-notify').onclick=async()=>{
+    if(!('Notification' in window)){alert('Notifications not supported');return;}
+    if(notifEnabled){notifEnabled=false;localStorage.setItem('wp_notif','0');$('#btn-notify').style.color='';return;}
+    const p=await Notification.requestPermission();
+    if(p==='granted'){notifEnabled=true;localStorage.setItem('wp_notif','1');$('#btn-notify').style.color='var(--accent)';schedulePrayerNotifs();}else{alert('Enable notifications to get prayer alerts');}
+};
+if(notifEnabled&&'Notification' in window&&Notification.permission==='granted')$('#btn-notify').style.color='var(--accent)';
+
+function schedulePrayerNotifs(){
+    if(!userCity||!notifEnabled)return;
+    fetchPrayer(userCity).then(pd=>{
+        const now=new Date();const tz=userCity.tz;
+        const localNow=new Date(now.toLocaleString('en-US',{timeZone:tz}));
+        const lh=localNow.getHours()+localNow.getMinutes()/60;
+        ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name=>{
+            const pt=pd.loc[name];if(!pt||pt<lh)return;
+            const ms=(pt-lh)*3600000-300000;// 5 min before
+            if(ms>0)setTimeout(()=>{if(notifEnabled)new Notification(`${name} Prayer Time`,{body:`Time for ${name} prayer`,icon:'/manifest.json'});},ms);
+        });
+    });
+}
+
+// Service Worker
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
 detectUser().then(()=>{
     renderRuler();renderAll();updateSel();updateEnrolled();
     setInterval(tickClocks,1000);
     setInterval(()=>{cache={};renderAll();},30*60*1000);
+    setTimeout(()=>{if(notifEnabled)schedulePrayerNotifs();},2000);
     // Hide loader
     setTimeout(()=>$('#loader').classList.add('hide'),400);
     setTimeout(()=>$('#loader').remove(),800);

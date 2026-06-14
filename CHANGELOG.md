@@ -2,6 +2,19 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.4.0] – 2026-06-15
+
+### Added
+- **City persistence** – Selected cities saved to localStorage, restored on reload
+- **Qibla direction** – Compass icon on each city row showing direction to Mecca
+- **Prayer notifications** – Browser alerts 5 minutes before each Salah
+- **Service worker** – Offline caching for faster loads and PWA support
+- **Notification toggle** – Bell icon in header to enable/disable alerts
+
+### Fixed
+- **City save on add/remove** – Changes persist across sessions
+- **Enhanced iCal** – Proper CALSCALE, UIDs, date-stamped filenames
+
 ## [1.3.0] – 2026-06-15
 
 ### Added
