@@ -390,6 +390,30 @@
         }
         .chime-btn:hover { background: rgba(56,189,248,0.1); border-color: var(--accent); }
 
+        /* Toast animation */
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        .toast { animation: toastIn 0.2s ease; }
+
+        /* Prayer legend */
+        .legend { display: flex; align-items: center; gap: 12px; padding: 4px 16px; font-size: 0.6rem; color: var(--muted); border-bottom: 1px solid var(--border); overflow-x: auto; }
+        .legend-item { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+        .legend-dot.fajr { background: var(--prayer-fajr); }
+        .legend-dot.dhuhr { background: var(--prayer-dhuhr); }
+        .legend-dot.asr { background: var(--prayer-asr); }
+        .legend-dot.maghrib { background: var(--prayer-maghrib); }
+        .legend-dot.isha { background: var(--prayer-isha); }
+        .legend-dot.sunrise { background: rgba(251,191,36,0.6); }
+        .legend-dot.now { background: var(--danger); }
+        .legend-dot.safe { background: var(--selection); }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+            #bg-canvas { display: none; }
+        }
+
+        /* Better mobile touch targets */
         @media (max-width: 768px) {
             :root { --label-w: 120px; --tl-min: 700px; }
             .city-label { padding: 6px 10px; }
@@ -399,6 +423,10 @@
             .header { padding: 6px 10px; }
             .status-bar { padding: 5px 10px; font-size: 0.7rem; }
             .panel { width: 100%; }
+            .resize-h { width: 20px; }
+            .icon-btn { width: 38px; height: 38px; }
+            .sel-handle { width: 32px; height: 16px; }
+            .remove-btn { opacity: 0.5; }
         }
     </style>
 </head>
@@ -458,6 +486,18 @@
         </span>
         <span class="status-detail" id="sel-display">Drag the bar to select</span>
         <span class="status-time" id="your-time"></span>
+    </div>
+
+    <!-- PRAYER LEGEND -->
+    <div class="legend">
+        <div class="legend-item"><div class="legend-dot fajr"></div>Fajr</div>
+        <div class="legend-item"><div class="legend-dot sunrise"></div>Sunrise</div>
+        <div class="legend-item"><div class="legend-dot dhuhr"></div>Dhuhr</div>
+        <div class="legend-item"><div class="legend-dot asr"></div>Asr</div>
+        <div class="legend-item"><div class="legend-dot maghrib"></div>Maghrib</div>
+        <div class="legend-item"><div class="legend-dot isha"></div>Isha</div>
+        <div class="legend-item"><div class="legend-dot now"></div>NOW</div>
+        <div class="legend-item"><div class="legend-dot safe"></div>Selection</div>
     </div>
 
     <!-- RULER -->
@@ -690,7 +730,7 @@ const i18n={en:{safe:'Safe Window',conflict:'Conflict',next:'Next:',noClass:'No 
     ar:{safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:'}};
 const t=k=>i18n[lang]?.[k]||i18n.en[k]||k;
 const PRAYER_NAMES={en:{Fajr:'Fajr',Dhuhr:'Dhuhr',Asr:'Asr',Maghrib:'Maghrib',Isha:'Isha'},ar:{Fajr:'فجر',Dhuhr:'ظهر',Asr:'عصر',Maghrib:'مغرب',Isha:'عشاء'}};
-function toast(msg){const el=document.createElement('div');el.textContent=msg;el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:8px;font-size:0.8rem;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.35);pointer-events:none;';document.body.appendChild(el);setTimeout(()=>el.remove(),2500);}
+function toast(msg){const el=document.createElement('div');el.textContent=msg;el.className='toast';el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:8px;font-size:0.8rem;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.35);pointer-events:none;';document.body.appendChild(el);setTimeout(()=>el.remove(),2500);}
 
 /* ── Time utils ─────────────────────────────────── */
 function getOff(tz){const n=new Date(),u=new Date(n.toLocaleString('en-US',{timeZone:'UTC'})),t=new Date(n.toLocaleString('en-US',{timeZone:tz}));return(t-u)/36e5;}
