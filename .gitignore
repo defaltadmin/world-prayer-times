@@ -1,5 +1,5 @@
 node_modules/
 .wrangler/
 .dev.vars
-*.json
-!manifest.json
+world-prayer-times.pages.dev-*.json
+prayer.mscarabia.com-*.json

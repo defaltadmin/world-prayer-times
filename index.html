@@ -954,19 +954,15 @@ function loadFromURL(){
 }
 
 /* ── iCal Export ─────────────────────────────────── */
+function fmtICal(d){return d.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';}
 function exportICal(){
-    const now=new Date();
-    const base=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-    const sh=Math.floor(selStart),sm=Math.round((selStart-sh)*60);
-    const eh=Math.floor(selStart+selDur),em=Math.round(((selStart+selDur)-eh)*60);
-    const pad=n=>String(n).padStart(2,'0');
-    const fmt=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
-    const start=new Date(base);start.setHours(sh,sm,0);
-    const end=new Date(base);end.setHours(eh,em,0);
+    const now=new Date();const pad=n=>String(n).padStart(2,'0');
+    const start=new Date(now);start.setHours(Math.floor(selStart),Math.round((selStart%1)*60),0);
+    const end=new Date(now);end.setHours(Math.floor(selStart+selDur),Math.round(((selStart+selDur)%1)*60),0);
     const cityNames=cities.map(c=>c.name).join(', ');
-    const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Prayer Times//EN\nBEGIN:VEVENT\nDTSTART:${fmt(start)}\nDTEND:${fmt(end)}\nSUMMARY:Safe Meeting Window\nDESCRIPTION:No prayer conflicts for: ${cityNames}\nEND:VEVENT\nEND:VCALENDAR`;
+    const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Prayer Times//EN\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nSUMMARY:Safe Meeting Window (No Salah Conflict)\nDTSTART:${fmtICal(start)}\nDTEND:${fmtICal(end)}\nDESCRIPTION:Coordinated safe time across: ${cityNames}\nUID:${Date.now()}@prayer.mscarabia.com\nEND:VEVENT\nEND:VCALENDAR`;
     const blob=new Blob([ics],{type:'text/calendar'});
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='safe-window.ics';a.click();
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`prayer-safe-${now.toISOString().slice(0,10)}.ics`;a.click();
 }
 
 /* ── Course panel ───────────────────────────────── */
