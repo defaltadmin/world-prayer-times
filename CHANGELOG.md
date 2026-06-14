@@ -2,6 +2,34 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.6.0] – 2026-06-15
+
+### Added
+- **Worldwide city search** — Nominatim geocoding (any city, not just 13 presets)
+- **Custom city persistence** — Geocoded cities saved to localStorage
+- **Privacy notice** — Dismissible banner + full privacy modal on first visit
+- **Prayer legend strip** — Color-coded key above timeline
+- **Toast notifications** — Smooth fade-in for share, export, etc.
+- **Keyboard control** — Arrow keys move selection, [ ] resize
+- **Arabic prayer names** — فجر، ظهر، عصر، مغرب، عشاء when lang=ar
+- **Hijri date** — Shows Islamic calendar date in header
+
+### Fixed
+- **Timeline overlap** — Pixel-based positioning fixes NOW line alignment
+- **Legend i18n** — Updates on language switch
+- **Header date perf** — Cached, only recomputes on day change
+- **userCity lat/lng** — Stores rounded coords for return visits
+- **Touch listeners** — Fixed passive flag syntax for iOS/Android
+- **hour12 inversion** — Clock shows correct 12h/24h format
+- **compCls day bug** — getUTCDay() replaced with getDay()
+- **Notification icon** — Now shows app icon instead of manifest.json
+- **iCal memory leak** — Blob URLs revoked after download
+
+### Security
+- **CSP headers** — Content-Security-Policy with nominatim whitelist
+- **Geolocation privacy** — Only rounded coords stored (±11km)
+- **Service worker** — API responses no longer cached permanently
+
 ## [1.5.0] – 2026-06-15
 
 ### Security

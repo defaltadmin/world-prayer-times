@@ -372,7 +372,7 @@
             font-size: 0.8rem; color: var(--text); outline: none;
         }
         .search-input:focus { border-color: var(--accent); }
-        .search-results { max-height: 140px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; margin-top: 6px; }
+        .search-results { max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; margin-top: 6px; }
         .search-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 8px 10px; cursor: pointer; font-size: 0.8rem;
@@ -381,6 +381,9 @@
         .search-item:last-child { border-bottom: none; }
         .search-item:hover { background: var(--card); }
         .search-item .plus { color: var(--accent); font-weight: 600; font-size: 0.75rem; }
+        .search-item .city-country { font-size: 0.65rem; color: var(--muted); }
+        .search-spinner { text-align: center; padding: 12px; font-size: 0.75rem; color: var(--muted); }
+        .search-hint { font-size: 0.65rem; color: var(--muted); margin-top: 6px; text-align: center; }
 
         /* Test chime */
         .chime-btn {
@@ -412,6 +415,26 @@
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
             #bg-canvas { display: none; }
         }
+
+        /* Privacy banner */
+        .privacy-banner {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
+            background: var(--card); border-top: 1px solid var(--border);
+            padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+            font-size: 0.72rem; color: var(--muted);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+        }
+        .privacy-banner a { color: var(--accent); text-decoration: none; }
+        .privacy-banner a:hover { text-decoration: underline; }
+        .privacy-banner .pb-actions { display: flex; gap: 8px; margin-left: auto; flex-shrink: 0; }
+        .privacy-banner.hidden { display: none; }
+
+        /* Privacy modal */
+        #m-privacy .modal { max-width: 500px; }
+        .privacy-section { margin-bottom: 14px; }
+        .privacy-section h3 { font-size: 0.78rem; font-weight: 700; color: var(--heading); margin-bottom: 6px; }
+        .privacy-section p, .privacy-section li { font-size: 0.72rem; color: var(--muted); line-height: 1.6; }
+        .privacy-section ul { padding-left: 16px; }
 
         /* Better mobile touch targets */
         @media (max-width: 768px) {
@@ -502,14 +525,14 @@
 
     <!-- RULER -->
     <div class="tl-scroll" id="ruler-scroll">
-        <div class="ruler" id="ruler" style="min-width:var(--tl-min);margin-left:var(--label-w);"></div>
+        <div class="ruler" id="ruler" style="min-width:calc(var(--tl-min) + var(--label-w));padding-left:var(--label-w);"></div>
     </div>
 
     <!-- TIMELINE -->
     <div class="flex-1 tl-scroll" id="tl-scroll">
-        <div style="position:relative;min-width:var(--tl-min);margin-left:var(--label-w);" id="tl-inner">
+        <div style="position:relative;min-width:calc(var(--tl-min) + var(--label-w));" id="tl-inner">
             <div id="rows"></div>
-            <div class="add-row" id="add-row">
+            <div class="add-row" id="add-row" style="margin-left:var(--label-w);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add City
             </div>
@@ -673,8 +696,57 @@
                 <button class="modal-close" data-close="m-addcity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <div id="popular-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
-            <input type="text" class="search-input" id="city-search" placeholder="Search city...">
+            <input type="text" class="search-input" id="city-search" placeholder="Search any city worldwide..." autocomplete="off">
             <div class="search-results" id="search-results"></div>
+            <div class="search-hint">Searches all cities worldwide via OpenStreetMap</div>
+        </div>
+    </div>
+
+    <!-- PRIVACY MODAL -->
+    <div class="modal-bg" id="m-privacy">
+        <div class="modal">
+            <div class="modal-head">
+                <span class="modal-title">Privacy &amp; Data</span>
+                <button class="modal-close" data-close="m-privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+            <div class="privacy-section">
+                <h3>No data collected</h3>
+                <p>This app does not collect, store, or transmit any personal data. There are no accounts, no analytics, and no tracking of any kind.</p>
+            </div>
+            <div class="privacy-section">
+                <h3>What stays on your device</h3>
+                <ul>
+                    <li>Your selected cities (localStorage)</li>
+                    <li>Theme, language, and time format preferences (localStorage)</li>
+                    <li>Your approximate timezone (localStorage) — precise GPS coordinates are never stored</li>
+                    <li>Class enrollment selections (localStorage)</li>
+                </ul>
+            </div>
+            <div class="privacy-section">
+                <h3>External requests made</h3>
+                <ul>
+                    <li><strong>api.aladhan.com</strong> — prayer time data (your coordinates sent, no user ID)</li>
+                    <li><strong>nominatim.openstreetmap.org</strong> — city search only (search text sent, no user ID)</li>
+                    <li><strong>fonts.googleapis.com</strong> — font loading</li>
+                </ul>
+            </div>
+            <div class="privacy-section">
+                <h3>Cookies</h3>
+                <p>No cookies are set. Browser localStorage is used only for preferences as described above. You can clear it at any time in your browser settings.</p>
+            </div>
+            <div class="privacy-section">
+                <h3>Geolocation</h3>
+                <p>If you grant location permission, your coordinates are used once to determine your timezone and approximate position for prayer times. Only a rounded value (±11km) is stored locally. Permission can be revoked in your browser settings at any time.</p>
+            </div>
+            <button class="btn btn-accent" data-close="m-privacy" style="width:100%;justify-content:center;margin-top:4px;">Got it</button>
+        </div>
+    </div>
+
+    <!-- PRIVACY BANNER -->
+    <div class="privacy-banner" id="privacy-banner">
+        <span>This app stores preferences locally on your device only. No cookies, no tracking. <a href="#" id="privacy-link">Learn more</a></span>
+        <div class="pb-actions">
+            <button class="btn btn-accent" id="privacy-ok" style="padding:5px 14px;">OK</button>
         </div>
     </div>
 </div>
@@ -854,11 +926,25 @@ function scrollToNow(){
 }
 function updateNow(){
     const n=new Date(),uH=n.getUTCHours()+n.getUTCMinutes()/60+n.getUTCSeconds()/3600;
-    const m=toMaster(uH);const p=pct(m);
-    $('#now-line').style.left=p+'%';$('#your-time').textContent=fmtH(m);
+    const m=toMaster(uH);
+    const lw=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w'))||140;
+    const iw=$('#tl-inner').offsetWidth||1000;
+    const stripW=iw-lw;
+    const nowPx=lw+(m/24)*stripW;
+    $('#now-line').style.left=nowPx+'px';$('#your-time').textContent=fmtH(m);
     if(!scrolledToNow)setTimeout(scrollToNow,500);
 }
-function updateSel(){$('#sel').style.left=pct(selStart)+'%';$('#sel').style.width=pct(selDur)+'%';$('#sel-display').textContent=`${fmtH(selStart)} – ${fmtH(selStart+selDur)} (${selDur.toFixed(1)}h)`;}
+function updateSel(){
+    // sel-overlay sits inside tl-inner which starts at 0; label is var(--label-w)
+    // prayer strips start at label-w, so we offset: left = label-w + pct(selStart)% of strip width
+    const lw=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w'))||140;
+    const iw=$('#tl-inner').offsetWidth||1000;
+    const stripW=iw-lw;
+    const selL=lw+(selStart/24)*stripW;
+    const selWpx=(selDur/24)*stripW;
+    $('#sel').style.left=selL+'px';$('#sel').style.width=selWpx+'px';
+    $('#sel-display').textContent=`${fmtH(selStart)} – ${fmtH(selStart+selDur)} (${selDur.toFixed(1)}h)`;
+}
 const PRAYER_DUR={Fajr:0.4,Dhuhr:0.3,Asr:0.3,Maghrib:0.25,Isha:0.35};
 function checkConflicts(){
     const s=selStart,e=s+selDur;let cf=[];
@@ -881,17 +967,35 @@ function checkConflicts(){
 /* ── Ruler ──────────────────────────────────────── */
 function renderRuler(){
     const r=$('#ruler');r.innerHTML='';
+    // Ruler tick marks sit in the area after the label column
+    // left% is calculated as: label_offset + (h/24) * remaining_width
+    // We use a pseudo-element approach: add a spacer div then position ticks within the tick area
+    const spacer=document.createElement('div');spacer.style.cssText=`position:absolute;left:0;top:0;width:var(--label-w);height:100%;background:var(--card);border-right:1px solid var(--border);`;r.appendChild(spacer);
     for(let h=0;h<24;h++){
-        const m=document.createElement('div');m.className='ruler-mark major';m.style.left=pct(h)+'%';r.appendChild(m);
-        const l=document.createElement('span');l.className='ruler-lbl';l.style.left=pct(h)+'%';
-        l.textContent=h24?(h%12||12)+(h>=12?'p':'a'):`${String(h).padStart(2,'0')}`;
+        const m=document.createElement('div');m.className='ruler-mark major';
+        // position within the full ruler width: label-w + (h/24)*(tl-min)
+        m.style.left=`calc(var(--label-w) + ${(h/24)*100}%)`;
+        r.appendChild(m);
+        const l=document.createElement('span');l.className='ruler-lbl';
+        l.style.left=`calc(var(--label-w) + ${(h/24)*100}%)`;
+        l.textContent=h24?`${String(h).padStart(2,'0')}:00`:(h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p');
         r.appendChild(l);
     }
 }
 
 /* ── Drag ───────────────────────────────────────── */
-function tlW(){const i=$('#tl-inner');return i?i.getBoundingClientRect().width:960;}
-function startD(e,isL=false,isR=false){dragging=true;resL=isL;resR=isR;$('#sel').classList.add('dragging');dragX=e.touches?e.touches[0].clientX:e.clientX;dragSL=selStart;dragSD=selDur;document.body.style.cursor=isL||isR?'ew-resize':'grabbing';e.preventDefault();e.stopPropagation();}
+function tlW(){
+    const i=$('#tl-inner');
+    const lw=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w'))||140;
+    return i?(i.getBoundingClientRect().width-lw):960;
+}
+function startD(e,isL=false,isR=false){
+    dragging=true;resL=isL;resR=isR;$('#sel').classList.add('dragging');
+    dragX=e.touches?e.touches[0].clientX:e.clientX;
+    dragSL=selStart;dragSD=selDur;
+    document.body.style.cursor=isL||isR?'ew-resize':'grabbing';
+    e.preventDefault();e.stopPropagation();
+}
 function moveD(e){if(!dragging)return;const cx=e.touches?e.touches[0].clientX:e.clientX;const dh=((cx-dragX)/tlW())*24;
 if(resL){let ns=dragSL+dh,ne=dragSL+dragSD;if(ns>=ne-0.5)ns=ne-0.5;ns=Math.round(ns*2)/2;selStart=clamp(ns,0,24-0.5);selDur=clamp(ne-selStart,0.5,24);}
 else if(resR){let ne=dragSL+dragSD+dh;if(ne<=dragSL+0.5)ne=dragSL+0.5;ne=Math.round(ne*2)/2;selDur=clamp(ne-dragSL,0.5,24-dragSL);}
@@ -906,7 +1010,14 @@ $('#rz-r').onmousedown=e=>startD(e,false,true);$('#rz-r').addEventListener('touc
 document.onmousemove=moveD;document.addEventListener('touchmove',moveD,{passive:false});
 document.onmouseup=endD;document.addEventListener('touchend',endD);
 
-$('#ruler').onclick=e=>{const r=$('#ruler').getBoundingClientRect();selStart=hrs(((e.clientX-r.left)/r.width)*100)-selDur/2;updateSel();checkConflicts();};
+$('#ruler').onclick=e=>{
+    const r=$('#ruler').getBoundingClientRect();
+    const lw=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w'))||140;
+    const stripW=r.width-lw;
+    const clickX=e.clientX-r.left-lw;
+    selStart=clamp((clickX/stripW)*24-selDur/2,0,24-selDur);
+    updateSel();checkConflicts();
+};
 $('#tl-scroll').onscroll=()=>{$('#ruler-scroll').scrollLeft=$('#tl-scroll').scrollLeft;};
 $('#ruler-scroll').onscroll=()=>{$('#tl-scroll').scrollLeft=$('#ruler-scroll').scrollLeft;};
 
@@ -981,6 +1092,13 @@ $('#test-chime').onclick=()=>playAlarm();
 function openM(id){$(id).classList.add('open');}
 function closeM(id){$(id).classList.remove('open');}
 $$('[data-close]').forEach(b=>b.onclick=()=>closeM('#'+b.dataset.close));
+// Privacy banner
+(function(){
+    if(localStorage.getItem('wp_privacy_ok'))return;
+    const banner=$('#privacy-banner');
+    $('#privacy-ok').onclick=()=>{localStorage.setItem('wp_privacy_ok','1');banner.classList.add('hidden');};
+    $('#privacy-link').onclick=e=>{e.preventDefault();openM('#m-privacy');};
+})();
 $$('.modal-bg').forEach(m=>m.onclick=e=>{if(e.target===m)closeM('#'+m.id);});
 
 /* ── Settings ───────────────────────────────────── */
@@ -1044,16 +1162,67 @@ function renderPopular(){
     $$('#popular-chips .chip').forEach(ch=>ch.onclick=()=>{const city=POOL.find(c=>c.id===ch.dataset.id);if(city)addCity(city);});
 }
 function saveCities(){localStorage.setItem(STORAGE_CITIES,JSON.stringify(cities.map(c=>c.id)));}
-function loadSavedCities(){const s=localStorage.getItem(STORAGE_CITIES);if(s){const ids=JSON.parse(s);cities=ids.map(id=>POOL.find(c=>c.id===id)||CITIES.find(c=>c.id===id)).filter(Boolean);if(!cities.length)cities=[...CITIES];}else cities=[...CITIES];}
-function addCity(city){if(cities.find(c=>c.id===city.id))return;cities.push({...city});saveCities();cache={};renderAll();closeM('#m-addcity');}
+function loadSavedCities(){
+    const s=localStorage.getItem(STORAGE_CITIES);
+    if(s){const ids=JSON.parse(s);cities=ids.map(id=>POOL.find(c=>c.id===id)||CITIES.find(c=>c.id===id)).filter(Boolean);if(!cities.length)cities=[...CITIES];}
+    else cities=[...CITIES];
+    // Also restore any custom geocoded cities
+    const custom=localStorage.getItem('wp_custom_cities');
+    if(custom){try{const cc=JSON.parse(custom);cc.forEach(c=>{if(!POOL.find(p=>p.id===c.id)&&cities.find(ci=>ci.id===c.id))POOL.push(c);});}catch{}}
+}
+function addCity(city){
+    if(cities.find(c=>c.id===city.id))return;
+    cities.push({...city});
+    // Persist custom geocoded cities to pool
+    if(!POOL.find(p=>p.id===city.id)){POOL.push({...city});const custom=JSON.parse(localStorage.getItem('wp_custom_cities')||'[]');custom.push(city);localStorage.setItem('wp_custom_cities',JSON.stringify(custom));}
+    saveCities();cache={};renderAll();closeM('#m-addcity');
+}
 function calculateQibla(lat,lng){const mLat=21.4225,mLng=39.8262,dLng=mLng-lng;return(Math.atan2(Math.sin(dLng*Math.PI/180)*Math.cos(mLat*Math.PI/180),Math.cos(lat*Math.PI/180)*Math.sin(mLat*Math.PI/180)-Math.sin(lat*Math.PI/180)*Math.cos(mLat*Math.PI/180)*Math.cos(dLng*Math.PI/180))*180/Math.PI+360)%360;}
+
+let geoSearchTimer=null;
 $('#city-search').oninput=()=>{
-    const q=$('#city-search').value.toLowerCase(),sr=$('#search-results');
-    if(q.length<2){sr.innerHTML='';return;}
+    const q=$('#city-search').value.trim();
+    const sr=$('#search-results');
+    clearTimeout(geoSearchTimer);
+    // First show instant local matches
     const ex=new Set([...cities.map(c=>c.id),'user']);
-    sr.innerHTML=POOL.filter(c=>!ex.has(c.id)&&c.name.toLowerCase().includes(q)).map(c=>`<div class="search-item" data-id="${c.id}"><span>${c.name}</span><span class="plus">+</span></div>`).join('');
-    $$('#search-results .search-item').forEach(el=>el.onclick=()=>{const city=POOL.find(c=>c.id===el.dataset.id);if(city)addCity(city);});
+    const local=POOL.filter(c=>!ex.has(c.id)&&c.name.toLowerCase().includes(q.toLowerCase()));
+    if(q.length<2){sr.innerHTML='';return;}
+    if(local.length){renderSearchItems(local,sr);}
+    else{sr.innerHTML='<div class="search-spinner">Searching...</div>';}
+    // Then fetch from Nominatim after 400ms debounce
+    geoSearchTimer=setTimeout(async()=>{
+        try{
+            const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
+            const r=await fetch(url,{headers:{'Accept-Language':'en'}});
+            const data=await r.json();
+            const results=[];
+            const seen=new Set(local.map(c=>c.id));
+            data.forEach(d=>{
+                const name=(d.address?.city||d.address?.town||d.address?.village||d.name||'').trim();
+                const country=d.address?.country||'';
+                if(!name)return;
+                const id='geo_'+name.toLowerCase().replace(/[^a-z0-9]/g,'_')+'_'+Math.round(parseFloat(d.lat))+'_'+Math.round(parseFloat(d.lon));
+                if(seen.has(id)||ex.has(id))return;
+                seen.add(id);
+                results.push({id,name,country,lat:parseFloat(d.lat),lng:parseFloat(d.lon),tz:Intl.DateTimeFormat().resolvedOptions().timeZone,method:3,geo:true});
+            });
+            renderSearchItems([...local,...results],sr,true);
+        }catch{if(!local.length)sr.innerHTML='<div class="search-spinner">No results found</div>';}
+    },400);
 };
+function renderSearchItems(items,sr,showCountry=false){
+    if(!items.length){sr.innerHTML='<div class="search-spinner">No results</div>';return;}
+    sr.innerHTML=items.map(c=>`<div class="search-item" data-id="${c.id}">
+        <span>${c.name}${c.country&&showCountry?`<span class="city-country"> — ${c.country}</span>`:''}</span>
+        <span class="plus">+</span>
+    </div>`).join('');
+    $$('#search-results .search-item').forEach(el=>el.onclick=()=>{
+        // Check pool first, else build from geocode result
+        let city=POOL.find(c=>c.id===el.dataset.id)||items.find(c=>c.id===el.dataset.id);
+        if(city)addCity(city);
+    });
+}
 $('#rows').onclick=e=>{const b=e.target.closest('.remove-btn');if(b&&cities.length>1){cities=cities.filter(c=>c.id!==b.dataset.id);saveCities();cache={};renderAll();}};
 
 /* ── User location ──────────────────────────────── */
@@ -1178,7 +1347,10 @@ document.addEventListener('keydown',e=>{
 let bgTimer;window.addEventListener('resize',()=>{clearTimeout(bgTimer);bgTimer=setTimeout(drawBG,150);});
 
 detectUser().then(()=>{
+    // Also fix privacy banner if already accepted
+    if(localStorage.getItem('wp_privacy_ok'))$('#privacy-banner').classList.add('hidden');
     renderRuler();renderAll();updateSel();updateEnrolled();updateLegend();
+    updateHeaderDate();
     setInterval(tickClocks,1000);
     setInterval(updateCD,10000);
     setInterval(()=>{cache={};renderAll();},30*60*1000);
