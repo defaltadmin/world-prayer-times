@@ -1,1 +1,14 @@
+# Block common scanner/attack paths before the SPA fallback
+/.env*              /index.html 404
+/.git*              /index.html 404
+/.DS_Store          /index.html 404
+/wp-config.php      /index.html 404
+/wp-admin*          /index.html 404
+/phpmyadmin*        /index.html 404
+/vendor*            /index.html 404
+/composer.json      /index.html 404
+/package.json       /index.html 404
+/yarn.lock          /index.html 404
+
+# SPA fallback — must be last
 /* /index.html 200

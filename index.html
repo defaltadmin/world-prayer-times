@@ -6,6 +6,8 @@
     <title>Prayer Times – Coordinate Salah Across Cities</title>
     <meta name="description" content="Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.">
     <meta name="theme-color" content="#0a0f1e">
+    <!-- CSP meta fallback: overridden by _headers on Cloudflare, protects other hosts -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org; img-src 'self' data: blob:; media-src 'self' blob:; manifest-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests;">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0f1e'/%3E%3Ccircle cx='50' cy='35' r='12' fill='none' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 v-28' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 l18 20 H32z' fill='%2338bdf8' opacity='0.3'/%3E%3Cpath d='M25 67 Q50 55 75 67' fill='none' stroke='%2338bdf8' stroke-width='2'/%3E%3C/svg%3E">
     <link rel="manifest" href="manifest.json">
 
@@ -495,6 +497,9 @@
             <button class="icon-btn" id="btn-notify" title="Prayer notifications" aria-label="Prayer notifications">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             </button>
+            <button class="icon-btn" id="btn-lang" title="Change language" aria-label="Change language" style="font-size:0.7rem;font-weight:700;font-family:'Inter',sans-serif;">
+                <span id="lang-icon">EN</span>
+            </button>
             <button class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
@@ -749,6 +754,13 @@
             <button class="btn btn-accent" id="privacy-ok" style="padding:5px 14px;">OK</button>
         </div>
     </div>
+
+    <!-- FOOTER -->
+    <footer style="text-align:center;padding:12px 16px;font-size:0.65rem;color:var(--muted);border-top:1px solid var(--border);background:var(--card);margin-top:auto;">
+        Made with ❤️ by <a href="https://mscarabia.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:600;">Mohammed Siddiqui</a> · 
+        <a href="https://mscarabia.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">mscarabia.com</a> · 
+        Powered by <a href="https://aladhan.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">Aladhan API</a>
+    </footer>
 </div>
 
 <script>
@@ -797,6 +809,11 @@ let lang=localStorage.getItem('wp_l')||'en';
 let alarm=localStorage.getItem('wp_a')||'ting';
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 
+function sanitizeName(s){
+    // Strip all HTML tags and limit length — used for geocoded city names
+    return String(s).replace(/<[^>]*>/g,'').replace(/[<>"'`]/g,'').trim().slice(0,60);
+}
+
 /* ── i18n ───────────────────────────────────────── */
 const i18n={en:{safe:'Safe Window',conflict:'Conflict',next:'Next:',noClass:'No upcoming classes',nextClass:'Next class:',sunrise:'Sunrise',now:'NOW',selection:'Selection'},
     ar:{safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:',sunrise:'شروق',now:'الآن',selection:'التحديد'}};
@@ -840,15 +857,24 @@ async function renderRow(city){
     const row=document.createElement('div');
     row.className='city-row'+(city.isUser?' user-row':'');
     row.dataset.id=city.id;
-    // Label
+    // Label — build with DOM, not innerHTML, to prevent XSS from geocoded city names
     const lbl=document.createElement('div');
     lbl.className='city-label';lbl.style.position='relative';
     const now=new Date();
     const lt=now.toLocaleTimeString('en-US',{timeZone:city.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!h24});
     const sign=pd.off>=0?'+':'';
-    lbl.innerHTML=`<span class="city-name">${city.isUser?'<svg width="10" height="10" viewBox="0 0 24 24" fill="#38bdf8" style="vertical-align:middle;margin-right:2px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>':''}${city.name}${city.isUser?'<span class="you-badge">YOU</span>':''}</span>
-    <span class="city-clock" data-tz="${city.tz}">${lt}</span>
-    <span class="city-offset">UTC${sign}${pd.off.toFixed(1)}</span>`;
+    // city-name span
+    const nameSpan=document.createElement('span');nameSpan.className='city-name';
+    if(city.isUser){
+        const pin=document.createElementNS('http://www.w3.org/2000/svg','svg');pin.setAttribute('width','10');pin.setAttribute('height','10');pin.setAttribute('viewBox','0 0 24 24');pin.setAttribute('fill','#38bdf8');pin.style.verticalAlign='middle';pin.style.marginRight='2px';
+        const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d','M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z');pin.appendChild(p);nameSpan.appendChild(pin);
+    }
+    nameSpan.appendChild(document.createTextNode(city.name));
+    if(city.isUser){const yb=document.createElement('span');yb.className='you-badge';yb.textContent='YOU';nameSpan.appendChild(yb);}
+    // clock + offset
+    const clockSpan=document.createElement('span');clockSpan.className='city-clock';clockSpan.dataset.tz=city.tz;clockSpan.textContent=lt;
+    const offSpan=document.createElement('span');offSpan.className='city-offset';offSpan.textContent=`UTC${sign}${pd.off.toFixed(1)}`;
+    lbl.appendChild(nameSpan);lbl.appendChild(clockSpan);lbl.appendChild(offSpan);
     if(!city.isUser&&cities.length>1){
         const rb=document.createElement('button');rb.className='remove-btn';rb.dataset.id=city.id;
         rb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
@@ -1034,22 +1060,36 @@ function updateEnrolled(){enrolled=enrolled.map(c=>{const d=compCls(c);return{..
 function renderToggles(){
     const ct=$('#class-timetable');if(!ct)return;
     const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const dayShort=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    // Group classes by day
     const byDay={};CLASSES.forEach((c,i)=>{if(!byDay[c.day])byDay[c.day]=[];byDay[c.day].push({...c,idx:i});});
-    let html='';
+    ct.innerHTML='';
     [0,1,2,3,4,5,6].forEach(d=>{
         if(!byDay[d])return;
-        const dayClasses=byDay[d];
-        html+=`<div style="margin-bottom:10px;">`;
-        html+=`<div style="font-size:0.65rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--border);">${days[d]}</div>`;
-        dayClasses.forEach(c=>{
+        const wrap=document.createElement('div');wrap.style.marginBottom='10px';
+        const dayHead=document.createElement('div');dayHead.style.cssText='font-size:0.65rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--border);';
+        dayHead.textContent=days[d];wrap.appendChild(dayHead);
+        byDay[d].forEach(c=>{
             const ch=enrolled.some(e=>e.subject===c.subject&&e.teacher===c.teacher&&e.day===c.day);
-            html+=`<label style="display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:0.7rem;transition:background 0.15s;${ch?'background:rgba(45,212,191,0.08);':'background:transparent;'}" onmouseover="this.style.background='rgba(45,212,191,0.05)'" onmouseout="this.style.background='${ch?'rgba(45,212,191,0.08)':'transparent'}'">`;
-            html+=`<input type="checkbox" data-i="${c.idx}" ${ch?'checked':''} style="accent-color:var(--accent);width:14px;height:14px;">`;
-            html+=`<span style="flex:1;"><span style="font-weight:600;color:var(--heading);">${c.subject}</span> <span style="color:var(--muted);">• ${c.teacher}</span></span>`;
-            html+=`<span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);">${c.start}</span>`;
-            html+=`</label>`;
+            const lbl=document.createElement('label');
+            lbl.style.cssText=`display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:0.7rem;transition:background 0.15s;background:${ch?'rgba(45,212,191,0.08)':'transparent'};`;
+            lbl.addEventListener('mouseenter',()=>lbl.style.background='rgba(45,212,191,0.05)');
+            lbl.addEventListener('mouseleave',()=>lbl.style.background=ch?'rgba(45,212,191,0.08)':'transparent');
+            const cb=document.createElement('input');cb.type='checkbox';cb.dataset.i=c.idx;if(ch)cb.checked=true;cb.style.cssText='accent-color:var(--accent);width:14px;height:14px;';
+            const info=document.createElement('span');info.style.flex='1';
+            const subj=document.createElement('span');subj.style.cssText='font-weight:600;color:var(--heading);';subj.textContent=c.subject;
+            const teach=document.createElement('span');teach.style.cssText='color:var(--muted);';teach.textContent=` • ${c.teacher}`;
+            info.appendChild(subj);info.appendChild(teach);
+            const time=document.createElement('span');time.style.cssText="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);";time.textContent=c.start;
+            lbl.appendChild(cb);lbl.appendChild(info);lbl.appendChild(time);
+            cb.onchange=()=>{const i=+cb.dataset.i,cls=CLASSES[i];
+                if(cb.checked){if(!enrolled.find(e=>e.subject===cls.subject&&e.teacher===cls.teacher&&e.day===cls.day))enrolled.push(cls);}
+                else enrolled=enrolled.filter(e=>!(e.subject===cls.subject&&e.teacher===cls.teacher&&e.day===cls.day));
+                updateEnrolled();renderToggles();renderAll();};
+            wrap.appendChild(lbl);
+        });
+        ct.appendChild(wrap);
+    });
+    updateClsCountdown();
+}
         });
         html+=`</div>`;
     });
@@ -1199,7 +1239,7 @@ $('#city-search').oninput=()=>{
             const results=[];
             const seen=new Set(local.map(c=>c.id));
             data.forEach(d=>{
-                const name=(d.address?.city||d.address?.town||d.address?.village||d.name||'').trim();
+                const name=sanitizeName(d.address?.city||d.address?.town||d.address?.village||d.name||'').trim();
                 const country=d.address?.country||'';
                 if(!name)return;
                 const id='geo_'+name.toLowerCase().replace(/[^a-z0-9]/g,'_')+'_'+Math.round(parseFloat(d.lat))+'_'+Math.round(parseFloat(d.lon));
@@ -1314,6 +1354,10 @@ $('#btn-notify').onclick=async()=>{
     if(p==='granted'){notifEnabled=true;localStorage.setItem('wp_notif','1');$('#btn-notify').style.color='var(--accent)';schedulePrayerNotifs();}else{alert('Enable notifications to get prayer alerts');}
 };
 if(notifEnabled&&'Notification' in window&&Notification.permission==='granted')$('#btn-notify').style.color='var(--accent)';
+
+// Quick language toggle
+$('#btn-lang').onclick=()=>{lang=lang==='en'?'ar':'en';localStorage.setItem('wp_l',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';$('#lang-sel').value=lang;$('#lang-icon').textContent=lang==='en'?'EN':'AR';checkConflicts();updateClsCountdown();updateLegend();};
+$('#lang-icon').textContent=lang==='en'?'EN':'AR';
 
 function schedulePrayerNotifs(){
     if(!userCity||!notifEnabled)return;
