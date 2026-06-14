@@ -2,6 +2,17 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.3.0] – 2026-06-15
+
+### Added
+- **iCal export** – Download calendar event for selected safe meeting window
+- **Robust city matching** – Share links handle "New York" vs "newyork" and special characters
+- **Calendar icon** – New button in header for quick export
+
+### Fixed
+- **City deduplication** – Share links no longer create duplicate city entries
+- **URL parsing** – Handles normalized city keys (alphanumeric only)
+
 ## [1.2.0] – 2026-06-15
 
 ### Added

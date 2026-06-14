@@ -431,6 +431,9 @@
             <button class="icon-btn" id="btn-share" title="Share link">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             </button>
+            <button class="icon-btn" id="btn-ical" title="Export to calendar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+            </button>
             <button class="icon-btn" id="btn-settings" title="Settings">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
@@ -930,22 +933,40 @@ $('#lang-sel').value=lang;
 
 /* ── Share ──────────────────────────────────────── */
 function genShareLink(){
-    const ids=cities.map(c=>c.id.toLowerCase()).join(',');
+    const ids=cities.map(c=>c.id.toLowerCase().replace(/[^a-z0-9]/g,'')).join(',');
     const p=new URLSearchParams({cities:ids,start:selStart.toFixed(2),dur:selDur.toFixed(2)});
     if(lang==='ar')p.set('lang','ar');
     return`${window.location.origin}${window.location.pathname}?${p.toString()}`;
 }
 $('#btn-share').onclick=async()=>{try{await navigator.clipboard.writeText(genShareLink());const b=$('#btn-share');b.style.color='var(--accent)';setTimeout(()=>b.style.color='',1500);}catch(e){window.prompt('Share link:',genShareLink());}};
+$('#btn-ical').onclick=()=>exportICal();
+function normCity(s){return s.toLowerCase().replace(/[^a-z0-9]/g,'');}
 function loadFromURL(){
     const p=new URLSearchParams(window.location.search);
     if(p.has('cities')){
-        const raw=p.get('cities').split(',').map(s=>s.trim().toLowerCase());
-        const matched=raw.map(id=>POOL.find(c=>c.id.toLowerCase()===id||c.name.toLowerCase().replace(/\s+/g,'')===id)).filter(Boolean);
-        if(matched.length>0)cities=matched.map(c=>({...c}));
+        const raw=p.get('cities').split(',').map(s=>normCity(s.trim()));
+        const matched=raw.flatMap(id=>POOL.filter(c=>normCity(c.id)===id||normCity(c.name)===id));
+        if(matched.length>0)cities=[...new Map(matched.map(c=>[c.id,c])).values()].map(c=>({...c}));
     }
     if(p.has('start'))selStart=parseFloat(p.get('start'))||9;
     if(p.has('dur'))selDur=parseFloat(p.get('dur'))||1;
     if(p.has('lang')){lang=p.get('lang')==='ar'?'ar':'en';localStorage.setItem('wp_l',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';$('#lang-sel').value=lang;}
+}
+
+/* ── iCal Export ─────────────────────────────────── */
+function exportICal(){
+    const now=new Date();
+    const base=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const sh=Math.floor(selStart),sm=Math.round((selStart-sh)*60);
+    const eh=Math.floor(selStart+selDur),em=Math.round(((selStart+selDur)-eh)*60);
+    const pad=n=>String(n).padStart(2,'0');
+    const fmt=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+    const start=new Date(base);start.setHours(sh,sm,0);
+    const end=new Date(base);end.setHours(eh,em,0);
+    const cityNames=cities.map(c=>c.name).join(', ');
+    const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Prayer Times//EN\nBEGIN:VEVENT\nDTSTART:${fmt(start)}\nDTEND:${fmt(end)}\nSUMMARY:Safe Meeting Window\nDESCRIPTION:No prayer conflicts for: ${cityNames}\nEND:VEVENT\nEND:VCALENDAR`;
+    const blob=new Blob([ics],{type:'text/calendar'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='safe-window.ics';a.click();
 }
 
 /* ── Course panel ───────────────────────────────── */
