@@ -17,20 +17,28 @@
         :root {
             --label-w: 140px;
             --tl-min: 1000px;
-            --surface: #0a0f1e;
-            --card: #0f172a;
-            --border: #1e293b;
-            --muted: #e2e8f0;
-            --text: #e2e8f0;
-            --heading: #ffffff;
-            --accent: #38bdf8;
+            --surface: #091117;
+            --card: #0d1922;
+            --border: #1a2a36;
+            --muted: #8ba4b4;
+            --text: #d0dce6;
+            --heading: #f0f6fa;
+            --accent: #2dd4bf;
+            --accent2: #06b6d4;
             --safe: #34d399;
-            --danger: #ef4444;
+            --danger: #f87171;
             --selection: #22d3ee;
+            --prayer-fajr: #67e8f9;
+            --prayer-dhuhr: #fbbf24;
+            --prayer-asr: #fb923c;
+            --prayer-maghrib: #f87171;
+            --prayer-isha: #a78bfa;
         }
         [data-theme="light"] {
-            --surface: #f8fafc; --card: #ffffff; --border: #e2e8f0; --muted: #475569;
-            --text: #1e293b; --heading: #0f172a; --safe: #10b981; --danger: #dc2626;
+            --surface: #f0f4f8; --card: #ffffff; --border: #d1dce6;
+            --muted: #4a6577; --text: #1e3a4f; --heading: #0f2940;
+            --accent: #0d9488; --accent2: #0891b2;
+            --safe: #059669; --danger: #dc2626;
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
@@ -60,9 +68,9 @@
         /* Islamic pattern background */
         #bg-canvas {
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            opacity: 0.12;
+            opacity: 0.08;
         }
-        [data-theme="light"] #bg-canvas { opacity: 0.06; }
+        [data-theme="light"] #bg-canvas { opacity: 0.05; }
 
         /* Glass */
         .glass {
@@ -188,16 +196,16 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         .prayer-block:hover { transform: scaleY(1.06); filter: brightness(1.1); z-index: 5; }
-        .prayer-block.fajr    { background: rgba(125,211,252,0.4); color: #0c4a6e; border-color: #38bdf8; }
-        .prayer-block.dhuhr   { background: rgba(253,224,71,0.45); color: #713f12; border-color: #facc15; }
-        .prayer-block.asr     { background: rgba(251,146,60,0.45); color: #7c2d12; border-color: #f97316; }
-        .prayer-block.maghrib { background: rgba(248,113,113,0.4); color: #7f1d1d; border-color: #ef4444; }
-        .prayer-block.isha    { background: rgba(196,181,253,0.45); color: #4c1d95; border-color: #8b5cf6; }
-        [data-theme="light"] .prayer-block.fajr    { background: rgba(56,189,248,0.2); }
-        [data-theme="light"] .prayer-block.dhuhr   { background: rgba(250,204,21,0.25); }
-        [data-theme="light"] .prayer-block.asr     { background: rgba(249,115,22,0.25); }
-        [data-theme="light"] .prayer-block.maghrib { background: rgba(239,68,68,0.2); }
-        [data-theme="light"] .prayer-block.isha    { background: rgba(139,92,246,0.2); }
+        .prayer-block.fajr    { background: rgba(103,232,249,0.35); color: #0c4a6e; border-color: var(--prayer-fajr); }
+        .prayer-block.dhuhr   { background: rgba(251,191,36,0.4); color: #713f12; border-color: var(--prayer-dhuhr); }
+        .prayer-block.asr     { background: rgba(251,146,60,0.4); color: #7c2d12; border-color: var(--prayer-asr); }
+        .prayer-block.maghrib { background: rgba(248,113,113,0.35); color: #7f1d1d; border-color: var(--prayer-maghrib); }
+        .prayer-block.isha    { background: rgba(167,139,250,0.4); color: #4c1d95; border-color: var(--prayer-isha); }
+        [data-theme="light"] .prayer-block.fajr    { background: rgba(6,182,212,0.2); }
+        [data-theme="light"] .prayer-block.dhuhr   { background: rgba(251,191,36,0.25); }
+        [data-theme="light"] .prayer-block.asr     { background: rgba(251,146,60,0.25); }
+        [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.2); }
+        [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.2); }
 
         /* Class events */
         .class-ev {
@@ -587,15 +595,18 @@
         </a>
 
         <div class="info-card" style="margin-top:12px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                <div class="info-card-title" style="margin:0;">I'm Enrolled</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div class="info-card-title" style="margin:0;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    I'm Enrolled
+                </div>
                 <label class="toggle"><input type="checkbox" id="enroll-toggle"><span class="slider"></span></label>
             </div>
             <div id="enroll-content" class="hidden">
-                <div id="class-toggles"></div>
-                <div style="margin-top:8px;padding:6px 8px;background:var(--card);border-radius:6px;display:flex;align-items:center;gap:6px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <span style="font-size:0.7rem;color:var(--muted);" id="next-cls">--</span>
+                <div id="class-timetable" style="max-height:300px;overflow-y:auto;"></div>
+                <div style="margin-top:10px;padding:8px 10px;background:var(--surface);border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span style="font-size:0.75rem;color:var(--muted);" id="next-cls">--</span>
                 </div>
             </div>
         </div>
@@ -844,14 +855,32 @@ function compCls(cls){
 }
 function updateEnrolled(){enrolled=enrolled.map(c=>{const d=compCls(c);return{...c,utcStart:d.utcStart,utcEnd:d.utcEnd,ts:d.ts};});localStorage.setItem('wp_e',JSON.stringify(enrolled));}
 function renderToggles(){
-    const ct=$('#class-toggles');if(!ct)return;
-    ct.innerHTML=CLASSES.map((c,i)=>{const ch=enrolled.some(e=>e.subject===c.subject&&e.teacher===c.teacher&&e.day===c.day);
-        return`<label class="class-check"><input type="checkbox" data-i="${i}" ${ch?'checked':''}> ${c.subject} (${c.teacher}) ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][c.day]} ${c.start}</label>`;
-    }).join('');
-    $$('#class-toggles input').forEach(inp=>{inp.onchange=()=>{const i=+inp.dataset.i,c=CLASSES[i];
+    const ct=$('#class-timetable');if(!ct)return;
+    const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const dayShort=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    // Group classes by day
+    const byDay={};CLASSES.forEach((c,i)=>{if(!byDay[c.day])byDay[c.day]=[];byDay[c.day].push({...c,idx:i});});
+    let html='';
+    [0,1,2,3,4,5,6].forEach(d=>{
+        if(!byDay[d])return;
+        const dayClasses=byDay[d];
+        html+=`<div style="margin-bottom:10px;">`;
+        html+=`<div style="font-size:0.65rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--border);">${days[d]}</div>`;
+        dayClasses.forEach(c=>{
+            const ch=enrolled.some(e=>e.subject===c.subject&&e.teacher===c.teacher&&e.day===c.day);
+            html+=`<label style="display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:0.7rem;transition:background 0.15s;${ch?'background:rgba(45,212,191,0.08);':'background:transparent;'}" onmouseover="this.style.background='rgba(45,212,191,0.05)'" onmouseout="this.style.background='${ch?'rgba(45,212,191,0.08)':'transparent'}'">`;
+            html+=`<input type="checkbox" data-i="${c.idx}" ${ch?'checked':''} style="accent-color:var(--accent);width:14px;height:14px;">`;
+            html+=`<span style="flex:1;"><span style="font-weight:600;color:var(--heading);">${c.subject}</span> <span style="color:var(--muted);">• ${c.teacher}</span></span>`;
+            html+=`<span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);">${c.start}</span>`;
+            html+=`</label>`;
+        });
+        html+=`</div>`;
+    });
+    ct.innerHTML=html;
+    $$('#class-timetable input').forEach(inp=>{inp.onchange=()=>{const i=+inp.dataset.i,c=CLASSES[i];
         if(inp.checked){if(!enrolled.find(e=>e.subject===c.subject&&e.teacher===c.teacher&&e.day===c.day))enrolled.push(c);}
         else{enrolled=enrolled.filter(e=>!(e.subject===c.subject&&e.teacher===c.teacher&&e.day===c.day));}
-        updateEnrolled();renderAll();};});
+        updateEnrolled();renderToggles();renderAll();};});
     updateClsCountdown();
 }
 function updateClsCountdown(){
@@ -901,20 +930,22 @@ $('#lang-sel').value=lang;
 
 /* ── Share ──────────────────────────────────────── */
 function genShareLink(){
-    const ids=cities.map(c=>c.id).join(',');
-    const p=new URLSearchParams({cities:ids,start:selStart.toFixed(2),dur:selDur.toFixed(2),lang:lang});
+    const ids=cities.map(c=>c.id.toLowerCase()).join(',');
+    const p=new URLSearchParams({cities:ids,start:selStart.toFixed(2),dur:selDur.toFixed(2)});
+    if(lang==='ar')p.set('lang','ar');
     return`${window.location.origin}${window.location.pathname}?${p.toString()}`;
 }
-$('#btn-share').onclick=()=>{navigator.clipboard.writeText(genShareLink()).then(()=>{const b=$('#btn-share');b.classList.add('active');setTimeout(()=>b.classList.remove('active'),1500);});};
+$('#btn-share').onclick=async()=>{try{await navigator.clipboard.writeText(genShareLink());const b=$('#btn-share');b.style.color='var(--accent)';setTimeout(()=>b.style.color='',1500);}catch(e){window.prompt('Share link:',genShareLink());}};
 function loadFromURL(){
     const p=new URLSearchParams(window.location.search);
     if(p.has('cities')){
-        const ids=p.get('cities').split(',');
-        cities=ids.map(id=>POOL.find(c=>c.id===id)).filter(Boolean).map(c=>({...c}));
+        const raw=p.get('cities').split(',').map(s=>s.trim().toLowerCase());
+        const matched=raw.map(id=>POOL.find(c=>c.id.toLowerCase()===id||c.name.toLowerCase().replace(/\s+/g,'')===id)).filter(Boolean);
+        if(matched.length>0)cities=matched.map(c=>({...c}));
     }
     if(p.has('start'))selStart=parseFloat(p.get('start'))||9;
     if(p.has('dur'))selDur=parseFloat(p.get('dur'))||1;
-    if(p.has('lang')){lang=p.get('lang');localStorage.setItem('wp_l',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';$('#lang-sel').value=lang;}
+    if(p.has('lang')){lang=p.get('lang')==='ar'?'ar':'en';localStorage.setItem('wp_l',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';$('#lang-sel').value=lang;}
 }
 
 /* ── Course panel ───────────────────────────────── */
@@ -978,20 +1009,29 @@ function drawBG(){
     cv.width=window.innerWidth;cv.height=window.innerHeight;
     ctx.clearRect(0,0,cv.width,cv.height);
     const isDark=document.documentElement.getAttribute('data-theme')==='dark';
-    ctx.strokeStyle=isDark?'rgba(56,189,248,0.15)':'rgba(56,189,248,0.1)';
-    ctx.lineWidth=0.5;
-    // Islamic geometric pattern - interlocking stars
-    const s=60;
+    // Teal/cyan color for Islamic pattern
+    const baseColor=isDark?'rgba(45,212,191,0.12)':'rgba(13,148,136,0.08)';
+    ctx.strokeStyle=baseColor;ctx.lineWidth=0.4;
+    // Islamic geometric pattern - interlocking octagonal stars
+    const s=80;const r=s*0.35;
     for(let x=0;x<cv.width+s;x+=s){
         for(let y=0;y<cv.height+s;y+=s){
+            // Outer octagon
             ctx.beginPath();
-            // 8-pointed star
             for(let i=0;i<8;i++){
-                const a=(Math.PI*2*i/8)-Math.PI/2;
-                const r1=s*0.4,r2=s*0.2;
-                ctx.lineTo(x+Math.cos(a)*r1,y+Math.sin(a)*r1);
+                const a=(Math.PI*2*i/8)-Math.PI/8;
+                const px=x+Math.cos(a)*r,py=y+Math.sin(a)*r;
+                if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+            }
+            ctx.closePath();ctx.stroke();
+            // Inner star
+            ctx.beginPath();
+            for(let i=0;i<8;i++){
+                const a=(Math.PI*2*i/8)-Math.PI/8;
+                const ri=r*0.5;
+                ctx.lineTo(x+Math.cos(a)*ri,y+Math.sin(a)*ri);
                 const a2=a+Math.PI/8;
-                ctx.lineTo(x+Math.cos(a2)*r2,y+Math.sin(a2)*r2);
+                ctx.lineTo(x+Math.cos(a2)*r*0.8,y+Math.sin(a2)*r*0.8);
             }
             ctx.closePath();ctx.stroke();
         }
