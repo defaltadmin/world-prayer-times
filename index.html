@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>World Prayer Times</title>
+    <meta name="description" content="Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.">
+    <meta name="theme-color" content="#0a0f1e">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        surface: 'var(--surface)',
+                        card: 'var(--card)',
+                        border: 'var(--border)',
+                        muted: 'var(--muted)',
+                        accent: '#38bdf8',
+                        fajr: '#7dd3fc',
+                        dhuhr: '#fde047',
+                        asr: '#fb923c',
+                        maghrib: '#f87171',
+                        isha: '#c4b5fd',
+                        safe: '#34d399',
+                        conflict: '#ef4444',
+                        selection: '#22d3ee',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        serif: ['Amiri', 'Georgia', 'serif'],
+                    },
+                },
+            },
+        };
+    </script>
+
+    <style>
+        /* ========== CSS VARIABLES & THEMES ========== */
+        :root {
+            --label-width: 175px;
+            --timeline-min-width: 1080px;
+            --surface: #0a0f1e;
+            --card: #111827;
+            --border: #1e293b;
+            --muted: #94a3b8;
+            --text: #e2e8f0;
+            --text-heading: #f1f5f9;
+            --glass-bg: rgba(17, 25, 40, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --glass-shadow: rgba(0, 0, 0, 0.4);
+            --row-bg: #0d1525;
+            --strip-bg: #0f1a2a;
+            --now-color: #ef4444;
+            --font-size-prayer: 0.65rem;
+        }
+        [data-theme="light"] {
+            --surface: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --muted: #475569;
+            --text: #1e293b;
+            --text-heading: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --glass-shadow: rgba(0, 0, 0, 0.05);
+            --row-bg: #fafcfd;
+            --strip-bg: #f8fafc;
+            --now-color: #dc2626;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: var(--surface);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            margin: 0; padding: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            min-height: 100vh;
+            background-attachment: fixed;
+            background-image:
+                radial-gradient(ellipse at 20% 10%, rgba(56,189,248,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 90%, rgba(139,92,246,0.06) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(14,165,233,0.02) 0%, rgba(139,92,246,0.03) 100%);
+        }
+        [data-theme="light"] body {
+            background-image:
+                radial-gradient(ellipse at 20% 10%, rgba(56,189,248,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 90%, rgba(139,92,246,0.08) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(14,165,233,0.04) 0%, rgba(139,92,246,0.04) 100%);
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px var(--glass-shadow);
+        }
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px var(--glass-shadow);
+        }
+
+        /* Timeline scroll */
+        .timeline-scroll {
+            overflow-x: auto; overflow-y: visible;
+            scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+            -webkit-overflow-scrolling: touch; position: relative;
+        }
+        .timeline-scroll::-webkit-scrollbar { height: 5px; }
+        .timeline-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        /* City row */
+        .city-row {
+            display: flex; align-items: stretch; min-height: 54px;
+            border-bottom: 1px solid var(--border);
+            background: var(--row-bg); transition: background 0.15s;
+        }
+        .city-row:hover { background: rgba(255,255,255,0.015); }
+        .city-row.user-highlight {
+            background: rgba(56,189,248,0.03);
+            border-left: 3px solid #38bdf8;
+        }
+        .city-label-area {
+            width: var(--label-width); min-width: var(--label-width);
+            flex-shrink: 0; padding: 6px 12px;
+            display: flex; flex-direction: column; justify-content: center;
+            border-right: 1px solid var(--border);
+            background: var(--card); position: sticky; left: 0; z-index: 2; gap: 2px;
+        }
+        .city-name {
+            font-weight: 600; font-size: 0.85rem;
+            color: var(--text-heading);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .city-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem; color: var(--muted); font-weight: 500;
+        }
+        .city-offset {
+            font-size: 0.55rem; color: #64748b;
+        }
+        .user-badge {
+            font-size: 0.55rem; background: rgba(56,189,248,0.15);
+            color: #38bdf8; padding: 2px 6px; border-radius: 10px;
+            margin-left: 6px; font-weight: 700; letter-spacing: 0.03em;
+        }
+
+        /* Prayer blocks */
+        .prayer-block {
+            position: absolute; top: 6px; bottom: 6px;
+            border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: var(--font-size-prayer);
+            letter-spacing: 0.04em; cursor: pointer;
+            z-index: 2; overflow: hidden; white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            border-left: 3px solid;
+            transition: transform 0.12s ease, filter 0.12s ease;
+            writing-mode: vertical-rl; text-orientation: mixed;
+            text-transform: uppercase;
+        }
+        .prayer-block:hover { transform: scaleY(1.08); filter: brightness(1.15); z-index: 5; }
+        .prayer-block.fajr    { background: rgba(125,211,252,0.45); color: #0c4a6e; border-color: #38bdf8; }
+        .prayer-block.dhuhr   { background: rgba(253,224,71,0.5); color: #713f12; border-color: #facc15; }
+        .prayer-block.asr     { background: rgba(251,146,60,0.5); color: #7c2d12; border-color: #f97316; }
+        .prayer-block.maghrib { background: rgba(248,113,113,0.45); color: #7f1d1d; border-color: #ef4444; }
+        .prayer-block.isha    { background: rgba(196,181,253,0.5); color: #4c1d95; border-color: #8b5cf6; }
+        [data-theme="light"] .prayer-block.fajr    { background: rgba(56,189,248,0.25); }
+        [data-theme="light"] .prayer-block.dhuhr   { background: rgba(250,204,21,0.3); }
+        [data-theme="light"] .prayer-block.asr     { background: rgba(249,115,22,0.3); }
+        [data-theme="light"] .prayer-block.maghrib { background: rgba(239,68,68,0.3); }
+        [data-theme="light"] .prayer-block.isha    { background: rgba(139,92,246,0.3); }
+
+        /* Selection overlay */
+        .selection-overlay {
+            position: absolute; top: 0; bottom: 0;
+            z-index: 10; pointer-events: none;
+            background: rgba(34,211,238,0.08);
+            border-left: 2px solid rgba(34,211,238,0.8);
+            border-right: 2px solid rgba(34,211,238,0.8);
+            cursor: grab; pointer-events: auto;
+            box-shadow: 0 0 24px rgba(34,211,238,0.15);
+            transition: left 0.06s ease-out, width 0.1s;
+        }
+        .selection-overlay.dragging {
+            transition: none; cursor: grabbing;
+            background: rgba(34,211,238,0.18);
+        }
+        .resize-handle {
+            position: absolute; top: 0; bottom: 0; width: 14px;
+            cursor: ew-resize; z-index: 12; pointer-events: auto;
+        }
+        .resize-handle.left  { left: -7px; }
+        .resize-handle.right { right: -7px; }
+        .selection-handle-center {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            width: 32px; height: 16px; background: #22d3ee; border-radius: 8px;
+            cursor: grab; z-index: 11; pointer-events: auto;
+            box-shadow: 0 0 10px rgba(34,211,238,0.6);
+        }
+        .selection-handle-center.top    { top: -8px; }
+        .selection-handle-center.bottom { bottom: -8px; }
+
+        /* NOW indicator */
+        .now-indicator {
+            position: absolute; top: 0; bottom: 0;
+            width: 2px; background: var(--now-color);
+            z-index: 8; pointer-events: none;
+            box-shadow: 0 0 8px var(--now-color);
+        }
+        .now-indicator::after {
+            content: 'NOW'; position: absolute; top: -18px; left: 50%;
+            transform: translateX(-50%); font-size: 0.55rem; font-weight: 700;
+            color: var(--now-color); background: var(--surface);
+            padding: 2px 6px; border-radius: 4px; letter-spacing: 0.08em;
+        }
+
+        /* Ruler */
+        .ruler-label {
+            position: absolute; top: 4px; transform: translateX(-50%);
+            font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+            color: var(--muted); pointer-events: none; z-index: 3; font-weight: 500;
+        }
+        .hour-marker {
+            position: absolute; top: 0; bottom: 0; width: 1px;
+            background: rgba(128,128,128,0.06); pointer-events: none; z-index: 0;
+        }
+        .hour-marker.major { background: rgba(128,128,128,0.15); width: 1.5px; }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 12px; border-radius: 16px; font-size: 0.75rem;
+            font-weight: 600; backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+        }
+        .status-badge.safe {
+            background: rgba(52,211,153,0.1); color: #34d399;
+            border: 1px solid rgba(52,211,153,0.25);
+        }
+        .status-badge.conflict {
+            background: rgba(239,68,68,0.1); color: #f87171;
+            border: 1px solid rgba(239,68,68,0.3);
+            animation: pulse-conflict 2s infinite;
+        }
+        @keyframes pulse-conflict {
+            0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+            50%     { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px; border-radius: 10px; font-weight: 600;
+            font-size: 0.8rem; cursor: pointer; letter-spacing: 0.01em;
+            display: inline-flex; align-items: center; gap: 6px; border: none;
+            transition: all 0.15s ease;
+        }
+        .btn-primary { background: #1d4ed8; color: #fff; box-shadow: 0 2px 10px rgba(29,78,216,0.25); }
+        .btn-primary:hover { background: #2563eb; box-shadow: 0 4px 16px rgba(37,99,235,0.35); }
+        .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+        .btn-ghost:hover { background: var(--card); color: var(--text); border-color: #475569; }
+        .btn-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; border: 1px solid var(--border);
+            background: transparent; color: var(--muted);
+            transition: all 0.15s ease; font-size: 0.9rem;
+        }
+        .btn-icon:hover { border-color: #475569; color: var(--text); background: var(--card); }
+        .btn-icon.active { border-color: #38bdf8; background: rgba(56,189,248,0.1); color: #38bdf8; }
+
+        /* Modals & panels */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+            z-index: 50; display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px); opacity: 0; visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        .modal-overlay.visible { opacity: 1; visibility: visible; }
+        .modal {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 24px; max-width: 440px; width: 92%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4); max-height: 85vh;
+            overflow-y: auto; backdrop-filter: blur(16px);
+            transform: scale(0.95); transition: transform 0.2s ease;
+        }
+        .modal-overlay.visible .modal { transform: scale(1); }
+        .slide-panel {
+            position: fixed; top: 0; right: -100%; width: 400px; max-width: 92vw;
+            height: 100vh; z-index: 55;
+            background: var(--glass-bg); backdrop-filter: blur(28px);
+            border-left: 1px solid var(--glass-border);
+            box-shadow: -8px 0 40px rgba(0,0,0,0.3);
+            transition: right 0.3s cubic-bezier(0.22,0.61,0.36,1);
+            overflow-y: auto; padding: 24px;
+        }
+        .slide-panel.open { right: 0; }
+        .slide-panel-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+            z-index: 54; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+        }
+        .slide-panel-backdrop.open { opacity: 1; pointer-events: auto; }
+
+        /* Class event */
+        .class-event {
+            position: absolute; top: 6px; bottom: 6px; border-radius: 3px;
+            background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2);
+            z-index: 1; display: flex; align-items: center; justify-content: center;
+            font-size: 0.5rem; font-weight: 600; color: rgba(255,255,255,0.5);
+            pointer-events: none; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* Add city row */
+        .add-city-row {
+            display: flex; align-items: center; justify-content: center;
+            padding: 10px; border-bottom: 1px solid var(--border);
+            background: var(--row-bg); cursor: pointer; color: var(--muted);
+            font-size: 1.2rem; transition: all 0.15s ease;
+        }
+        .add-city-row:hover { background: rgba(56,189,248,0.03); color: #38bdf8; }
+
+        /* Remove button */
+        .remove-city-btn {
+            position: absolute; top: 4px; right: 4px;
+            width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem; color: var(--muted); cursor: pointer;
+            background: transparent; border: none; opacity: 0;
+            transition: all 0.15s ease;
+        }
+        .city-row:hover .remove-city-btn { opacity: 1; }
+        .remove-city-btn:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
+
+        /* Chip */
+        .chip {
+            padding: 6px 12px; border-radius: 8px; font-size: 0.75rem;
+            font-weight: 500; cursor: pointer; transition: all 0.15s ease;
+            background: var(--card); border: 1px solid var(--border); color: var(--text);
+        }
+        .chip:hover { border-color: #38bdf8; color: #38bdf8; background: rgba(56,189,248,0.05); }
+
+        /* Toggle switch */
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #334155; transition: 0.3s; border-radius: 22px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 16px; width: 16px;
+            left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #38bdf8; }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        /* Loading spinner */
+        .loading-spinner {
+            width: 24px; height: 24px; border: 2px solid var(--border);
+            border-top-color: #38bdf8; border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            :root { --label-width: 110px; --timeline-min-width: 780px; --font-size-prayer: 0.5rem; }
+            .slide-panel { width: 100%; }
+            .city-label-area { padding: 4px 8px; }
+            .city-name { font-size: 0.75rem; }
+            .city-time { font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="min-h-screen flex flex-col relative">
+
+    <!-- HEADER -->
+    <header class="glass sticky top-0 z-30 px-3 py-2 sm:px-5 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-indigo-500 flex items-center justify-center shadow-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    <circle cx="12" cy="12" r="4"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-sm sm:text-base font-bold text-[var(--text-heading)] tracking-tight">Prayer Times</h1>
+                <p class="text-[10px] sm:text-xs text-[var(--muted)] font-mono" id="current-date-display"></p>
+            </div>
+        </div>
+        <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <span class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-mono bg-accent/10 border border-accent/30 text-accent" id="countdown-display">
+                <span id="countdown-text">Loading...</span>
+            </span>
+            <button class="btn-icon" id="help-btn" title="How to use">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </button>
+            <button class="btn-icon" id="course-btn" title="Sannatayn Course">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            </button>
+            <button class="btn-icon" id="settings-btn" title="Settings">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- STATUS BAR -->
+    <div class="px-3 py-1.5 sm:px-5 border-b border-[var(--border)] bg-[var(--card)]/60 flex items-center gap-2 flex-wrap text-xs">
+        <span id="status-badge" class="status-badge safe">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Safe Window
+        </span>
+        <span class="text-[var(--muted)]" id="selection-time-display">Drag the bar to select</span>
+        <span class="text-[var(--muted)] ml-auto hidden sm:inline font-mono" id="utc-now-display"></span>
+    </div>
+
+    <!-- RULER -->
+    <div class="timeline-scroll border-b border-[var(--border)]" id="ruler-scroll">
+        <div style="height:28px; position:relative; min-width:var(--timeline-min-width); margin-left:var(--label-width);" id="ruler-inner"></div>
+    </div>
+
+    <!-- CITY TIMELINES -->
+    <div class="flex-1 timeline-scroll" id="cities-scroll">
+        <div style="position:relative; min-width:var(--timeline-min-width); margin-left:var(--label-width);" id="cities-inner">
+            <div id="city-rows-container"></div>
+            <div class="add-city-row" id="add-city-row" title="Add city">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+
+            <!-- Selection overlay -->
+            <div class="selection-overlay" id="selection-overlay" style="left:41.67%; width:4.1667%; top:0; bottom:0;">
+                <div class="resize-handle left" id="resize-left"></div>
+                <div class="resize-handle right" id="resize-right"></div>
+                <div class="selection-handle-center top" id="handle-top"></div>
+                <div class="selection-handle-center bottom" id="handle-bottom"></div>
+            </div>
+            <!-- NOW line -->
+            <div class="now-indicator" id="now-indicator" style="left:50%;"></div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-[var(--text-heading)]">Settings</h3>
+                <button class="btn-icon" id="close-settings-btn" style="width:28px;height:28px;font-size:0.7rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="space-y-3 text-sm">
+                <div class="flex items-center justify-between py-2 border-b border-[var(--border)]">
+                    <span class="text-[var(--muted)]">Theme</span>
+                    <button id="theme-toggle-btn" class="btn btn-ghost" style="padding:4px 12px;font-size:0.75rem;">Dark</button>
+                </div>
+                <div class="flex items-center justify-between py-2 border-b border-[var(--border)]">
+                    <span class="text-[var(--muted)]">Time Format</span>
+                    <button id="format-toggle-btn" class="btn btn-ghost" style="padding:4px 12px;font-size:0.75rem;">24h</button>
+                </div>
+                <div class="flex items-center justify-between py-2 border-b border-[var(--border)]">
+                    <span class="text-[var(--muted)]">Language</span>
+                    <select id="lang-select" class="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-1.5 text-xs w-28">
+                        <option value="en">English</option><option value="ar">العربية</option>
+                    </select>
+                </div>
+                <div class="flex items-center justify-between py-2">
+                    <span class="text-[var(--muted)]">Alarm Sound</span>
+                    <select id="alarm-sound-select" class="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-1.5 text-xs w-28">
+                        <option value="ting">Ting</option><option value="chime">Chime</option><option value="bell">Bell</option>
+                    </select>
+                </div>
+                <button id="how-to-use-btn" class="btn btn-ghost w-full justify-center mt-2" style="font-size:0.75rem;">How to Use</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOW TO USE MODAL -->
+    <div class="modal-overlay" id="help-modal">
+        <div class="modal">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-bold text-[var(--text-heading)]">How to Use</h3>
+                <button class="btn-icon" id="close-help-btn" style="width:28px;height:28px;font-size:0.7rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <ul class="text-xs space-y-2.5 text-[var(--muted)]">
+                <li class="flex gap-2"><span class="text-accent">1.</span> Your local time is the ruler at the top (red NOW line).</li>
+                <li class="flex gap-2"><span class="text-accent">2.</span> Each row shows prayer times as colored blocks.</li>
+                <li class="flex gap-2"><span class="text-accent">3.</span> Drag the cyan bar to select a meeting window. Resize by dragging edges.</li>
+                <li class="flex gap-2"><span class="text-accent">4.</span> The status shows if the window conflicts with any prayer.</li>
+                <li class="flex gap-2"><span class="text-accent">5.</span> Click the book icon to view Sannatayn course info and enroll.</li>
+            </ul>
+            <button class="btn btn-ghost mt-4 w-full justify-center" id="close-help-btn-2" style="font-size:0.75rem;">Got it</button>
+        </div>
+    </div>
+
+    <!-- COURSE INFO PANEL -->
+    <div class="slide-panel-backdrop" id="course-panel-backdrop"></div>
+    <aside class="slide-panel" id="course-panel">
+        <div class="flex justify-between items-center mb-5">
+            <h2 class="text-lg font-bold font-serif">Sannatayn & Tafseer</h2>
+            <button class="btn-icon" id="close-course-panel-btn" style="width:28px;height:28px;font-size:0.7rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="space-y-3 text-xs">
+            <div class="glass-card p-3">
+                <div class="font-semibold text-[var(--text-heading)] mb-1">Attendance</div>
+                <div class="text-[var(--muted)]">Missing 2 lessons without notice releases your place.</div>
+            </div>
+            <div class="glass-card p-3">
+                <div class="font-semibold text-[var(--text-heading)] mb-1">Deposit</div>
+                <div class="text-[var(--muted)]">£100 refundable. UK: Sort 60-84-64, Acc 60190598.</div>
+            </div>
+            <div class="glass-card p-3">
+                <div class="font-semibold text-[var(--text-heading)] mb-1">Groups</div>
+                <div class="text-[var(--muted)] space-y-1">
+                    <div>Sannatayn (Men)</div>
+                    <div>Tafseer (All) 3:30–5:30 PM BST</div>
+                </div>
+            </div>
+            <div class="glass-card p-3">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="font-semibold text-[var(--text-heading)]">I'm Enrolled</div>
+                    <label class="switch"><input type="checkbox" id="enrolled-toggle"><span class="slider"></span></label>
+                </div>
+                <div id="enrolled-content" class="hidden space-y-2">
+                    <div id="class-toggles" class="space-y-1.5"></div>
+                    <div class="mt-3 p-2 bg-[var(--surface)] rounded-lg flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span class="text-[var(--muted)]" id="next-class-countdown">Next class: --</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ADD CITY MODAL -->
+    <div class="modal-overlay" id="add-city-modal">
+        <div class="modal">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-bold text-[var(--text-heading)]">Add City</h3>
+                <button class="btn-icon" id="close-add-modal-btn" style="width:28px;height:28px;font-size:0.7rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-3" id="popular-cities-chips"></div>
+            <input type="text" class="w-full p-2.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:border-accent" id="city-search-input" placeholder="Search city...">
+            <div class="mt-2 max-h-40 overflow-y-auto border border-[var(--border)] rounded-lg" id="search-results"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    /* ───────────────────────────────────────────────
+       CONFIGURATION
+       ─────────────────────────────────────────────── */
+    const DEFAULT_CITIES = [
+        { id: 'london',   name: 'London',   city: 'London',   country: 'UK', tz: 'Europe/London',    lat: 51.51, lng: -0.13, method: 3 },
+        { id: 'riyadh',   name: 'Riyadh',   city: 'Riyadh',   country: 'SA', tz: 'Asia/Riyadh',      lat: 24.71, lng: 46.68, method: 4 },
+        { id: 'mumbai',   name: 'Mumbai',   city: 'Mumbai',   country: 'IN', tz: 'Asia/Kolkata',     lat: 19.08, lng: 72.88, method: 1 },
+        { id: 'brussels', name: 'Brussels', city: 'Brussels', country: 'BE', tz: 'Europe/Brussels',  lat: 50.85, lng: 4.35,  method: 3 },
+        { id: 'newyork',  name: 'New York', city: 'New York', country: 'US', tz: 'America/New_York', lat: 40.71, lng: -74.01, method: 2 },
+    ];
+
+    const POPULAR_POOL = [...DEFAULT_CITIES,
+        { id: 'dubai', name: 'Dubai', tz: 'Asia/Dubai', lat: 25.2, lng: 55.27, method: 4 },
+        { id: 'istanbul', name: 'Istanbul', tz: 'Europe/Istanbul', lat: 41.01, lng: 28.98, method: 3 },
+        { id: 'cairo', name: 'Cairo', tz: 'Africa/Cairo', lat: 30.04, lng: 31.24, method: 3 },
+        { id: 'jakarta', name: 'Jakarta', tz: 'Asia/Jakarta', lat: -6.21, lng: 106.85, method: 3 },
+        { id: 'singapore', name: 'Singapore', tz: 'Asia/Singapore', lat: 1.35, lng: 103.82, method: 3 },
+    ];
+
+    const CLASS_SCHEDULE = [
+        { day: 4, start: '14:30', end: '15:30', subject: 'Fique',    teacher: 'Aakif' },
+        { day: 5, start: '15:30', end: '16:30', subject: 'Tafseer',  teacher: 'Abdel-Nasser' },
+        { day: 5, start: '16:30', end: '17:30', subject: 'Tafseer',  teacher: 'Abdel-Nasser' },
+        { day: 0, start: '17:25', end: '18:25', subject: 'Seerah',   teacher: 'Ammar' },
+        { day: 1, start: '17:25', end: '18:25', subject: 'Seerah',   teacher: 'Ammar' },
+        { day: 2, start: '17:25', end: '18:25', subject: 'Fique',    teacher: 'Aakif' },
+        { day: 3, start: '17:25', end: '18:25', subject: 'Adab',     teacher: 'Ammar' },
+        { day: 4, start: '17:25', end: '18:25', subject: 'Adab',     teacher: 'Ammar' },
+        { day: 6, start: '17:25', end: '18:25', subject: 'Seerah',   teacher: 'Ammar' },
+        { day: 1, start: '18:30', end: '19:30', subject: 'Arabic',   teacher: 'Abdelaziz' },
+        { day: 2, start: '18:30', end: '19:30', subject: 'Hadith',   teacher: 'Ahmad' },
+        { day: 3, start: '18:30', end: '19:30', subject: 'Arabic',   teacher: 'Abdelaziz' },
+        { day: 4, start: '18:30', end: '19:30', subject: 'Hadith',   teacher: 'Ahmad' },
+        { day: 6, start: '18:30', end: '19:30', subject: 'Aqaaid',   teacher: 'Ahmad' },
+    ];
+
+    const PRAYER_COLORS = {
+        Fajr:    { bg: 'rgba(125,211,252,0.45)', text: '#0c4a6e', border: '#38bdf8' },
+        Dhuhr:   { bg: 'rgba(253,224,71,0.5)',   text: '#713f12', border: '#facc15' },
+        Asr:     { bg: 'rgba(251,146,60,0.5)',   text: '#7c2d12', border: '#f97316' },
+        Maghrib: { bg: 'rgba(248,113,113,0.45)', text: '#7f1d1d', border: '#ef4444' },
+        Isha:    { bg: 'rgba(196,181,253,0.5)',  text: '#4c1d95', border: '#8b5cf6' },
+    };
+
+    /* ───────────────────────────────────────────────
+       STATE
+       ─────────────────────────────────────────────── */
+    let activeCities = [...DEFAULT_CITIES];
+    let prayerCache = {};
+    let selectionStartHour = 10;
+    let selectionDuration = 1;
+    let isDragging = false, resizingLeft = false, resizingRight = false;
+    let dragStartX = 0, dragStartLeft = 0, dragStartWidth = 0;
+    let use12Hour = false;
+    let isDark = true;
+    let userCityObj = null;
+    let masterOffset = 0;
+    let enrolledClasses = JSON.parse(localStorage.getItem('wp_enrolled') || '[]');
+    let currentLang = localStorage.getItem('wp_lang') || 'en';
+    let alarmSound = localStorage.getItem('wp_alarm') || 'ting';
+
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+
+    /* ───────────────────────────────────────────────
+       TRANSLATIONS
+       ─────────────────────────────────────────────── */
+    const translations = {
+        en: { safe:'Safe Window', conflict:'Conflict', nextPrayer:'Next:', noClass:'No upcoming classes', nextClass:'Next class:' },
+        ar: { safe:'نافذة آمنة', conflict:'تعارض', nextPrayer:'القادمة:', noClass:'لا توجد فصول قادمة', nextClass:'الفصل القادم:' }
+    };
+    function t(key) {
+        return translations[currentLang]?.[key] || translations.en[key] || key;
+    }
+
+    /* ───────────────────────────────────────────────
+       TIME UTILITIES
+       ─────────────────────────────────────────────── */
+    function getOffset(tz) {
+        const now = new Date();
+        const utc = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
+        const tzDate = new Date(now.toLocaleString('en-US', { timeZone: tz }));
+        return (tzDate - utc) / 3600000;
+    }
+
+    function formatHour(h) {
+        const hh = Math.floor(h);
+        const mm = Math.round((h - hh) * 60);
+        if (use12Hour) {
+            const period = hh >= 12 ? 'PM' : 'AM';
+            const h12 = hh % 12 || 12;
+            return `${h12}:${String(mm).padStart(2,'0')} ${period}`;
+        }
+        return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+    }
+
+    function pct(h) { return (h / 24) * 100; }
+    function hours(p) { return (p / 100) * 24; }
+    function clamp(v, m, M) { return Math.max(m, Math.min(M, v)); }
+
+    /* ───────────────────────────────────────────────
+       PRAYER DATA (Aladhan API)
+       ─────────────────────────────────────────────── */
+    async function fetchPrayer(city) {
+        const dateKey = new Date().toISOString().slice(0,10).split('-').reverse().join('-');
+        const cacheKey = `${city.id}-${dateKey}`;
+        if (prayerCache[cacheKey]) return prayerCache[cacheKey];
+
+        const url = `https://api.aladhan.com/v1/timings?latitude=${city.lat}&longitude=${city.lng}&method=${city.method}&date=${dateKey}`;
+        try {
+            const r = await fetch(url);
+            const j = await r.json();
+            if (j.code !== 200) throw new Error('API');
+            const tz = j.data.meta.timezone || city.tz;
+            const offset = getOffset(tz);
+            const names = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+            const utcTimes = {}, localTimes = {};
+            names.forEach(n => {
+                const [h,m] = j.data.timings[n].split(':').map(Number);
+                const local = h + m/60;
+                let utc = local - offset;
+                while (utc < 0) utc += 24;
+                utcTimes[n] = utc % 24;
+                localTimes[n] = local;
+            });
+            const res = { utcTimes, localTimes, offset, tz };
+            prayerCache[cacheKey] = res;
+            return res;
+        } catch (e) {
+            const offset = getOffset(city.tz);
+            const fall = { Fajr:5, Sunrise:6.5, Dhuhr:12.5, Asr:16, Maghrib:18.5, Isha:20 };
+            const utcTimes = {}, localTimes = {};
+            for (let k in fall) {
+                let u = fall[k] - offset;
+                while (u < 0) u += 24;
+                utcTimes[k] = u % 24;
+                localTimes[k] = fall[k];
+            }
+            const res = { utcTimes, localTimes, offset, tz:city.tz, isFallback:true };
+            prayerCache[cacheKey] = res;
+            return res;
+        }
+    }
+
+    function toMasterTime(utcHour) {
+        let h = utcHour + masterOffset;
+        while (h < 0) h += 24;
+        return h % 24;
+    }
+
+    /* ───────────────────────────────────────────────
+       RENDERING
+       ─────────────────────────────────────────────── */
+    async function renderCityRow(city) {
+        const pData = await fetchPrayer(city);
+        const row = document.createElement('div');
+        row.className = 'city-row';
+        if (city.isUser) row.classList.add('user-highlight');
+        row.dataset.cityId = city.id;
+
+        const label = document.createElement('div');
+        label.className = 'city-label-area';
+        label.style.position = 'relative';
+        const now = new Date();
+        const localTime = now.toLocaleTimeString('en-US', { timeZone: city.tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:use12Hour });
+        const sign = pData.offset >= 0 ? '+' : '';
+        label.innerHTML = `
+            <span class="city-name">${city.isUser ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="#38bdf8" stroke="none" style="display:inline;vertical-align:middle;margin-right:2px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>' : ''}${city.name}${city.isUser ? '<span class="user-badge">YOU</span>' : ''}</span>
+            <span class="city-time font-mono" data-tz="${city.tz}">${localTime}</span>
+            <span class="city-offset">UTC${sign}${pData.offset.toFixed(1)}</span>
+        `;
+        if (!city.isUser && activeCities.length > 1) {
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-city-btn';
+            removeBtn.dataset.id = city.id;
+            removeBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+            label.appendChild(removeBtn);
+        }
+        row.appendChild(label);
+
+        const strip = document.createElement('div');
+        strip.className = 'timeline-strip-area';
+        strip.style.flex = '1';
+        strip.style.position = 'relative';
+        strip.style.background = 'var(--strip-bg)';
+
+        const prayers = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+        prayers.forEach(name => {
+            const utc = pData.utcTimes[name];
+            if (utc === undefined) return;
+            const master = toMasterTime(utc);
+            const left = pct(master);
+            const width = pct(0.5);
+            const block = document.createElement('div');
+            block.className = `prayer-block ${name.toLowerCase()}`;
+            block.style.left = `${left}%`;
+            block.style.width = `${width}%`;
+            block.textContent = name;
+            block.title = `${name}: ${formatHour(master)} (local ${formatHour(pData.localTimes[name])})`;
+            block.addEventListener('click', (e) => {
+                e.stopPropagation();
+                setSelectionStart(master - selectionDuration/2);
+                updateSelection();
+                checkConflicts();
+            });
+            strip.appendChild(block);
+        });
+
+        enrolledClasses.forEach(cls => {
+            const masterStart = toMasterTime(cls.utcStart);
+            const masterEnd   = toMasterTime(cls.utcEnd);
+            const left = pct(masterStart);
+            const width = pct(masterEnd - masterStart);
+            const ev = document.createElement('div');
+            ev.className = 'class-event';
+            ev.style.left = `${left}%`;
+            ev.style.width = `${width}%`;
+            ev.textContent = `${cls.subject}`;
+            strip.appendChild(ev);
+        });
+
+        row.appendChild(strip);
+        return row;
+    }
+
+    async function renderAll() {
+        const container = $('#city-rows-container');
+        container.innerHTML = '';
+        const all = [...activeCities];
+        if (userCityObj && !all.find(c => c.id === 'user-location')) all.unshift(userCityObj);
+        const rows = await Promise.all(all.map(c => renderCityRow(c)));
+        rows.forEach(r => container.appendChild(r));
+        updateOverlayHeight();
+        updateNowIndicator();
+        updateSelection();
+        checkConflicts();
+        renderEnrolledToggles();
+    }
+
+    function updateOverlayHeight() {
+        const h = $('#city-rows-container').offsetHeight;
+        if (h > 0) $('#selection-overlay').style.height = h + 'px';
+    }
+
+    function updateNowIndicator() {
+        const now = new Date();
+        const utcH = now.getUTCHours() + now.getUTCMinutes()/60 + now.getUTCSeconds()/3600;
+        const master = toMasterTime(utcH);
+        $('#now-indicator').style.left = pct(master) + '%';
+        $('#utc-now-display').textContent = formatHour(master);
+    }
+
+    function setSelectionStart(h) { selectionStartHour = clamp(h, 0, 24 - selectionDuration); }
+
+    function updateSelection() {
+        const left = pct(selectionStartHour);
+        const width = pct(selectionDuration);
+        const overlay = $('#selection-overlay');
+        overlay.style.left = left + '%';
+        overlay.style.width = width + '%';
+        $('#selection-time-display').textContent =
+            `${formatHour(selectionStartHour)} – ${formatHour(selectionStartHour+selectionDuration)} (${selectionDuration.toFixed(1)}h)`;
+    }
+
+    function checkConflicts() {
+        const s = selectionStartHour, e = s + selectionDuration;
+        let conflicts = [];
+        const allIds = new Set([...activeCities.map(c=>c.id), userCityObj?.id].filter(Boolean));
+        for (let id of allIds) {
+            const city = [...activeCities, userCityObj].find(c => c && c.id === id);
+            if (!city) continue;
+            const dateKey = new Date().toISOString().slice(0,10).split('-').reverse().join('-');
+            const cacheKey = `${city.id}-${dateKey}`;
+            const pData = prayerCache[cacheKey];
+            if (!pData) continue;
+            ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
+                const utc = pData.utcTimes[name];
+                if (utc === undefined) return;
+                const master = toMasterTime(utc);
+                const ps = master, pe = master + 0.5;
+                if (ps < e && pe > s) conflicts.push({ city: city.name, prayer: name });
+            });
+        }
+        const badge = $('#status-badge');
+        if (conflicts.length === 0) {
+            badge.className = 'status-badge safe';
+            badge.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ${t('safe')}`;
+        } else {
+            badge.className = 'status-badge conflict';
+            badge.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ${t('conflict')}: ${conflicts.map(c=>`${c.prayer} ${c.city}`).join(', ')}`;
+        }
+    }
+
+    function renderRuler() {
+        const ruler = $('#ruler-inner');
+        ruler.innerHTML = '';
+        for (let h=0; h<24; h++) {
+            const left = pct(h);
+            const mark = document.createElement('div');
+            mark.className = 'hour-marker major';
+            mark.style.left = left + '%';
+            ruler.appendChild(mark);
+            const lbl = document.createElement('span');
+            lbl.className = 'ruler-label';
+            lbl.style.left = left + '%';
+            lbl.textContent = use12Hour ? (h%12||12)+(h>=12?'p':'a') : `${String(h).padStart(2,'0')}`;
+            ruler.appendChild(lbl);
+        }
+    }
+
+    /* ───────────────────────────────────────────────
+       DRAG & RESIZE
+       ─────────────────────────────────────────────── */
+    function getTimelineWidth() {
+        const inner = $('#cities-inner');
+        return inner ? inner.getBoundingClientRect().width : 960;
+    }
+
+    function startDrag(e, isResizeLeft=false, isResizeRight=false) {
+        isDragging = true;
+        resizingLeft = isResizeLeft;
+        resizingRight = isResizeRight;
+        $('#selection-overlay').classList.add('dragging');
+        dragStartX = e.touches ? e.touches[0].clientX : e.clientX;
+        dragStartLeft = selectionStartHour;
+        dragStartWidth = selectionDuration;
+        document.body.style.cursor = resizingLeft||resizingRight ? 'ew-resize' : 'grabbing';
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function moveDrag(e) {
+        if (!isDragging) return;
+        const cx = e.touches ? e.touches[0].clientX : e.clientX;
+        const dx = cx - dragStartX;
+        const deltaHours = (dx / getTimelineWidth()) * 24;
+
+        if (resizingLeft) {
+            let newStart = dragStartLeft + deltaHours;
+            let newEnd = dragStartLeft + dragStartWidth;
+            if (newStart >= newEnd - 0.5) newStart = newEnd - 0.5;
+            newStart = Math.round(newStart * 2) / 2;
+            selectionStartHour = clamp(newStart, 0, 24 - 0.5);
+            selectionDuration = clamp(newEnd - selectionStartHour, 0.5, 24);
+        } else if (resizingRight) {
+            let newEnd = dragStartLeft + dragStartWidth + deltaHours;
+            if (newEnd <= dragStartLeft + 0.5) newEnd = dragStartLeft + 0.5;
+            newEnd = Math.round(newEnd * 2) / 2;
+            selectionDuration = clamp(newEnd - dragStartLeft, 0.5, 24 - dragStartLeft);
+        } else {
+            setSelectionStart(dragStartLeft + deltaHours);
+        }
+        updateSelection();
+        checkConflicts();
+        e.preventDefault();
+    }
+
+    function endDrag() {
+        if (!isDragging) return;
+        isDragging = resizingLeft = resizingRight = false;
+        $('#selection-overlay').classList.remove('dragging');
+        document.body.style.cursor = '';
+        selectionStartHour = Math.round(selectionStartHour * 2) / 2;
+        selectionDuration = Math.round(selectionDuration * 2) / 2;
+        setSelectionStart(selectionStartHour);
+        updateSelection();
+        checkConflicts();
+    }
+
+    $('#selection-overlay').addEventListener('mousedown', e => startDrag(e));
+    $('#selection-overlay').addEventListener('touchstart', e => startDrag(e), {passive:false});
+    $('#resize-left').addEventListener('mousedown', e => startDrag(e, true, false));
+    $('#resize-left').addEventListener('touchstart', e => startDrag(e, true, false), {passive:false});
+    $('#resize-right').addEventListener('mousedown', e => startDrag(e, false, true));
+    $('#resize-right').addEventListener('touchstart', e => startDrag(e, false, true), {passive:false});
+    document.addEventListener('mousemove', moveDrag);
+    document.addEventListener('touchmove', moveDrag, {passive:false});
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+
+    $('#ruler-inner').addEventListener('click', e => {
+        const rect = $('#ruler-inner').getBoundingClientRect();
+        const p = (e.clientX - rect.left) / rect.width * 100;
+        setSelectionStart(hours(p) - selectionDuration/2);
+        updateSelection();
+        checkConflicts();
+    });
+
+    $('#cities-scroll').addEventListener('scroll', () => { $('#ruler-scroll').scrollLeft = $('#cities-scroll').scrollLeft; });
+    $('#ruler-scroll').addEventListener('scroll', () => { $('#cities-scroll').scrollLeft = $('#ruler-scroll').scrollLeft; });
+
+    /* ───────────────────────────────────────────────
+       ENROLLED CLASSES
+       ─────────────────────────────────────────────── */
+    function computeClassUTCDayTime(cls) {
+        const [h,m] = cls.start.split(':').map(Number);
+        const endH = cls.end.split(':').map(Number);
+        const duration = (endH[0] + endH[1]/60) - (h + m/60);
+        const now = new Date();
+        const bstNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+        const dayOfWeek = bstNow.getUTCDay();
+        let diff = cls.day - dayOfWeek;
+        if (diff < 0) diff += 7;
+        const classDate = new Date(Date.UTC(bstNow.getUTCFullYear(), bstNow.getUTCMonth(), bstNow.getUTCDate() + diff, h, m));
+        const utcStart = classDate.getUTCHours() + classDate.getUTCMinutes()/60;
+        const utcEnd = utcStart + duration;
+        return { utcStart, utcEnd, timestamp: classDate.getTime(), subject: cls.subject, teacher: cls.teacher };
+    }
+
+    function updateEnrolledEvents() {
+        enrolledClasses = enrolledClasses.map(cls => {
+            const computed = computeClassUTCDayTime(cls);
+            return { ...cls, utcStart: computed.utcStart, utcEnd: computed.utcEnd, timestamp: computed.timestamp };
+        });
+        localStorage.setItem('wp_enrolled', JSON.stringify(enrolledClasses));
+    }
+
+    function renderEnrolledToggles() {
+        const container = $('#class-toggles');
+        if (!container) return;
+        container.innerHTML = CLASS_SCHEDULE.map((cls,i) => {
+            const checked = enrolledClasses.some(e => e.subject===cls.subject && e.teacher===cls.teacher && e.day===cls.day);
+            return `<label class="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" data-index="${i}" ${checked?'checked':''} class="accent-accent"> ${cls.subject} (${cls.teacher}) ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][cls.day]} ${cls.start}</label>`;
+        }).join('');
+        $$('#class-toggles input').forEach(inp => {
+            inp.addEventListener('change', () => {
+                const idx = parseInt(inp.dataset.index);
+                const cls = CLASS_SCHEDULE[idx];
+                if (inp.checked) {
+                    if (!enrolledClasses.find(e => e.subject===cls.subject && e.teacher===cls.teacher && e.day===cls.day)) {
+                        enrolledClasses.push(cls);
+                    }
+                } else {
+                    enrolledClasses = enrolledClasses.filter(e => !(e.subject===cls.subject && e.teacher===cls.teacher && e.day===cls.day));
+                }
+                updateEnrolledEvents();
+                renderAll();
+            });
+        });
+        updateNextClassCountdown();
+    }
+
+    function updateNextClassCountdown() {
+        const now = Date.now();
+        const upcoming = enrolledClasses.map(cls => computeClassUTCDayTime(cls))
+                                       .filter(e => e.timestamp > now)
+                                       .sort((a,b) => a.timestamp - b.timestamp);
+        const el = $('#next-class-countdown');
+        if (!el) return;
+        if (upcoming.length > 0) {
+            const next = upcoming[0];
+            const diff = next.timestamp - now;
+            const h = Math.floor(diff/3600000);
+            const m = Math.floor((diff%3600000)/60000);
+            const s = Math.floor((diff%60000)/1000);
+            el.textContent = `${t('nextClass')} ${next.subject} in ${h}h ${m}m ${s}s`;
+        } else {
+            el.textContent = t('noClass');
+        }
+    }
+    setInterval(updateNextClassCountdown, 1000);
+
+    function playAlarm() {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const sounds = {
+            ting:  [800,0.1, 1000,0.1],
+            chime: [600,0.15, 800,0.15, 1000,0.2],
+            bell:  [500,0.2, 700,0.2, 900,0.3],
+        };
+        const pattern = sounds[alarmSound] || sounds.ting;
+        let time = ctx.currentTime;
+        for (let i=0; i<pattern.length; i+=2) {
+            const osc = ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(pattern[i], time);
+            osc.connect(ctx.destination);
+            osc.start(time);
+            osc.stop(time + pattern[i+1]);
+            time += pattern[i+1] + 0.05;
+        }
+    }
+
+    setInterval(() => {
+        const now = Date.now();
+        enrolledClasses.forEach(cls => {
+            const { timestamp } = computeClassUTCDayTime(cls);
+            if (Math.abs(now - timestamp) < 30000 && !cls.alarmTriggered) {
+                cls.alarmTriggered = true;
+                playAlarm();
+                setTimeout(() => cls.alarmTriggered = false, 120000);
+            }
+        });
+    }, 15000);
+
+    $('#alarm-sound-select').addEventListener('change', function() {
+        alarmSound = this.value;
+        localStorage.setItem('wp_alarm', alarmSound);
+    });
+    $('#alarm-sound-select').value = alarmSound;
+
+    /* ───────────────────────────────────────────────
+       MODALS & SETTINGS
+       ─────────────────────────────────────────────── */
+    function openModal(id) { $(id).classList.add('visible'); }
+    function closeModal(id) { $(id).classList.remove('visible'); }
+
+    function toggleTheme() {
+        isDark = !isDark;
+        document.documentElement.setAttribute('data-theme', isDark?'dark':'light');
+        localStorage.setItem('wp_theme', isDark?'dark':'light');
+        $('#theme-toggle-btn').textContent = isDark ? 'Dark' : 'Light';
+    }
+    $('#theme-toggle-btn').addEventListener('click', toggleTheme);
+    $('#theme-toggle-btn').textContent = isDark ? 'Dark' : 'Light';
+
+    $('#format-toggle-btn').addEventListener('click', () => {
+        use12Hour = !use12Hour;
+        localStorage.setItem('wp_12h', use12Hour?'1':'0');
+        $('#format-toggle-btn').textContent = use12Hour ? '12h' : '24h';
+        renderRuler();
+        updateSelection();
+        renderAll();
+    });
+    $('#format-toggle-btn').textContent = use12Hour ? '12h' : '24h';
+
+    $('#lang-select').addEventListener('change', function() {
+        currentLang = this.value;
+        localStorage.setItem('wp_lang', currentLang);
+        document.documentElement.lang = currentLang;
+        document.documentElement.dir = currentLang==='ar' ? 'rtl' : 'ltr';
+        updateUITexts();
+    });
+    $('#lang-select').value = currentLang;
+
+    function updateUITexts() {
+        checkConflicts();
+        updateCountdown();
+    }
+
+    $('#settings-btn').addEventListener('click', () => openModal('#settings-modal'));
+    $('#close-settings-btn').addEventListener('click', () => closeModal('#settings-modal'));
+    $('#settings-modal').addEventListener('click', e => { if(e.target.id==='settings-modal') closeModal('#settings-modal'); });
+
+    $('#how-to-use-btn').addEventListener('click', () => { closeModal('#settings-modal'); openModal('#help-modal'); });
+    $('#help-btn').addEventListener('click', () => openModal('#help-modal'));
+    $('#close-help-btn').addEventListener('click', () => closeModal('#help-modal'));
+    $('#close-help-btn-2').addEventListener('click', () => closeModal('#help-modal'));
+    $('#help-modal').addEventListener('click', e => { if(e.target.id==='help-modal') closeModal('#help-modal'); });
+
+    /* ───────────────────────────────────────────────
+       COURSE PANEL
+       ─────────────────────────────────────────────── */
+    $('#course-btn').addEventListener('click', () => {
+        $('#course-panel').classList.add('open');
+        $('#course-panel-backdrop').classList.add('open');
+    });
+    $('#close-course-panel-btn').addEventListener('click', closeCoursePanel);
+    $('#course-panel-backdrop').addEventListener('click', closeCoursePanel);
+    function closeCoursePanel() {
+        $('#course-panel').classList.remove('open');
+        $('#course-panel-backdrop').classList.remove('open');
+    }
+
+    $('#enrolled-toggle').addEventListener('change', function() {
+        $('#enrolled-content').classList.toggle('hidden', !this.checked);
+        if (this.checked) renderEnrolledToggles();
+    });
+
+    /* ───────────────────────────────────────────────
+       ADD CITY
+       ─────────────────────────────────────────────── */
+    $('#add-city-row').addEventListener('click', () => {
+        openModal('#add-city-modal');
+        renderPopularChips();
+        $('#city-search-input').value = '';
+        $('#search-results').innerHTML = '';
+    });
+    $('#close-add-modal-btn').addEventListener('click', () => closeModal('#add-city-modal'));
+    $('#add-city-modal').addEventListener('click', e => { if(e.target.id==='add-city-modal') closeModal('#add-city-modal'); });
+
+    function renderPopularChips() {
+        const existing = new Set([...activeCities.map(c=>c.id), 'user-location']);
+        const available = POPULAR_POOL.filter(c => !existing.has(c.id));
+        $('#popular-cities-chips').innerHTML = available.slice(0,10).map(c =>
+            `<span class="chip" data-id="${c.id}">+ ${c.name}</span>`).join('');
+        $$('#popular-cities-chips .chip').forEach(chip => chip.addEventListener('click', () => {
+            const city = POPULAR_POOL.find(c => c.id === chip.dataset.id);
+            if (city) addCity(city);
+        }));
+    }
+
+    function addCity(city) {
+        if (activeCities.find(c => c.id === city.id)) return;
+        activeCities.push({...city});
+        prayerCache = {};
+        renderAll();
+        closeModal('#add-city-modal');
+    }
+
+    $('#city-search-input').addEventListener('input', () => {
+        const q = $('#city-search-input').value.toLowerCase();
+        const sr = $('#search-results');
+        if (q.length < 2) { sr.innerHTML = ''; return; }
+        const existing = new Set([...activeCities.map(c=>c.id), 'user-location']);
+        const matches = POPULAR_POOL.filter(c => !existing.has(c.id) && (c.name.toLowerCase().includes(q) || (c.city||'').toLowerCase().includes(q)));
+        sr.innerHTML = matches.map(c =>
+            `<div class="flex justify-between items-center px-3 py-2 hover:bg-[var(--card)] cursor-pointer" data-id="${c.id}" style="border-bottom:1px solid var(--border)"><span class="text-sm">${c.name}</span><span class="text-accent text-xs font-semibold">+</span></div>`
+        ).join('');
+        $$('#search-results > div').forEach(el => el.addEventListener('click', () => {
+            const city = POPULAR_POOL.find(c => c.id === el.dataset.id);
+            if (city) addCity(city);
+        }));
+    });
+
+    $('#city-rows-container').addEventListener('click', e => {
+        const btn = e.target.closest('.remove-city-btn');
+        if (btn && activeCities.length > 1) {
+            activeCities = activeCities.filter(c => c.id !== btn.dataset.id);
+            prayerCache = {};
+            renderAll();
+        }
+    });
+
+    /* ───────────────────────────────────────────────
+       USER LOCATION
+       ─────────────────────────────────────────────── */
+    async function detectUser() {
+        const saved = localStorage.getItem('wp_user');
+        if (saved) { userCityObj = JSON.parse(saved); masterOffset = getOffset(userCityObj.tz); return; }
+        try {
+            const pos = await new Promise((res,rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout:4000 }));
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            userCityObj = { id:'user-location', name:'You', city:'Your Location', tz, lat:pos.coords.latitude, lng:pos.coords.longitude, method:3, isUser:true };
+            masterOffset = getOffset(tz);
+            localStorage.setItem('wp_user', JSON.stringify(userCityObj));
+        } catch {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            userCityObj = { id:'user-location', name:'You', city:'Your Location', tz, lat:0, lng:0, method:3, isUser:true };
+            masterOffset = getOffset(tz);
+            localStorage.setItem('wp_user', JSON.stringify(userCityObj));
+        }
+    }
+
+    /* ───────────────────────────────────────────────
+       LIVE CLOCKS & COUNTDOWN
+       ─────────────────────────────────────────────── */
+    function updateLiveClocks() {
+        $$('.city-time').forEach(el => {
+            const tz = el.dataset.tz;
+            if (tz) el.textContent = new Date().toLocaleTimeString('en-US', { timeZone: tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:use12Hour });
+        });
+        updateNowIndicator();
+        const dateEl = $('#current-date-display');
+        if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday:'short', year:'numeric', month:'short', day:'numeric' });
+        updateCountdown();
+    }
+
+    async function updateCountdown() {
+        if (!userCityObj) return;
+        const pData = await fetchPrayer(userCityObj);
+        const now = new Date();
+        const localStr = now.toLocaleString('en-US', { timeZone: userCityObj.tz });
+        const localDate = new Date(localStr);
+        const localH = localDate.getHours() + localDate.getMinutes()/60 + localDate.getSeconds()/3600;
+        const prayers = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+        let next = null, nextTime = null;
+        for (let name of prayers) {
+            const lt = pData.localTimes[name];
+            if (lt > localH) { next = name; nextTime = lt; break; }
+        }
+        if (!next) { next = 'Fajr'; nextTime = (pData.localTimes['Fajr']||5) + 24; }
+        const diff = Math.max(0, (nextTime - localH) * 3600);
+        const h = Math.floor(diff/3600), m = Math.floor((diff%3600)/60), s = Math.floor(diff%60);
+        const el = $('#countdown-text');
+        if (el) el.textContent = `${t('nextPrayer')} ${next} ${h}h ${m}m ${s}s`;
+    }
+
+    /* ───────────────────────────────────────────────
+       INIT
+       ─────────────────────────────────────────────── */
+    function init() {
+        isDark = (localStorage.getItem('wp_theme') || 'dark') === 'dark';
+        document.documentElement.setAttribute('data-theme', isDark?'dark':'light');
+        use12Hour = localStorage.getItem('wp_12h') === '1';
+        currentLang = localStorage.getItem('wp_lang') || 'en';
+        document.documentElement.lang = currentLang;
+        document.documentElement.dir = currentLang==='ar' ? 'rtl' : 'ltr';
+        $('#lang-select').value = currentLang;
+        updateUITexts();
+
+        detectUser().then(() => {
+            renderRuler();
+            renderAll();
+            updateSelection();
+            updateEnrolledEvents();
+            setInterval(updateLiveClocks, 1000);
+            setInterval(() => { prayerCache = {}; renderAll(); }, 30 * 60 * 1000);
+        });
+    }
+    init();
+})();
+</script>
+</body>
+</html>
