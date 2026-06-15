@@ -6,7 +6,6 @@
     <title>Prayer Times – Coordinate Salah Across Cities</title>
     <meta name="description" content="Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.">
     <meta name="theme-color" content="#0a0f1e">
-    <!-- CSP meta fallback: overridden by _headers on Cloudflare, protects other hosts -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org; img-src 'self' data: blob:; media-src 'self' blob:; manifest-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests;">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0f1e'/%3E%3Ccircle cx='50' cy='35' r='12' fill='none' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 v-28' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 l18 20 H32z' fill='%2338bdf8' opacity='0.3'/%3E%3Cpath d='M25 67 Q50 55 75 67' fill='none' stroke='%2338bdf8' stroke-width='2'/%3E%3C/svg%3E">
     <link rel="manifest" href="manifest.json">
@@ -58,7 +57,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Loading screen */
+        /* ── Loading screen ─────────────────────────────── */
         #loader {
             position: fixed; inset: 0; z-index: 999;
             background: var(--surface);
@@ -66,33 +65,23 @@
             transition: opacity 0.4s ease;
         }
         #loader.hide { opacity: 0; pointer-events: none; }
-        .loader-spinner {
-            width: 40px; height: 40px; border: 3px solid var(--border);
-            border-top-color: var(--accent); border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
+        .loader-spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loader-text { font-size: 0.85rem; color: var(--muted); }
 
-        /* Islamic pattern background */
-        #bg-canvas {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            opacity: 0.08;
-        }
+        /* ── Islamic pattern canvas ──────────────────────── */
+        #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.08; }
         [data-theme="light"] #bg-canvas { opacity: 0.05; }
 
-        /* Glass */
+        /* ── Glass ───────────────────────────────────────── */
         .glass {
             background: rgba(17,25,40,0.75); backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255,255,255,0.06);
         }
-        [data-theme="light"] .glass {
-            background: rgba(255,255,255,0.8);
-            border: 1px solid rgba(0,0,0,0.05);
-        }
+        [data-theme="light"] .glass { background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.05); }
 
-        /* Header */
+        /* ── Header ──────────────────────────────────────── */
         .header {
             position: sticky; top: 0; z-index: 30; padding: 8px 16px;
             display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -103,20 +92,19 @@
             width: 36px; height: 36px; border-radius: 10px;
             background: linear-gradient(135deg, #38bdf8, #6366f1);
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 12px rgba(56,189,248,0.3);
+            box-shadow: 0 2px 12px rgba(56,189,248,0.3); flex-shrink: 0;
         }
         .header-title { font-size: 0.95rem; font-weight: 700; color: var(--heading); letter-spacing: -0.01em; }
         .header-date { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-        .header-right { display: flex; align-items: center; gap: 6px; }
+        .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
         .countdown-pill {
             display: none; padding: 4px 10px; border-radius: 20px;
             font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;
-            background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.25);
-            color: var(--accent); white-space: nowrap;
+            background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.25); color: var(--accent); white-space: nowrap;
         }
         @media (min-width: 640px) { .countdown-pill { display: inline-flex; align-items: center; gap: 4px; } }
 
-        /* Icon buttons */
+        /* ── Icon buttons ────────────────────────────────── */
         .icon-btn {
             width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
             background: transparent; color: var(--muted); cursor: pointer;
@@ -124,37 +112,41 @@
             transition: all 0.15s ease;
         }
         .icon-btn:hover { border-color: #475569; color: var(--text); background: var(--card); }
+        .icon-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(56,189,248,0.1); }
         .icon-btn svg { width: 16px; height: 16px; }
 
-        /* Status bar */
+        /* ── Status bar ──────────────────────────────────── */
         .status-bar {
             padding: 6px 16px; border-bottom: 1px solid var(--border);
             display: flex; align-items: center; gap: 8px; font-size: 0.75rem;
-            background: rgba(17,24,39,0.5);
+            background: rgba(17,24,39,0.5); flex-wrap: wrap;
         }
         [data-theme="light"] .status-bar { background: rgba(255,255,255,0.5); }
         .status-badge {
             display: inline-flex; align-items: center; gap: 5px;
             padding: 4px 10px; border-radius: 14px; font-weight: 600;
-            font-size: 0.7rem; white-space: nowrap;
+            font-size: 0.7rem; white-space: nowrap; flex-shrink: 0;
         }
         .status-badge.safe { background: rgba(52,211,153,0.1); color: var(--safe); border: 1px solid rgba(52,211,153,0.25); }
-        .status-badge.conflict { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.25); }
+        .status-badge.conflict { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.25); animation: conflictPulse 2s ease-in-out infinite; }
+        @keyframes conflictPulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)} }
         .status-badge svg { width: 12px; height: 12px; flex-shrink: 0; }
-        .status-detail { color: var(--muted); flex: 1; }
-        .status-time { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; }
+        .status-detail { color: var(--muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .status-time { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; flex-shrink: 0; }
 
-        /* Timeline */
+        /* ── Timeline ────────────────────────────────────── */
         .tl-scroll { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
         .tl-scroll::-webkit-scrollbar { height: 4px; }
         .tl-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-        /* Ruler */
+        /* ── Ruler ───────────────────────────────────────── */
+        /*
+         * FIX: The ruler inner div uses padding-left=label-w so the timeline
+         * marks must be positioned using (100% - label-w) as the usable width,
+         * not the full 100%. Formula: left = label-w + (100% - label-w) * (h/24)
+         */
         .ruler { height: 26px; position: relative; border-bottom: 1px solid var(--border); }
-        .ruler-mark {
-            position: absolute; top: 0; bottom: 0; width: 1px;
-            background: rgba(128,128,128,0.1);
-        }
+        .ruler-mark { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(128,128,128,0.1); }
         .ruler-mark.major { background: rgba(128,128,128,0.2); }
         .ruler-lbl {
             position: absolute; top: 3px; transform: translateX(-50%);
@@ -162,25 +154,27 @@
             color: var(--muted); pointer-events: none;
         }
 
-        /* City rows */
+        /* ── City rows ───────────────────────────────────── */
         .city-row {
             display: flex; align-items: stretch; min-height: 50px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--border); background: var(--card);
         }
         .city-row:hover { background: rgba(255,255,255,0.01); }
         .city-row.user-row { background: rgba(56,189,248,0.03); border-left: 3px solid var(--accent); }
         .city-label {
             width: var(--label-w); min-width: var(--label-w); flex-shrink: 0;
-            padding: 8px 12px; display: flex; flex-direction: column; justify-content: center;
-            border-right: 1px solid var(--border); background: var(--card);
-            position: sticky; left: 0; z-index: 20; gap: 4px; overflow: hidden;
+            padding: 8px 10px 8px 12px;
+            display: flex; flex-direction: column; justify-content: center;
+            border-right: 1px solid var(--border); background: inherit;
+            position: sticky; left: 0; z-index: 20; gap: 3px;
+            overflow: hidden; position: relative;
         }
-        .city-name { font-weight: 600; font-size: 0.85rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+        .city-name { font-weight: 600; font-size: 0.85rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; display: flex; align-items: center; gap: 3px; }
         .city-clock { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #e2e8f0; line-height: 1.3; }
-        .city-offset { font-size: 0.55rem; color: #94a3b8; line-height: 1.3; }
+        .city-offset { font-size: 0.52rem; color: #64748b; line-height: 1.3; }
         .you-badge {
             font-size: 0.5rem; background: rgba(56,189,248,0.15); color: var(--accent);
-            padding: 1px 5px; border-radius: 8px; margin-left: 4px; font-weight: 700;
+            padding: 1px 5px; border-radius: 8px; font-weight: 700; flex-shrink: 0;
         }
         .remove-btn {
             position: absolute; top: 3px; right: 3px;
@@ -193,7 +187,7 @@
         .remove-btn:hover { color: var(--danger); background: rgba(239,68,68,0.1); }
         .remove-btn svg { width: 10px; height: 10px; }
 
-        /* Prayer blocks */
+        /* ── Prayer blocks ───────────────────────────────── */
         .prayer-block {
             position: absolute; top: 5px; bottom: 5px; border-radius: 3px;
             display: flex; align-items: center; justify-content: center;
@@ -204,19 +198,19 @@
             transition: transform 0.12s, filter 0.12s;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-        .prayer-block:hover { transform: scaleY(1.06); filter: brightness(1.1); z-index: 5; }
+        .prayer-block:hover { transform: scaleY(1.06); filter: brightness(1.15); z-index: 5; }
         .prayer-block.fajr    { background: rgba(103,232,249,0.35); color: #0c4a6e; border-color: var(--prayer-fajr); }
-        .prayer-block.dhuhr   { background: rgba(251,191,36,0.4); color: #713f12; border-color: var(--prayer-dhuhr); }
-        .prayer-block.asr     { background: rgba(251,146,60,0.4); color: #7c2d12; border-color: var(--prayer-asr); }
+        .prayer-block.dhuhr   { background: rgba(251,191,36,0.38);  color: #713f12; border-color: var(--prayer-dhuhr); }
+        .prayer-block.asr     { background: rgba(251,146,60,0.38);  color: #7c2d12; border-color: var(--prayer-asr); }
         .prayer-block.maghrib { background: rgba(248,113,113,0.35); color: #7f1d1d; border-color: var(--prayer-maghrib); }
-        .prayer-block.isha    { background: rgba(167,139,250,0.4); color: #4c1d95; border-color: var(--prayer-isha); }
+        .prayer-block.isha    { background: rgba(167,139,250,0.38); color: #4c1d95; border-color: var(--prayer-isha); }
         [data-theme="light"] .prayer-block.fajr    { background: rgba(6,182,212,0.2); }
         [data-theme="light"] .prayer-block.dhuhr   { background: rgba(251,191,36,0.25); }
         [data-theme="light"] .prayer-block.asr     { background: rgba(251,146,60,0.25); }
         [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.2); }
         [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.2); }
 
-        /* Class events */
+        /* ── Class event overlays ────────────────────────── */
         .class-ev {
             position: absolute; top: 5px; bottom: 5px; border-radius: 3px;
             background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.15);
@@ -225,7 +219,7 @@
             pointer-events: none; overflow: hidden;
         }
 
-        /* Selection overlay */
+        /* ── Selection overlay ───────────────────────────── */
         .sel-overlay {
             position: absolute; top: 0; bottom: 0; z-index: 10;
             background: rgba(34,211,238,0.08);
@@ -245,22 +239,21 @@
         }
         .sel-handle.t { top: -7px; } .sel-handle.b { bottom: -7px; }
 
-        /* NOW line */
+        /* ── NOW line ────────────────────────────────────── */
         .now-line {
             position: absolute; top: 0; bottom: 0; width: 2.5px;
             background: var(--danger); z-index: 9; pointer-events: none;
             box-shadow: 0 0 10px var(--danger), 0 0 3px var(--danger);
-            transition: left 1s linear;
+            /* NO transition — ruler sync uses % and rows use px; transition would misalign them */
         }
         .now-line::after {
             content: 'NOW'; position: absolute; top: -18px; left: 50%;
             transform: translateX(-50%); font-size: 0.5rem; font-weight: 700;
             color: #fff; background: var(--danger);
-            padding: 2px 6px; border-radius: 3px; letter-spacing: 0.08em;
-            white-space: nowrap;
+            padding: 2px 6px; border-radius: 3px; letter-spacing: 0.08em; white-space: nowrap;
         }
 
-        /* Add city */
+        /* ── Add city row ─────────────────────────────────── */
         .add-row {
             display: flex; align-items: center; justify-content: center;
             padding: 8px; border-bottom: 1px solid var(--border);
@@ -269,45 +262,36 @@
         .add-row:hover { background: rgba(56,189,248,0.03); color: var(--accent); }
         .add-row svg { width: 16px; height: 16px; margin-right: 4px; }
 
-        /* Buttons */
+        /* ── Buttons ─────────────────────────────────────── */
         .btn {
             padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 0.75rem;
-            cursor: pointer; border: none; display: inline-flex; align-items: center;
-            gap: 5px; transition: all 0.15s;
+            cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s;
         }
         .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
         .btn-ghost:hover { background: var(--card); color: var(--text); }
         .btn-accent { background: var(--accent); color: #000; }
         .btn-accent:hover { filter: brightness(1.1); }
 
-        /* Chips */
+        /* ── Chips ───────────────────────────────────────── */
         .chip {
             padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 500;
-            cursor: pointer; background: var(--card); border: 1px solid var(--border);
-            color: var(--text); transition: all 0.15s;
+            cursor: pointer; background: var(--card); border: 1px solid var(--border); color: var(--text); transition: all 0.15s;
         }
         .chip:hover { border-color: var(--accent); color: var(--accent); }
 
-        /* Toggle */
+        /* ── Toggle ─────────────────────────────────────── */
         .toggle { position: relative; display: inline-block; width: 38px; height: 20px; }
         .toggle input { opacity: 0; width: 0; height: 0; }
-        .toggle .slider {
-            position: absolute; inset: 0; background: #334155; border-radius: 20px;
-            cursor: pointer; transition: 0.3s;
-        }
-        .toggle .slider::before {
-            content: ''; position: absolute; height: 14px; width: 14px;
-            left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s;
-        }
+        .toggle .slider { position: absolute; inset: 0; background: #334155; border-radius: 20px; cursor: pointer; transition: 0.3s; }
+        .toggle .slider::before { content: ''; position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; }
         .toggle input:checked + .slider { background: var(--accent); }
         .toggle input:checked + .slider::before { transform: translateX(18px); }
 
-        /* Modals */
+        /* ── Modals ─────────────────────────────────────── */
         .modal-bg {
             position: fixed; inset: 0; background: rgba(0,0,0,0.5);
             z-index: 50; display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(4px); opacity: 0; visibility: hidden;
-            transition: all 0.2s;
+            backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: all 0.2s;
         }
         .modal-bg.open { opacity: 1; visibility: visible; }
         .modal {
@@ -325,16 +309,10 @@
         .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
         .setting-row:last-child { border-bottom: none; }
         .setting-label { font-size: 0.8rem; color: var(--muted); }
-        .setting-control select {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
-            padding: 4px 8px; font-size: 0.75rem; color: var(--text);
-        }
+        .setting-control select { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; color: var(--text); }
 
-        /* Slide panel */
-        .panel-bg {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 54;
-            opacity: 0; pointer-events: none; transition: opacity 0.25s;
-        }
+        /* ── Slide panel ─────────────────────────────────── */
+        .panel-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 54; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
         .panel-bg.open { opacity: 1; pointer-events: auto; }
         .panel {
             position: fixed; top: 0; right: -100%; width: 380px; max-width: 92vw;
@@ -345,10 +323,7 @@
             overflow-y: auto; padding: 20px;
         }
         .panel.open { right: 0; }
-        .info-card {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-            padding: 12px; margin-bottom: 10px;
-        }
+        .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
         .info-card-title { font-weight: 600; font-size: 0.8rem; color: var(--heading); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
         .info-card-body { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
         .info-link {
@@ -363,23 +338,27 @@
         .info-link-title { font-weight: 600; }
         .info-link-desc { font-size: 0.65rem; color: var(--muted); }
 
-        /* Class toggle */
-        .class-check { display: flex; align-items: center; gap: 6px; padding: 4px 0; font-size: 0.7rem; }
-        .class-check input[type="checkbox"] { accent-color: var(--accent); }
+        /* ── Course password gate ────────────────────────── */
+        .course-locked { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 0 8px; gap: 12px; }
+        .course-locked svg { opacity: 0.3; }
+        .course-locked p { font-size: 0.8rem; color: var(--muted); text-align: center; }
+        .course-content { display: none; }
+        .course-content.unlocked { display: block; }
+        .unlock-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.65rem; color: var(--safe); background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); padding: 3px 8px; border-radius: 10px; margin-bottom: 12px; }
+        .pw-gate { padding: 8px 0 16px; }
+        .pw-gate p { font-size: 0.78rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+        .pw-input-row { display: flex; gap: 8px; }
+        .pw-input { flex: 1; padding: 9px 12px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); font-size: 0.85rem; color: var(--text); outline: none; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em; }
+        .pw-input:focus { border-color: var(--accent); }
+        .pw-input.error { border-color: var(--danger); animation: shake 0.3s ease; }
+        @keyframes shake { 0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)} }
+        .pw-hint { font-size: 0.65rem; color: var(--danger); margin-top: 6px; min-height: 16px; }
 
-        /* Search */
-        .search-input {
-            width: 100%; padding: 8px 10px; border-radius: 8px;
-            background: var(--surface); border: 1px solid var(--border);
-            font-size: 0.8rem; color: var(--text); outline: none;
-        }
+        /* ── Search ─────────────────────────────────────── */
+        .search-input { width: 100%; padding: 8px 10px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); font-size: 0.8rem; color: var(--text); outline: none; }
         .search-input:focus { border-color: var(--accent); }
         .search-results { max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; margin-top: 6px; }
-        .search-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 10px; cursor: pointer; font-size: 0.8rem;
-            border-bottom: 1px solid var(--border); transition: background 0.1s;
-        }
+        .search-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid var(--border); transition: background 0.1s; }
         .search-item:last-child { border-bottom: none; }
         .search-item:hover { background: var(--card); }
         .search-item .plus { color: var(--accent); font-weight: 600; font-size: 0.75rem; }
@@ -387,19 +366,15 @@
         .search-spinner { text-align: center; padding: 12px; font-size: 0.75rem; color: var(--muted); }
         .search-hint { font-size: 0.65rem; color: var(--muted); margin-top: 6px; text-align: center; }
 
-        /* Test chime */
-        .chime-btn {
-            padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);
-            background: var(--surface); color: var(--accent); cursor: pointer;
-            font-size: 0.7rem; font-weight: 600; transition: all 0.15s;
-        }
+        /* ── Test chime button ───────────────────────────── */
+        .chime-btn { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--accent); cursor: pointer; font-size: 0.7rem; font-weight: 600; transition: all 0.15s; }
         .chime-btn:hover { background: rgba(56,189,248,0.1); border-color: var(--accent); }
 
-        /* Toast animation */
-        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        /* ── Toast ───────────────────────────────────────── */
+        @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)} }
         .toast { animation: toastIn 0.2s ease; }
 
-        /* Prayer legend */
+        /* ── Prayer legend ───────────────────────────────── */
         .legend { display: flex; align-items: center; gap: 12px; padding: 4px 16px; font-size: 0.6rem; color: var(--muted); border-bottom: 1px solid var(--border); overflow-x: auto; }
         .legend-item { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
         .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
@@ -408,65 +383,39 @@
         .legend-dot.asr { background: var(--prayer-asr); }
         .legend-dot.maghrib { background: var(--prayer-maghrib); }
         .legend-dot.isha { background: var(--prayer-isha); }
-        .legend-dot.sunrise { background: rgba(251,191,36,0.6); }
+        .legend-dot.sunrise { background: rgba(251,191,36,0.7); }
         .legend-dot.now { background: var(--danger); }
         .legend-dot.safe { background: var(--selection); }
 
-        /* Reduced motion */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-            #bg-canvas { display: none; }
-        }
-
-        /* Course panel password gate */
-        .pw-gate { padding: 8px 0 16px; }
-        .pw-gate p { font-size: 0.78rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
-        .pw-input-row { display: flex; gap: 8px; }
-        .pw-input {
-            flex: 1; padding: 9px 12px; border-radius: 8px;
-            background: var(--surface); border: 1px solid var(--border);
-            font-size: 0.85rem; color: var(--text); outline: none;
-            font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em;
-        }
-        .pw-input:focus { border-color: var(--accent); }
-        .pw-input.error { border-color: var(--danger); animation: shake 0.3s ease; }
-        @keyframes shake {
-            0%,100% { transform: translateX(0); }
-            25% { transform: translateX(-6px); }
-            75% { transform: translateX(6px); }
-        }
-        .pw-hint { font-size: 0.65rem; color: var(--danger); margin-top: 6px; min-height: 16px; }
-        .course-locked { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 0 8px; gap: 12px; }
-        .course-locked svg { opacity: 0.3; }
-        .course-locked p { font-size: 0.8rem; color: var(--muted); text-align: center; }
-        .course-content { display: none; }
-        .course-content.unlocked { display: block; }
-        .unlock-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.65rem; color: var(--safe); background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); padding: 3px 8px; border-radius: 10px; margin-bottom: 12px; }
-
-        /* Privacy banner */
+        /* ── Privacy banner ──────────────────────────────── */
         .privacy-banner {
             position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
             background: var(--card); border-top: 1px solid var(--border);
             padding: 10px 16px; display: flex; align-items: center; gap: 10px;
-            font-size: 0.72rem; color: var(--muted);
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+            font-size: 0.72rem; color: var(--muted); box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
         }
         .privacy-banner a { color: var(--accent); text-decoration: none; }
         .privacy-banner a:hover { text-decoration: underline; }
         .privacy-banner .pb-actions { display: flex; gap: 8px; margin-left: auto; flex-shrink: 0; }
         .privacy-banner.hidden { display: none; }
 
-        /* Privacy modal */
+        /* ── Privacy modal ───────────────────────────────── */
         #m-privacy .modal { max-width: 500px; }
         .privacy-section { margin-bottom: 14px; }
         .privacy-section h3 { font-size: 0.78rem; font-weight: 700; color: var(--heading); margin-bottom: 6px; }
         .privacy-section p, .privacy-section li { font-size: 0.72rem; color: var(--muted); line-height: 1.6; }
         .privacy-section ul { padding-left: 16px; }
 
-        /* Better mobile touch targets */
+        /* ── Reduced motion ──────────────────────────────── */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+            #bg-canvas { display: none; }
+        }
+
+        /* ── Mobile ─────────────────────────────────────── */
         @media (max-width: 768px) {
             :root { --label-w: 120px; --tl-min: 700px; }
-            .city-label { padding: 6px 10px; }
+            .city-label { padding: 6px 8px 6px 10px; }
             .city-name { font-size: 0.78rem; }
             .city-clock { font-size: 0.68rem; }
             .city-offset { font-size: 0.5rem; }
@@ -492,7 +441,7 @@
 
 <div id="app" style="position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;">
 
-    <!-- HEADER -->
+    <!-- ══════════════ HEADER ══════════════ -->
     <header class="header glass">
         <div class="header-left">
             <div class="logo">
@@ -507,6 +456,11 @@
         </div>
         <div class="header-right">
             <span class="countdown-pill" id="countdown"><span id="cd-text">--</span></span>
+
+            <!-- Scroll to Now -->
+            <button class="icon-btn" id="btn-now" title="Scroll to current time" aria-label="Scroll to current time">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </button>
             <button class="icon-btn" id="btn-help" title="How to use" aria-label="How to use">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             </button>
@@ -516,7 +470,7 @@
             <button class="icon-btn" id="btn-share" title="Share link" aria-label="Share link">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             </button>
-            <button class="icon-btn" id="btn-ical" title="Export to calendar" aria-label="Export to calendar">
+            <button class="icon-btn" id="btn-ical" title="Export to calendar" aria-label="Export calendar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
             </button>
             <button class="icon-btn" id="btn-notify" title="Prayer notifications" aria-label="Prayer notifications">
@@ -531,17 +485,17 @@
         </div>
     </header>
 
-    <!-- STATUS BAR -->
+    <!-- ══════════════ STATUS BAR ══════════════ -->
     <div class="status-bar">
         <span id="status-badge" class="status-badge safe">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span id="status-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span id="status-text">Safe Window</span>
         </span>
         <span class="status-detail" id="sel-display">Drag the bar to select</span>
         <span class="status-time" id="your-time"></span>
     </div>
 
-    <!-- PRAYER LEGEND -->
+    <!-- ══════════════ LEGEND ══════════════ -->
     <div class="legend">
         <div class="legend-item"><div class="legend-dot fajr"></div><span id="lg-fajr">Fajr</span></div>
         <div class="legend-item"><div class="legend-dot sunrise"></div><span id="lg-sunrise">Sunrise</span></div>
@@ -553,12 +507,12 @@
         <div class="legend-item"><div class="legend-dot safe"></div><span id="lg-sel">Selection</span></div>
     </div>
 
-    <!-- RULER -->
+    <!-- ══════════════ RULER ══════════════ -->
     <div class="tl-scroll" id="ruler-scroll">
         <div class="ruler" id="ruler" style="min-width:calc(var(--tl-min) + var(--label-w));padding-left:var(--label-w);"></div>
     </div>
 
-    <!-- TIMELINE -->
+    <!-- ══════════════ TIMELINE ══════════════ -->
     <div class="flex-1 tl-scroll" id="tl-scroll">
         <div style="position:relative;min-width:calc(var(--tl-min) + var(--label-w));" id="tl-inner">
             <div id="rows"></div>
@@ -566,82 +520,71 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add City
             </div>
+            <!-- Selection bar -->
             <div class="sel-overlay" id="sel" style="left:41.67%;width:4.167%;top:0;bottom:0;">
                 <div class="resize-h l" id="rz-l"></div>
                 <div class="resize-h r" id="rz-r"></div>
                 <div class="sel-handle t" id="h-top"></div>
                 <div class="sel-handle b" id="h-bot"></div>
             </div>
+            <!-- NOW line (pixel-positioned by JS) -->
             <div class="now-line" id="now-line" style="left:50%;"></div>
         </div>
     </div>
 
-    <!-- SETTINGS MODAL -->
+    <!-- ══════════════ SETTINGS MODAL ══════════════ -->
     <div class="modal-bg" id="m-settings">
         <div class="modal">
             <div class="modal-head">
                 <span class="modal-title">Settings</span>
                 <button class="modal-close" data-close="m-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
-            <div class="setting-row">
-                <span class="setting-label">Theme</span>
-                <button class="btn btn-ghost" id="theme-btn">Dark</button>
-            </div>
-            <div class="setting-row">
-                <span class="setting-label">Time Format</span>
-                <button class="btn btn-ghost" id="fmt-btn">24h</button>
-            </div>
+            <div class="setting-row"><span class="setting-label">Theme</span><button class="btn btn-ghost" id="theme-btn">Dark</button></div>
+            <div class="setting-row"><span class="setting-label">Time Format</span><button class="btn btn-ghost" id="fmt-btn">24h</button></div>
             <div class="setting-row">
                 <span class="setting-label">Language</span>
-                <div class="setting-control">
-                    <select id="lang-sel"><option value="en">English</option><option value="ar">العربية</option></select>
-                </div>
+                <div class="setting-control"><select id="lang-sel"><option value="en">English</option><option value="ar">العربية</option></select></div>
             </div>
             <div class="setting-row">
                 <span class="setting-label">Alarm Sound</span>
                 <div class="setting-control" style="display:flex;align-items:center;gap:6px;">
                     <select id="alarm-sel"><option value="ting">Ting</option><option value="chime">Chime</option><option value="bell">Bell</option></select>
-                    <button class="chime-btn" id="test-chime" title="Test alarm sound">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                        Test
-                    </button>
+                    <button class="chime-btn" id="test-chime"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Test</button>
                 </div>
             </div>
             <button class="btn btn-ghost" id="btn-howto" style="width:100%;justify-content:center;margin-top:8px;">How to Use</button>
         </div>
     </div>
 
-    <!-- HELP MODAL -->
+    <!-- ══════════════ HELP MODAL ══════════════ -->
     <div class="modal-bg" id="m-help">
         <div class="modal">
-            <div class="modal-head">
-                <span class="modal-title">How to Use</span>
-                <button class="modal-close" data-close="m-help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>
+            <div class="modal-head"><span class="modal-title">How to Use</span><button class="modal-close" data-close="m-help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
             <div style="font-size:0.78rem;color:var(--muted);line-height:1.6;">
-                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">1.</strong> The ruler at the top shows your local time. The red <strong>NOW</strong> line marks the current moment.</p>
-                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">2.</strong> Each city row displays prayer times as color-coded blocks.</p>
-                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">3.</strong> Drag the <span style="color:var(--selection);font-weight:600;">cyan bar</span> to select a meeting window. Resize by dragging the left/right edges.</p>
-                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">4.</strong> The status badge shows <span style="color:var(--safe);">Safe Window</span> or <span style="color:var(--danger);">Conflict</span> based on prayer overlaps.</p>
-                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">5.</strong> Click the <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="vertical-align:middle;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> icon to view course info and enroll.</p>
+                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">1.</strong> The ruler shows your local time. The red <strong>NOW</strong> line marks the current moment.</p>
+                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">2.</strong> Prayer blocks show the full window for each Salah — wider blocks reflect longer prayer windows (e.g. Fajr spans from Adhan to Sunrise).</p>
+                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">3.</strong> <span style="color:var(--selection);font-weight:600;">Drag the cyan bar</span> to select a meeting window. Resize by dragging the left/right edges. Arrow keys also move it.</p>
+                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">4.</strong> The status badge turns <span style="color:var(--danger);">red</span> if your selection overlaps any prayer window, <span style="color:var(--safe);">green</span> if it's clear for everyone.</p>
+                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">5.</strong> Click the 📖 icon to view Sannatayn course links and enroll in classes.</p>
+                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">6.</strong> Use the 🕐 button to scroll the timeline back to the current time.</p>
             </div>
             <button class="btn btn-ghost" data-close="m-help" style="width:100%;justify-content:center;margin-top:12px;">Got it</button>
         </div>
     </div>
 
-    <!-- COURSE PANEL -->
+    <!-- ══════════════ COURSE PANEL ══════════════ -->
     <div class="panel-bg" id="panel-bg"></div>
     <aside class="panel" id="course-panel">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
             <h2 style="font-size:1rem;font-weight:700;font-family:'Amiri',serif;">Sannatayn &amp; Tafseer</h2>
-            <button class="modal-close" id="close-panel" aria-label="Close panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            <button class="modal-close" id="close-panel" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
 
-        <!-- LOCKED STATE -->
+        <!-- Locked state -->
         <div id="course-locked-view">
             <div class="course-locked">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <p>This area is for enrolled students only.<br>Enter the group password to access course links, timetable, and class schedule.</p>
+                <p>For enrolled students only.<br>Enter the group password to access course links and class schedule.</p>
             </div>
             <div class="pw-gate">
                 <div class="pw-input-row">
@@ -652,83 +595,24 @@
             </div>
         </div>
 
-        <!-- UNLOCKED CONTENT -->
+        <!-- Unlocked content -->
         <div class="course-content" id="course-unlocked-view">
             <div class="unlock-badge">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 Member access
                 <button id="course-lock-btn" style="margin-left:6px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.65rem;padding:0;" title="Lock">lock</button>
             </div>
-
-            <div class="info-card">
-                <div class="info-card-title">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    Attendance
-                </div>
-                <div class="info-card-body">Missing 2 lessons without telling your teacher releases your place. Excused absences cover up to 5 days.</div>
-            </div>
-
-            <div class="info-card">
-                <div class="info-card-title">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                    Deposit
-                </div>
-                <div class="info-card-body">£100 refundable. Contact your teacher for payment details.</div>
-            </div>
-
+            <div class="info-card"><div class="info-card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Attendance</div><div class="info-card-body">Missing 2 lessons without notice releases your place. Excused absences cover up to 5 days.</div></div>
+            <div class="info-card"><div class="info-card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Deposit</div><div class="info-card-body">£100 refundable. Contact your teacher for payment details.</div></div>
             <div style="margin:12px 0 8px;font-size:0.75rem;font-weight:600;color:var(--heading);">Quick Links</div>
-
-            <a href="https://chat.whatsapp.com/LhyQf7mVW5BKwrsQHWQgZz" target="_blank" rel="noopener noreferrer" class="info-link">
-                <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                <div class="info-link-text">
-                    <div class="info-link-title">Sannatayn (Men) – WhatsApp</div>
-                    <div class="info-link-desc">Join the men's group chat</div>
-                </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </a>
-
-            <a href="https://chat.whatsapp.com/IFkpHOR1vzb59O9s7ZyR0E" target="_blank" rel="noopener noreferrer" class="info-link">
-                <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                <div class="info-link-text">
-                    <div class="info-link-title">Tafseer (All) – WhatsApp</div>
-                    <div class="info-link-desc">Men &amp; Women, 3:30–5:30 PM BST</div>
-                </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </a>
-
-            <a href="https://drive.google.com/file/d/18uQcfYNPOQDH6y3eLACfDvtrE-K5i9n8/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="info-link">
-                <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                <div class="info-link-text">
-                    <div class="info-link-title">Timetable</div>
-                    <div class="info-link-desc">View the full weekly schedule</div>
-                </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </a>
-
-            <a href="https://docs.google.com/document/d/17unRrJvczfFRRteNn2DODEOBVtTmMwmBq4QP4IVAbdM/edit" target="_blank" rel="noopener noreferrer" class="info-link">
-                <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg>
-                <div class="info-link-text">
-                    <div class="info-link-title">Meeting Links</div>
-                    <div class="info-link-desc">Zoom / Google Meet links for each class</div>
-                </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </a>
-
-            <a href="https://docs.google.com/document/d/1G4wPSx5GS7tD57QExrB9thUjMnoY8T5JPiCtOuVlQLI/edit" target="_blank" rel="noopener noreferrer" class="info-link">
-                <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-                <div class="info-link-text">
-                    <div class="info-link-title">Recording Links</div>
-                    <div class="info-link-desc">Access past lesson recordings</div>
-                </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </a>
-
+            <a href="https://chat.whatsapp.com/LhyQf7mVW5BKwrsQHWQgZz" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><div class="info-link-text"><div class="info-link-title">Sannatayn (Men) – WhatsApp</div><div class="info-link-desc">Join the men's group chat</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <a href="https://chat.whatsapp.com/IFkpHOR1vzb59O9s7ZyR0E" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><div class="info-link-text"><div class="info-link-title">Tafseer (All) – WhatsApp</div><div class="info-link-desc">Men &amp; Women, 3:30–5:30 PM BST</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <a href="https://drive.google.com/file/d/18uQcfYNPOQDH6y3eLACfDvtrE-K5i9n8/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><div class="info-link-text"><div class="info-link-title">Timetable</div><div class="info-link-desc">View the full weekly schedule</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <a href="https://docs.google.com/document/d/17unRrJvczfFRRteNn2DODEOBVtTmMwmBq4QP4IVAbdM/edit" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg><div class="info-link-text"><div class="info-link-title">Meeting Links</div><div class="info-link-desc">Zoom / Google Meet links for each class</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <a href="https://docs.google.com/document/d/1G4wPSx5GS7tD57QExrB9thUjMnoY8T5JPiCtOuVlQLI/edit" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div class="info-link-text"><div class="info-link-title">Recording Links</div><div class="info-link-desc">Access past lesson recordings</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
             <div class="info-card" style="margin-top:12px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-                    <div class="info-card-title" style="margin:0;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        I'm Enrolled
-                    </div>
+                    <div class="info-card-title" style="margin:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>I'm Enrolled</div>
                     <label class="toggle"><input type="checkbox" id="enroll-toggle"><span class="slider"></span></label>
                 </div>
                 <div id="enroll-content" class="hidden">
@@ -742,746 +626,1155 @@
         </div>
     </aside>
 
-    <!-- ADD CITY MODAL -->
+    <!-- ══════════════ ADD CITY MODAL ══════════════ -->
     <div class="modal-bg" id="m-addcity">
         <div class="modal">
-            <div class="modal-head">
-                <span class="modal-title">Add City</span>
-                <button class="modal-close" data-close="m-addcity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>
+            <div class="modal-head"><span class="modal-title">Add City</span><button class="modal-close" data-close="m-addcity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
             <div id="popular-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
             <input type="text" class="search-input" id="city-search" placeholder="Search any city worldwide..." autocomplete="off">
             <div class="search-results" id="search-results"></div>
-            <div class="search-hint">Searches all cities worldwide via OpenStreetMap</div>
+            <div class="search-hint">Searches all cities via OpenStreetMap</div>
         </div>
     </div>
 
-    <!-- PRIVACY MODAL -->
+    <!-- ══════════════ PRIVACY MODAL ══════════════ -->
     <div class="modal-bg" id="m-privacy">
-        <div class="modal">
-            <div class="modal-head">
-                <span class="modal-title">Privacy &amp; Data</span>
-                <button class="modal-close" data-close="m-privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>
-            <div class="privacy-section">
-                <h3>No data collected</h3>
-                <p>This app does not collect, store, or transmit any personal data. There are no accounts, no analytics, and no tracking of any kind.</p>
-            </div>
-            <div class="privacy-section">
-                <h3>What stays on your device</h3>
-                <ul>
-                    <li>Your selected cities (localStorage)</li>
-                    <li>Theme, language, and time format preferences (localStorage)</li>
-                    <li>Your approximate timezone (localStorage) — precise GPS coordinates are never stored</li>
-                    <li>Class enrollment selections (localStorage)</li>
-                </ul>
-            </div>
-            <div class="privacy-section">
-                <h3>External requests made</h3>
-                <ul>
-                    <li><strong>api.aladhan.com</strong> — prayer time data (your coordinates sent, no user ID)</li>
-                    <li><strong>nominatim.openstreetmap.org</strong> — city search only (search text sent, no user ID)</li>
-                    <li><strong>fonts.googleapis.com</strong> — font loading</li>
-                </ul>
-            </div>
-            <div class="privacy-section">
-                <h3>Cookies</h3>
-                <p>No cookies are set. Browser localStorage is used only for preferences as described above. You can clear it at any time in your browser settings.</p>
-            </div>
-            <div class="privacy-section">
-                <h3>Geolocation</h3>
-                <p>If you grant location permission, your coordinates are used once to determine your timezone and approximate position for prayer times. Only a rounded value (±11km) is stored locally. Permission can be revoked in your browser settings at any time.</p>
-            </div>
+        <div class="modal" style="max-width:500px;">
+            <div class="modal-head"><span class="modal-title">Privacy &amp; Data</span><button class="modal-close" data-close="m-privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+            <div class="privacy-section"><h3>No data collected</h3><p>This app does not collect, store, or transmit any personal data. No accounts, no analytics, no tracking.</p></div>
+            <div class="privacy-section"><h3>What stays on your device</h3><ul><li>Selected cities (localStorage)</li><li>Theme, language, and time format preferences (localStorage)</li><li>Your approximate timezone (localStorage) — precise GPS coords are never stored</li><li>Class enrollment selections (localStorage)</li></ul></div>
+            <div class="privacy-section"><h3>External requests</h3><ul><li><strong>api.aladhan.com</strong> — prayer time data (coordinates sent, no user ID)</li><li><strong>nominatim.openstreetmap.org</strong> — city search only (text sent, no user ID)</li><li><strong>fonts.googleapis.com</strong> — font loading</li></ul></div>
+            <div class="privacy-section"><h3>Geolocation</h3><p>If you grant location permission, coordinates are used once to set your timezone. Only a rounded value (±11 km) is stored locally. You can revoke this in browser settings at any time.</p></div>
             <button class="btn btn-accent" data-close="m-privacy" style="width:100%;justify-content:center;margin-top:4px;">Got it</button>
         </div>
     </div>
 
-    <!-- PRIVACY BANNER -->
+    <!-- ══════════════ PRIVACY BANNER ══════════════ -->
     <div class="privacy-banner" id="privacy-banner">
-        <span>This app stores preferences locally on your device only. No cookies, no tracking. <a href="#" id="privacy-link">Learn more</a></span>
-        <div class="pb-actions">
-            <button class="btn btn-accent" id="privacy-ok" style="padding:5px 14px;">OK</button>
-        </div>
+        <span>Preferences stored locally only. No cookies, no tracking. <a href="#" id="privacy-link">Learn more</a></span>
+        <div class="pb-actions"><button class="btn btn-accent" id="privacy-ok" style="padding:5px 14px;">OK</button></div>
     </div>
 
-    <!-- FOOTER -->
+    <!-- ══════════════ FOOTER ══════════════ -->
     <footer style="text-align:center;padding:12px 16px;font-size:0.65rem;color:var(--muted);border-top:1px solid var(--border);background:var(--card);margin-top:auto;">
-        Made with ❤️ by <a href="https://mscarabia.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:600;">Mohammed Siddiqui</a> · 
-        <a href="https://mscarabia.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">mscarabia.com</a> · 
+        Made with ❤️ by <a href="https://mscarabia.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:600;">Mohammed Siddiqui</a> ·
+        <a href="https://mscarabia.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">mscarabia.com</a> ·
         Powered by <a href="https://aladhan.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">Aladhan API</a>
     </footer>
 </div>
 
 <script>
 (function(){
-/* ── Config ─────────────────────────────────────── */
+'use strict';
+
+/* ── Config & Data ────────────────────────────────────────────────── */
 const CITIES=[
-    {id:'london',name:'London',tz:'Europe/London',lat:51.51,lng:-0.13,method:3},
-    {id:'riyadh',name:'Riyadh',tz:'Asia/Riyadh',lat:24.71,lng:46.68,method:4},
-    {id:'mumbai',name:'Mumbai',tz:'Asia/Kolkata',lat:19.08,lng:72.88,method:1},
-    {id:'brussels',name:'Brussels',tz:'Europe/Brussels',lat:50.85,lng:4.35,method:3},
-    {id:'newyork',name:'New York',tz:'America/New_York',lat:40.71,lng:-74.01,method:2},
+    {id:'london',  name:'London',   tz:'Europe/London',    lat:51.51, lng:-0.13,  method:3},
+    {id:'riyadh',  name:'Riyadh',   tz:'Asia/Riyadh',      lat:24.71, lng:46.68,  method:4},
+    {id:'mumbai',  name:'Mumbai',   tz:'Asia/Kolkata',     lat:19.08, lng:72.88,  method:1},
+    {id:'brussels',name:'Brussels', tz:'Europe/Brussels',  lat:50.85, lng:4.35,   method:3},
+    {id:'newyork', name:'New York', tz:'America/New_York', lat:40.71, lng:-74.01, method:2},
 ];
 const POOL=[...CITIES,
-    {id:'dubai',name:'Dubai',tz:'Asia/Dubai',lat:25.2,lng:55.27,method:4},
-    {id:'istanbul',name:'Istanbul',tz:'Europe/Istanbul',lat:41.01,lng:28.98,method:3},
-    {id:'cairo',name:'Cairo',tz:'Africa/Cairo',lat:30.04,lng:31.24,method:3},
-    {id:'lagos',name:'Lagos',tz:'Africa/Lagos',lat:6.52,lng:3.38,method:2},
-    {id:'jakarta',name:'Jakarta',tz:'Asia/Jakarta',lat:-6.21,lng:106.85,method:3},
-    {id:'singapore',name:'Singapore',tz:'Asia/Singapore',lat:1.35,lng:103.82,method:3},
-    {id:'karachi',name:'Karachi',tz:'Asia/Karachi',lat:24.86,lng:67.01,method:2},
+    {id:'dubai',    name:'Dubai',        tz:'Asia/Dubai',        lat:25.20, lng:55.27,  method:4},
+    {id:'istanbul', name:'Istanbul',     tz:'Europe/Istanbul',   lat:41.01, lng:28.98,  method:3},
+    {id:'cairo',    name:'Cairo',        tz:'Africa/Cairo',      lat:30.04, lng:31.24,  method:3},
+    {id:'lagos',    name:'Lagos',        tz:'Africa/Lagos',      lat:6.52,  lng:3.38,   method:2},
+    {id:'jakarta',  name:'Jakarta',      tz:'Asia/Jakarta',      lat:-6.21, lng:106.85, method:3},
+    {id:'singapore',name:'Singapore',    tz:'Asia/Singapore',    lat:1.35,  lng:103.82, method:3},
+    {id:'karachi',  name:'Karachi',      tz:'Asia/Karachi',      lat:24.86, lng:67.01,  method:2},
+    {id:'kl',       name:'Kuala Lumpur', tz:'Asia/Kuala_Lumpur', lat:3.14,  lng:101.69, method:3},
 ];
+
+// Class schedule (all times in Europe/London timezone)
 const CLASSES=[
-    {day:4,start:'14:30',end:'15:30',subject:'Fique',teacher:'Aakif'},
-    {day:5,start:'15:30',end:'16:30',subject:'Tafseer',teacher:'Abdel-Nasser'},
-    {day:5,start:'16:30',end:'17:30',subject:'Tafseer',teacher:'Abdel-Nasser'},
-    {day:0,start:'17:25',end:'18:25',subject:'Seerah',teacher:'Ammar'},
-    {day:1,start:'17:25',end:'18:25',subject:'Seerah',teacher:'Ammar'},
-    {day:2,start:'17:25',end:'18:25',subject:'Fique',teacher:'Aakif'},
-    {day:3,start:'17:25',end:'18:25',subject:'Adab',teacher:'Ammar'},
-    {day:4,start:'17:25',end:'18:25',subject:'Adab',teacher:'Ammar'},
-    {day:6,start:'17:25',end:'18:25',subject:'Seerah',teacher:'Ammar'},
-    {day:1,start:'18:30',end:'19:30',subject:'Arabic',teacher:'Abdelaziz'},
-    {day:2,start:'18:30',end:'19:30',subject:'Hadith',teacher:'Ahmad'},
-    {day:3,start:'18:30',end:'19:30',subject:'Arabic',teacher:'Abdelaziz'},
-    {day:4,start:'18:30',end:'19:30',subject:'Hadith',teacher:'Ahmad'},
-    {day:6,start:'18:30',end:'19:30',subject:'Aqaaid',teacher:'Ahmad'},
+    {day:4,start:'14:30',end:'15:30',subject:'Fiqh',    teacher:'Aakif'},
+    {day:5,start:'15:30',end:'16:30',subject:'Tafseer', teacher:'Abdel-Nasser'},
+    {day:5,start:'16:30',end:'17:30',subject:'Tafseer', teacher:'Abdel-Nasser'},
+    {day:0,start:'17:25',end:'18:25',subject:'Seerah',  teacher:'Ammar'},
+    {day:1,start:'17:25',end:'18:25',subject:'Seerah',  teacher:'Ammar'},
+    {day:2,start:'17:25',end:'18:25',subject:'Fiqh',    teacher:'Aakif'},
+    {day:3,start:'17:25',end:'18:25',subject:'Adab',    teacher:'Ammar'},
+    {day:4,start:'17:25',end:'18:25',subject:'Adab',    teacher:'Ammar'},
+    {day:6,start:'17:25',end:'18:25',subject:'Seerah',  teacher:'Ammar'},
+    {day:1,start:'18:30',end:'19:30',subject:'Arabic',  teacher:'Abdelaziz'},
+    {day:2,start:'18:30',end:'19:30',subject:'Hadith',  teacher:'Ahmad'},
+    {day:3,start:'18:30',end:'19:30',subject:'Arabic',  teacher:'Abdelaziz'},
+    {day:4,start:'18:30',end:'19:30',subject:'Hadith',  teacher:'Ahmad'},
+    {day:6,start:'18:30',end:'19:30',subject:'Aqaaid',  teacher:'Ahmad'},
 ];
 
-/* ── State ──────────────────────────────────────── */
-const STORAGE_CITIES='wp_cities_v1';
-let cities=[...CITIES], cache={}, selStart=9, selDur=1;
-let dragging=false, resL=false, resR=false, dragX=0, dragSL=0, dragSD=0;
-let h24=false, dark=true, userCity=null, mOffset=0;
-let enrolled=JSON.parse(localStorage.getItem('wp_e')||'[]');
-let lang=localStorage.getItem('wp_l')||'en';
-let alarm=localStorage.getItem('wp_a')||'ting';
-const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+/*
+ * Prayer window definitions: how wide each prayer block is on the timeline.
+ * Blocks use the NEXT prayer start as their end, capped at maxDurH hours.
+ * This matches the actual Islamic prayer window for each Salah.
+ *
+ * FIX: The old code always used a hardcoded durMap (0.2–0.33 h) because
+ * pd.loc[name+'End'] and pd.loc[name+'Minutes'] never exist in the API response.
+ * Now pw (prayer windows) is stored in the cache from fetchPrayer() and used
+ * consistently by BOTH renderRow() (visual blocks) and checkConflicts().
+ */
+const PRAYER_WINDOWS = {
+    Fajr:    { nextKey:'Sunrise', maxDurH:1.5  }, // Fajr → Sunrise
+    Dhuhr:   { nextKey:'Asr',     maxDurH:1.0  }, // Dhuhr → 1 hr max
+    Asr:     { nextKey:'Maghrib', maxDurH:1.5  }, // Asr → Maghrib or 1.5 hr
+    Maghrib: { nextKey:'Isha',    maxDurH:0.75 }, // Maghrib → Isha or 45 min
+    Isha:    { nextKey:null,      maxDurH:1.5  }, // Isha + 1.5 hr
+};
 
-function sanitizeName(s){
-    // Strip all HTML tags and limit length — used for geocoded city names
-    return String(s).replace(/<[^>]*>/g,'').replace(/[<>"'`]/g,'').trim().slice(0,60);
+/* ── State ────────────────────────────────────────────────────────── */
+const STORAGE_CITIES = 'wp_cities_v1';
+let cities = [...CITIES], cache = {}, selStart = 9, selDur = 1;
+let dragging = false, resL = false, resR = false, dragX = 0, dragSL = 0, dragSD = 0;
+let h24 = false, dark = true, userCity = null, mOffset = 0;
+let enrolled = JSON.parse(localStorage.getItem('wp_e') || '[]');
+let lang = localStorage.getItem('wp_l') || 'en';
+let alarm = localStorage.getItem('wp_a') || 'ting';
+const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+
+/* ── Sanitise geocoded city names (XSS prevention) ───────────────── */
+function sanitizeName(s) {
+    return String(s).replace(/<[^>]*>/g,'').replace(/[<>"'`]/g,'').trim().slice(0, 60);
 }
 
-/* ── i18n ───────────────────────────────────────── */
-const i18n={en:{safe:'Safe Window',conflict:'Conflict',next:'Next:',noClass:'No upcoming classes',nextClass:'Next class:',sunrise:'Sunrise',now:'NOW',selection:'Selection'},
-    ar:{safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:',sunrise:'شروق',now:'الآن',selection:'التحديد'}};
-const t=k=>i18n[lang]?.[k]||i18n.en[k]||k;
-function updateLegend(){const n=PRAYER_NAMES[lang];$('#lg-fajr').textContent=n.Fajr;$('#lg-dhuhr').textContent=n.Dhuhr;$('#lg-asr').textContent=n.Asr;$('#lg-maghrib').textContent=n.Maghrib;$('#lg-isha').textContent=n.Isha;$('#lg-sunrise').textContent=t('sunrise');$('#lg-now').textContent=t('now');$('#lg-sel').textContent=t('selection');}
-const PRAYER_NAMES={en:{Fajr:'Fajr',Dhuhr:'Dhuhr',Asr:'Asr',Maghrib:'Maghrib',Isha:'Isha'},ar:{Fajr:'فجر',Dhuhr:'ظهر',Asr:'عصر',Maghrib:'مغرب',Isha:'عشاء'}};
-function toast(msg){const el=document.createElement('div');el.textContent=msg;el.className='toast';el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:8px;font-size:0.8rem;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.35);pointer-events:none;';document.body.appendChild(el);setTimeout(()=>el.remove(),2500);}
+/* ── i18n ──────────────────────────────────────────────────────────  */
+const i18n = {
+    en: {safe:'Safe Window',conflict:'Conflict',next:'Next:',noClass:'No upcoming classes',nextClass:'Next class:',sunrise:'Sunrise',now:'NOW',selection:'Selection'},
+    ar: {safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:',sunrise:'شروق',now:'الآن',selection:'التحديد'},
+};
+const t = k => i18n[lang]?.[k] || i18n.en[k] || k;
+const PRAYER_NAMES = {
+    en: {Fajr:'Fajr',Dhuhr:'Dhuhr',Asr:'Asr',Maghrib:'Maghrib',Isha:'Isha'},
+    ar: {Fajr:'فجر',Dhuhr:'ظهر',Asr:'عصر',Maghrib:'مغرب',Isha:'عشاء'},
+};
+function updateLegend() {
+    const n = PRAYER_NAMES[lang];
+    ['fajr','dhuhr','asr','maghrib','isha'].forEach(p => {
+        const el = $(`#lg-${p}`);
+        if (el) el.textContent = n[p.charAt(0).toUpperCase()+p.slice(1)];
+    });
+    if ($('#lg-sunrise')) $('#lg-sunrise').textContent = t('sunrise');
+    if ($('#lg-now'))     $('#lg-now').textContent     = t('now');
+    if ($('#lg-sel'))     $('#lg-sel').textContent     = t('selection');
+}
 
-/* ── Time utils ─────────────────────────────────── */
-function getOff(tz){const n=new Date(),u=new Date(n.toLocaleString('en-US',{timeZone:'UTC'})),t=new Date(n.toLocaleString('en-US',{timeZone:tz}));return(t-u)/36e5;}
-function fmtH(h){const hh=Math.floor(h),mm=Math.round((h-hh)*60);if(h24)return`${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;const p=hh>=12?'PM':'AM',h12=hh%12||12;return`${h12}:${String(mm).padStart(2,'0')} ${p}`;}
-function pct(h){return(h/24)*100;}
-function hrs(p){return(p/100)*24;}
-function clamp(v,m,M){return Math.max(m,Math.min(M,v));}
+/* ── Toast ────────────────────────────────────────────────────────── */
+function toast(msg) {
+    const el = document.createElement('div');
+    el.textContent = msg; el.className = 'toast';
+    el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:8px;font-size:0.8rem;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.35);pointer-events:none;';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+}
 
-/* ── Prayer API ─────────────────────────────────── */
-async function fetchPrayer(city){
-    const dk=new Date().toISOString().slice(0,10).split('-').reverse().join('-');
-    const ck=`${city.id}-${dk}`;
-    if(cache[ck])return cache[ck];
-    const url=`https://api.aladhan.com/v1/timings/${dk}?latitude=${city.lat}&longitude=${city.lng}&method=${city.method}`;
-    try{
-        const r=await fetch(url),j=await r.json();
-        if(j.code!==200)throw 0;
-        const tz=j.data.meta.timezone||city.tz,off=getOff(tz);
-        const names=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
-        const utc={},loc={};
-        names.forEach(n=>{const[hh,mm]=j.data.timings[n].split(':').map(Number);const l=hh+mm/60;let u=l-off;while(u<0)u+=24;utc[n]=u%24;loc[n]=l;});
-        const res={utc,loc,off,tz};cache[ck]=res;return res;
-    }catch(e){
-        const off=getOff(city.tz),fb={Fajr:5,Sunrise:6.5,Dhuhr:12.5,Asr:16,Maghrib:18.5,Isha:20};
-        const utc={},loc={};for(let k in fb){let u=fb[k]-off;while(u<0)u+=24;utc[k]=u%24;loc[k]=fb[k];}
-        const res={utc,loc,off,tz:city.tz,fallback:true};cache[ck]=res;return res;
+/* ── Time utilities ────────────────────────────────────────────────  */
+function getOff(tz) {
+    const n = new Date();
+    const u = new Date(n.toLocaleString('en-US', {timeZone:'UTC'}));
+    const l = new Date(n.toLocaleString('en-US', {timeZone:tz}));
+    return (l - u) / 36e5;
+}
+function fmtH(h) {
+    h = ((h % 24) + 24) % 24;
+    const hh = Math.floor(h), mm = Math.round((h - hh) * 60);
+    if (!h24) { const p = hh >= 12 ? 'PM' : 'AM', h12 = hh % 12 || 12; return `${h12}:${String(mm).padStart(2,'0')} ${p}`; }
+    return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+}
+function pct(h) { return (h / 24) * 100; }
+function clamp(v, m, M) { return Math.max(m, Math.min(M, v)); }
+function toMaster(uh) { let h = uh + mOffset; while (h < 0) h += 24; return h % 24; }
+
+/* ── API: fetch prayer times ──────────────────────────────────────── */
+async function fetchPrayer(city) {
+    const dk  = new Date().toISOString().slice(0,10).split('-').reverse().join('-');
+    const ck  = `${city.id}-${dk}`;
+    if (cache[ck]) return cache[ck];
+
+    const url = `https://api.aladhan.com/v1/timings/${dk}?latitude=${city.lat}&longitude=${city.lng}&method=${city.method}`;
+    try {
+        const r = await fetch(url), j = await r.json();
+        if (j.code !== 200) throw new Error('API');
+
+        const tz  = j.data.meta.timezone || city.tz;
+        const off = getOff(tz);
+        const names = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+        const utc = {}, loc = {};
+
+        names.forEach(n => {
+            const [hh, mm] = j.data.timings[n].split(':').map(Number);
+            const l = hh + mm / 60;
+            let u = l - off;
+            while (u < 0) u += 24;
+            utc[n] = u % 24;
+            loc[n] = l;
+        });
+
+        /*
+         * FIX: Build prayer window end times (UTC hours).
+         * These replace the old hardcoded durMap that was always used
+         * because pd.loc[name+'End'] never existed in the API response.
+         */
+        const pw = {};
+        Object.entries(PRAYER_WINDOWS).forEach(([p, {nextKey, maxDurH}]) => {
+            if (utc[p] === undefined) return;
+            let durH = maxDurH;
+            if (nextKey && utc[nextKey] !== undefined) {
+                let d = utc[nextKey] - utc[p];
+                if (d < 0) d += 24;           // handle midnight wrap
+                durH = Math.min(d, maxDurH);
+            }
+            pw[p] = (utc[p] + durH) % 24;
+        });
+
+        const res = { utc, loc, pw, off, tz };
+        cache[ck] = res;
+        return res;
+    } catch {
+        // Fallback with estimated times
+        const off = getOff(city.tz);
+        const fb  = { Fajr:5, Sunrise:6.5, Dhuhr:12.5, Asr:16, Maghrib:18.5, Isha:20 };
+        const utc = {}, loc = {};
+        for (const k in fb) { let u = fb[k] - off; while (u < 0) u += 24; utc[k] = u % 24; loc[k] = fb[k]; }
+
+        // Build fallback prayer windows too
+        const pw = {};
+        Object.entries(PRAYER_WINDOWS).forEach(([p, {nextKey, maxDurH}]) => {
+            if (utc[p] === undefined) return;
+            let durH = maxDurH;
+            if (nextKey && utc[nextKey] !== undefined) {
+                let d = utc[nextKey] - utc[p]; if (d < 0) d += 24;
+                durH = Math.min(d, maxDurH);
+            }
+            pw[p] = (utc[p] + durH) % 24;
+        });
+
+        const res = { utc, loc, pw, off, tz:city.tz, fallback:true };
+        cache[ck] = res;
+        return res;
     }
 }
-function toMaster(uh){let h=uh+mOffset;while(h<0)h+=24;return h%24;}
 
-/* ── Render ─────────────────────────────────────── */
-async function renderRow(city){
-    const pd=await fetchPrayer(city);
-    const row=document.createElement('div');
-    row.className='city-row'+(city.isUser?' user-row':'');
-    row.dataset.id=city.id;
-    // Label — build with DOM, not innerHTML, to prevent XSS from geocoded city names
-    const lbl=document.createElement('div');
-    lbl.className='city-label';lbl.style.position='relative';
-    const now=new Date();
-    const lt=now.toLocaleTimeString('en-US',{timeZone:city.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!h24});
-    const sign=pd.off>=0?'+':'';
-    // city-name span
-    const nameSpan=document.createElement('span');nameSpan.className='city-name';
-    if(city.isUser){
-        const pin=document.createElementNS('http://www.w3.org/2000/svg','svg');pin.setAttribute('width','10');pin.setAttribute('height','10');pin.setAttribute('viewBox','0 0 24 24');pin.setAttribute('fill','#38bdf8');pin.style.verticalAlign='middle';pin.style.marginRight='2px';
-        const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d','M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z');pin.appendChild(p);nameSpan.appendChild(pin);
+/* ── Render: city row ─────────────────────────────────────────────── */
+async function renderRow(city) {
+    const pd  = await fetchPrayer(city);
+
+    /*
+     * FIX: Geocoded cities (from Nominatim search) have tz set to the user's
+     * local timezone at the time of the search. Update it from the API response,
+     * which returns the actual timezone for the city's coordinates.
+     */
+    if (city.geo && pd.tz && city.tz !== pd.tz) {
+        city.tz = pd.tz;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'city-row' + (city.isUser ? ' user-row' : '');
+    row.dataset.id = city.id;
+
+    // ── City label (sticky-left, safe DOM construction)
+    const lbl = document.createElement('div');
+    lbl.className = 'city-label';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'city-name';
+    if (city.isUser) {
+        // Pin icon for user's detected location
+        const pin = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        pin.setAttribute('width','10'); pin.setAttribute('height','10');
+        pin.setAttribute('viewBox','0 0 24 24'); pin.setAttribute('fill','#38bdf8');
+        pin.style.cssText = 'vertical-align:middle;margin-right:2px;flex-shrink:0;';
+        const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+        p.setAttribute('d','M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z');
+        pin.appendChild(p); nameSpan.appendChild(pin);
     }
     nameSpan.appendChild(document.createTextNode(city.name));
-    if(city.isUser){const yb=document.createElement('span');yb.className='you-badge';yb.textContent='YOU';nameSpan.appendChild(yb);}
-    // clock + offset
-    const clockSpan=document.createElement('span');clockSpan.className='city-clock';clockSpan.dataset.tz=city.tz;clockSpan.textContent=lt;
-    const offSpan=document.createElement('span');offSpan.className='city-offset';offSpan.textContent=`UTC${sign}${pd.off.toFixed(1)}`;
-    lbl.appendChild(nameSpan);lbl.appendChild(clockSpan);lbl.appendChild(offSpan);
-    if(!city.isUser&&cities.length>1){
-        const rb=document.createElement('button');rb.className='remove-btn';rb.dataset.id=city.id;
-        rb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    if (city.isUser) { const yb = document.createElement('span'); yb.className = 'you-badge'; yb.textContent = 'YOU'; nameSpan.appendChild(yb); }
+    lbl.appendChild(nameSpan);
+
+    const now = new Date();
+    const lt  = now.toLocaleTimeString('en-US', {timeZone:city.tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
+    const clockSpan = document.createElement('span'); clockSpan.className = 'city-clock'; clockSpan.dataset.tz = city.tz; clockSpan.textContent = lt;
+    lbl.appendChild(clockSpan);
+
+    const sign = pd.off >= 0 ? '+' : '';
+    const offSpan = document.createElement('span'); offSpan.className = 'city-offset'; offSpan.textContent = `UTC${sign}${pd.off % 1 === 0 ? pd.off : pd.off.toFixed(1)}`;
+    lbl.appendChild(offSpan);
+
+    // Remove button
+    if (!city.isUser && cities.length > 1) {
+        const rb = document.createElement('button');
+        rb.className = 'remove-btn'; rb.dataset.id = city.id; rb.title = 'Remove city';
+        rb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
         lbl.appendChild(rb);
     }
+
     row.appendChild(lbl);
-    // Strip
-    const strip=document.createElement('div');
-    strip.style.cssText='flex:1;position:relative;background:var(--surface);';
-    ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name=>{
-        const u=pd.utc[name];if(u===undefined)return;
-        const m=toMaster(u);
-        const localStart=pd.loc[name];
-        let localEnd=pd.loc[name+'End'];
-        if(!localEnd&&pd.loc[name+'Minutes'])localEnd=localStart+pd.loc[name+'Minutes']/60;
-        if(!localEnd){
-            const durMap={Fajr:0.33,Dhuhr:0.25,Asr:0.25,Maghrib:0.2,Isha:0.3};
-            localEnd=localStart+(durMap[name]||0.25);
+
+    // ── Timeline strip
+    const strip = document.createElement('div');
+    strip.style.cssText = 'flex:1;position:relative;background:var(--surface);';
+
+    // Prayer blocks
+    ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
+        const u = pd.utc[name];
+        if (u === undefined) return;
+        const m = toMaster(u);
+
+        /*
+         * FIX: Use pw (prayer windows) from the API cache for block width.
+         * The old code tried pd.loc[name+'End'] which never exists in the API,
+         * making it always fall back to a tiny hardcoded durMap (≈12–20 min).
+         * Now blocks correctly show e.g. Fajr spanning to Sunrise (~45–90 min).
+         */
+        let durHours;
+        if (pd.pw && pd.pw[name] !== undefined) {
+            let d = pd.pw[name] - pd.utc[name];
+            if (d < 0) d += 24;
+            durHours = d;
+        } else {
+            const fallbackDur = {Fajr:0.75, Dhuhr:0.5, Asr:0.75, Maghrib:0.45, Isha:1.0};
+            durHours = fallbackDur[name] || 0.5;
         }
-        const durHours=localEnd-localStart;
-        const b=document.createElement('div');
-        b.className=`prayer-block ${name.toLowerCase()}`;
-        b.style.left=pct(m)+'%';b.style.width=pct(Math.max(durHours,0.2))+'%';
-        b.textContent=PRAYER_NAMES[lang]?.[name]||name;b.title=`${name}: ${fmtH(m)} – ${fmtH(m+durHours)} (local ${fmtH(localStart)})`;
-        b.onclick=e=>{e.stopPropagation();selStart=m-selDur/2;updateSel();checkConflicts();};
+
+        const localStart = pd.loc[name];
+        const localEnd   = localStart + durHours;
+
+        const b = document.createElement('div');
+        b.className = `prayer-block ${name.toLowerCase()}`;
+        b.style.left  = pct(m) + '%';
+        b.style.width = pct(Math.max(durHours, 0.15)) + '%';
+        b.textContent = PRAYER_NAMES[lang]?.[name] || name;
+        b.title = `${name}: ${fmtH(m)} – ${fmtH(m + durHours)} (local ${fmtH(localStart)}–${fmtH(localEnd)})`;
+        b.onclick = e => {
+            e.stopPropagation();
+            selStart = clamp(m - selDur / 2, 0, 24 - selDur);
+            updateSel(); checkConflicts();
+        };
         strip.appendChild(b);
     });
-    // Sunrise marker
-    if(pd.utc.Sunrise!==undefined){
-        const srM=toMaster(pd.utc.Sunrise);
-        const sr=document.createElement('div');
-        sr.style.cssText=`position:absolute;left:${pct(srM)}%;width:1.5px;top:0;bottom:0;background:rgba(251,191,36,0.5);z-index:1;pointer-events:none;`;
-        sr.title=`Sunrise: ${fmtH(srM)}`;
+
+    // Sunrise marker (yellow vertical line)
+    if (pd.utc.Sunrise !== undefined) {
+        const srM = toMaster(pd.utc.Sunrise);
+        const sr  = document.createElement('div');
+        sr.style.cssText = `position:absolute;left:${pct(srM)}%;width:1.5px;top:0;bottom:0;background:rgba(251,191,36,0.55);z-index:1;pointer-events:none;`;
+        sr.title = `Sunrise: ${fmtH(srM)}`;
         strip.appendChild(sr);
     }
-    enrolled.forEach(cls=>{
-        const ms=toMaster(cls.utcStart),me=toMaster(cls.utcEnd);
-        const ev=document.createElement('div');ev.className='class-ev';
-        ev.style.left=pct(ms)+'%';ev.style.width=pct(me-ms)+'%';
-        ev.textContent=cls.subject;strip.appendChild(ev);
+
+    // Enrolled class overlays
+    enrolled.forEach(cls => {
+        if (cls.utcStart === undefined) return;
+        const ms = toMaster(cls.utcStart), me = toMaster(cls.utcEnd);
+        const ev = document.createElement('div');
+        ev.className = 'class-ev';
+        ev.style.left  = pct(ms) + '%';
+        ev.style.width = pct(me - ms) + '%';
+        ev.textContent = cls.subject;
+        strip.appendChild(ev);
     });
-    // Qibla indicator
-    if(city.lat&&city.lng){
-        const qDeg=calculateQibla(city.lat,city.lng);
-        const qb=document.createElement('div');
-        qb.style.cssText=`position:absolute;right:8px;top:50%;transform:translateY(-50%) rotate(${qDeg}deg);font-size:14px;opacity:0.5;z-index:1;pointer-events:none;`;
-        qb.title=`Qibla: ${Math.round(qDeg)}°`;
-        qb.innerHTML='🧭';
-        lbl.appendChild(qb);
-    }
-    row.appendChild(strip);return row;
+
+    row.appendChild(strip);
+    return row;
 }
 
-async function renderAll(){
-    const c=$('#rows');c.innerHTML='';
-    const all=[...cities];
-    if(userCity&&!all.find(x=>x.id==='user'))all.unshift(userCity);
-    const rows=await Promise.all(all.map(renderRow));
-    rows.forEach(r=>c.appendChild(r));
-    updateOverlayH();updateNow();updateSel();checkConflicts();renderToggles();
-}
-function updateOverlayH(){const h=$('#rows').offsetHeight;if(h>0)$('#sel').style.height=h+'px';}
-let scrolledToNow=false;
-function scrollToNow(){
-    if(scrolledToNow)return;
-    const n=new Date(),uH=n.getUTCHours()+n.getUTCMinutes()/60+n.getUTCSeconds()/3600;
-    const m=toMaster(uH);const pctVal=(m/24)*100;
-    const scroll=$('#tl-scroll');const inner=$('#tl-inner');
-    if(!scroll||!inner)return;
-    const viewW=scroll.clientWidth;const innerW=inner.offsetWidth;
-    const targetPx=(pctVal/100)*innerW;
-    const scrollTarget=Math.max(0,Math.min(targetPx-viewW*0.4,innerW-viewW));
-    scroll.scrollTo({left:scrollTarget,behavior:'smooth'});
-    scrolledToNow=true;
-}
-function updateNow(){
-    const n=new Date(),uH=n.getUTCHours()+n.getUTCMinutes()/60+n.getUTCSeconds()/3600;
-    const m=toMaster(uH);
-    const lw=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w'))||140;
-    const iw=$('#tl-inner').offsetWidth||1000;
-    const stripW=iw-lw;
-    const nowPx=lw+(m/24)*stripW;
-    $('#now-line').style.left=nowPx+'px';$('#your-time').textContent=fmtH(m);
-    if(!scrolledToNow)setTimeout(scrollToNow,500);
-}
-function updateSel(){
-    // sel-overlay sits inside tl-inner which starts at 0; label is var(--label-w)
-    // prayer strips start at label-w, so we offset: left = label-w + pct(selStart)% of strip width
-    const lw=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w'))||140;
-    const iw=$('#tl-inner').offsetWidth||1000;
-    const stripW=iw-lw;
-    const selL=lw+(selStart/24)*stripW;
-    const selWpx=(selDur/24)*stripW;
-    $('#sel').style.left=selL+'px';$('#sel').style.width=selWpx+'px';
-    $('#sel-display').textContent=`${fmtH(selStart)} – ${fmtH(selStart+selDur)} (${selDur.toFixed(1)}h)`;
-}
-const PRAYER_DUR={Fajr:0.4,Dhuhr:0.3,Asr:0.3,Maghrib:0.25,Isha:0.35};
-function checkConflicts(){
-    const s=selStart,e=s+selDur;let cf=[];
-    const ids=new Set([...cities.map(c=>c.id),userCity?.id].filter(Boolean));
-    for(let id of ids){
-        const city=[...cities,userCity].find(c=>c&&c.id===id);if(!city)continue;
-        const dk=new Date().toISOString().slice(0,10).split('-').reverse().join('-');
-        const pd=cache[`${city.id}-${dk}`];if(!pd)continue;
-        ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name=>{
-            const u=pd.utc[name];if(u===undefined)return;
-            const m=toMaster(u);const dur=PRAYER_DUR[name]||0.3;
-            if(m<e&&m+dur>s)cf.push({city:city.name,prayer:name});
-        });
-    }
-    const b=$('#status-badge'),txt=$('#status-text');
-    if(!cf.length){b.className='status-badge safe';txt.textContent=t('safe');}
-    else{b.className='status-badge conflict';txt.textContent=`${t('conflict')}: ${cf.map(c=>`${c.prayer} ${c.city}`).join(', ')}`;}
+/* ── Render: all rows ─────────────────────────────────────────────── */
+async function renderAll() {
+    const c = $('#rows');
+    c.innerHTML = '';
+    const all = [...cities];
+    if (userCity && !all.find(x => x.id === 'user')) all.unshift(userCity);
+    const rows = await Promise.all(all.map(renderRow));
+    rows.forEach(r => c.appendChild(r));
+    updateOverlayH();
+    updateNow();
+    updateSel();
+    checkConflicts();
+    renderToggles();
 }
 
-/* ── Ruler ──────────────────────────────────────── */
-function renderRuler(){
-    const r=$('#ruler');r.innerHTML='';
-    // Ruler tick marks sit in the area after the label column
-    // left% is calculated as: label_offset + (h/24) * remaining_width
-    // We use a pseudo-element approach: add a spacer div then position ticks within the tick area
-    const spacer=document.createElement('div');spacer.style.cssText=`position:absolute;left:0;top:0;width:var(--label-w);height:100%;background:var(--card);border-right:1px solid var(--border);`;r.appendChild(spacer);
-    for(let h=0;h<24;h++){
-        const m=document.createElement('div');m.className='ruler-mark major';
-        // position within the full ruler width: label-w + (h/24)*(tl-min)
-        m.style.left=`calc(var(--label-w) + ${(h/24)*100}%)`;
+function updateOverlayH() {
+    const h = $('#rows').offsetHeight;
+    if (h > 0) $('#sel').style.height = h + 'px';
+}
+
+/* ── NOW line (pixel-positioned to match prayer blocks exactly) ────── */
+function scrollToNow() {
+    const n = new Date();
+    const uH = n.getUTCHours() + n.getUTCMinutes() / 60 + n.getUTCSeconds() / 3600;
+    const m  = toMaster(uH);
+    const scroll = $('#tl-scroll'), inner = $('#tl-inner');
+    if (!scroll || !inner) return;
+    const viewW = scroll.clientWidth, innerW = inner.offsetWidth;
+    const targetPx = (m / 24) * innerW;
+    scroll.scrollTo({left: Math.max(0, Math.min(targetPx - viewW * 0.4, innerW - viewW)), behavior:'smooth'});
+}
+
+function updateNow() {
+    const n  = new Date();
+    const uH = n.getUTCHours() + n.getUTCMinutes() / 60 + n.getUTCSeconds() / 3600;
+    const m  = toMaster(uH);
+
+    /*
+     * The NOW line uses pixel positioning relative to tl-inner.
+     * It must match prayer blocks which use pct(m)% within their strip divs.
+     * strip width = tl-inner width (labelled by JS) – label width.
+     * NOW line left = label-w + (m/24) * stripW.
+     */
+    const lw  = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140;
+    const iw  = ($('#tl-inner') || {offsetWidth:1000}).offsetWidth;
+    const stripW = iw - lw;
+    const nowPx  = lw + (m / 24) * stripW;
+
+    const nl = $('#now-line');
+    if (nl) nl.style.left = nowPx + 'px';
+
+    if ($('#your-time')) $('#your-time').textContent = fmtH(m);
+    updateHeaderDate();
+}
+
+/* ── Ruler ─────────────────────────────────────────────────────────── */
+/*
+ * FIX: Previous formula was: left = calc(var(--label-w) + (h/24)*100%)
+ * This is wrong because 100% is the full ruler width (including the label area),
+ * so hour marks get increasingly shifted right compared to the prayer blocks.
+ *
+ * Correct formula: left = calc(var(--label-w) + (100% - var(--label-w)) * (h/24))
+ * This uses only the strip portion (100% - label-w) and applies the fraction to it.
+ * Result: at h=0 → left=label-w (strip start), at h=24 → left=100% (strip end).
+ * This perfectly aligns ruler marks with prayer blocks.
+ */
+function renderRuler() {
+    const r = $('#ruler');
+    r.innerHTML = '';
+
+    // Spacer covers the label column in the ruler row
+    const spacer = document.createElement('div');
+    spacer.style.cssText = 'position:absolute;left:0;top:0;width:var(--label-w);height:100%;background:var(--card);border-right:1px solid var(--border);';
+    r.appendChild(spacer);
+
+    for (let h = 0; h < 24; h++) {
+        const leftExpr = `calc(var(--label-w) + (100% - var(--label-w)) * ${h / 24})`;
+
+        const m = document.createElement('div');
+        m.className = 'ruler-mark' + (h % 6 === 0 ? ' major' : '');
+        m.style.left = leftExpr;
         r.appendChild(m);
-        const l=document.createElement('span');l.className='ruler-lbl';
-        l.style.left=`calc(var(--label-w) + ${(h/24)*100}%)`;
-        l.textContent=h24?`${String(h).padStart(2,'0')}:00`:(h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p');
+
+        const l = document.createElement('span');
+        l.className = 'ruler-lbl';
+        l.style.left = leftExpr;
+        l.textContent = h24
+            ? `${String(h).padStart(2,'0')}:00`
+            : (h === 0 ? '12a' : h < 12 ? h + 'a' : h === 12 ? '12p' : (h - 12) + 'p');
         r.appendChild(l);
     }
+
+    // NOW marker in ruler (percentage-based to match strip)
+    const n  = new Date();
+    const uH = n.getUTCHours() + n.getUTCMinutes() / 60;
+    const m  = toMaster(uH);
+    const rn = document.createElement('div');
+    rn.id = 'ruler-now';
+    rn.style.cssText = `position:absolute;left:calc(var(--label-w) + (100% - var(--label-w)) * ${m/24});top:0;bottom:0;width:2.5px;background:var(--danger);box-shadow:0 0 6px var(--danger);pointer-events:none;z-index:5;`;
+    r.appendChild(rn);
 }
 
-/* ── Drag ───────────────────────────────────────── */
-function tlW(){
-    const i=$('#tl-inner');
-    const lw=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w'))||140;
-    return i?(i.getBoundingClientRect().width-lw):960;
-}
-function startD(e,isL=false,isR=false){
-    dragging=true;resL=isL;resR=isR;$('#sel').classList.add('dragging');
-    dragX=e.touches?e.touches[0].clientX:e.clientX;
-    dragSL=selStart;dragSD=selDur;
-    document.body.style.cursor=isL||isR?'ew-resize':'grabbing';
-    e.preventDefault();e.stopPropagation();
-}
-function moveD(e){if(!dragging)return;const cx=e.touches?e.touches[0].clientX:e.clientX;const dh=((cx-dragX)/tlW())*24;
-if(resL){let ns=dragSL+dh,ne=dragSL+dragSD;if(ns>=ne-0.5)ns=ne-0.5;ns=Math.round(ns*2)/2;selStart=clamp(ns,0,24-0.5);selDur=clamp(ne-selStart,0.5,24);}
-else if(resR){let ne=dragSL+dragSD+dh;if(ne<=dragSL+0.5)ne=dragSL+0.5;ne=Math.round(ne*2)/2;selDur=clamp(ne-dragSL,0.5,24-dragSL);}
-else{let ns=dragSL+dh;setStart(ns);}
-updateSel();checkConflicts();e.preventDefault();}
-function endD(){if(!dragging)return;dragging=resL=resR=false;$('#sel').classList.remove('dragging');document.body.style.cursor='';selStart=Math.round(selStart*2)/2;selDur=Math.round(selDur*2)/2;setStart(selStart);updateSel();checkConflicts();}
-function setStart(h){selStart=clamp(h,0,24-selDur);}
+/* ── Selection bar ────────────────────────────────────────────────── */
+function updateSel() {
+    const lw    = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140;
+    const iw    = ($('#tl-inner') || {offsetWidth:1000}).offsetWidth;
+    const stripW = iw - lw;
 
-$('#sel').onmousedown=e=>startD(e);$('#sel').addEventListener('touchstart',e=>startD(e),{passive:false});
-$('#rz-l').onmousedown=e=>startD(e,true,false);$('#rz-l').addEventListener('touchstart',e=>startD(e,true,false),{passive:false});
-$('#rz-r').onmousedown=e=>startD(e,false,true);$('#rz-r').addEventListener('touchstart',e=>startD(e,false,true),{passive:false});
-document.onmousemove=moveD;document.addEventListener('touchmove',moveD,{passive:false});
-document.onmouseup=endD;document.addEventListener('touchend',endD);
+    $('#sel').style.left  = (lw + (selStart / 24) * stripW) + 'px';
+    $('#sel').style.width = ((selDur   / 24) * stripW) + 'px';
 
-$('#ruler').onclick=e=>{
-    const r=$('#ruler').getBoundingClientRect();
-    const lw=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w'))||140;
-    const stripW=r.width-lw;
-    const clickX=e.clientX-r.left-lw;
-    selStart=clamp((clickX/stripW)*24-selDur/2,0,24-selDur);
-    updateSel();checkConflicts();
+    if ($('#sel-display'))
+        $('#sel-display').textContent = `${fmtH(selStart)} – ${fmtH(selStart + selDur)} (${selDur.toFixed(1)}h)`;
+}
+
+/* ── Conflict detection ───────────────────────────────────────────── */
+function checkConflicts() {
+    const s = selStart, e = s + selDur;
+    let cf = [];
+    const dk  = new Date().toISOString().slice(0,10).split('-').reverse().join('-');
+    const ids = new Set([...cities.map(c => c.id), userCity?.id].filter(Boolean));
+
+    for (const id of ids) {
+        const city = [...cities, userCity].find(c => c && c.id === id);
+        if (!city) continue;
+        const pd = cache[`${city.id}-${dk}`];
+        if (!pd) continue;
+
+        ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
+            const u = pd.utc[name];
+            if (u === undefined) return;
+            const m = toMaster(u);
+
+            /*
+             * FIX: Use pw (prayer windows) for conflict detection.
+             * This makes conflict detection consistent with what is visually shown.
+             * The old PRAYER_DUR constants (0.25–0.4 h) were inconsistent with
+             * the visual blocks, causing false "safe" readings near prayer windows.
+             */
+            let endU = pd.pw?.[name];
+            if (endU === undefined) {
+                const fb = {Fajr:0.75, Dhuhr:0.5, Asr:0.75, Maghrib:0.45, Isha:1.0};
+                endU = (u + (fb[name] || 0.5)) % 24;
+            }
+            const endM = toMaster(endU);
+
+            // Handle midnight wrap-around (e.g. Isha ending after midnight)
+            const overlaps = endM < m
+                ? (m < e || endM > s)      // block wraps midnight
+                : (m < e && endM > s);     // normal case
+
+            if (overlaps) cf.push({ city:city.name, prayer:name });
+        });
+    }
+
+    const badge    = $('#status-badge');
+    const iconEl   = $('#status-icon');
+    const statusTx = $('#status-text');
+    if (!badge) return;
+
+    if (!cf.length) {
+        badge.className = 'status-badge safe';
+        iconEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+        statusTx.textContent = t('safe');
+    } else {
+        badge.className = 'status-badge conflict';
+        iconEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+        // Deduplicate and limit display to 3 entries
+        const cfStrs  = [...new Set(cf.map(c => `${PRAYER_NAMES[lang]?.[c.prayer] || c.prayer} (${c.city})`))];
+        const overflow = cfStrs.length > 3 ? ` +${cfStrs.length - 3} more` : '';
+        statusTx.textContent = `${t('conflict')}: ${cfStrs.slice(0,3).join(', ')}${overflow}`;
+    }
+}
+
+/* ── Live clocks ──────────────────────────────────────────────────── */
+function tickClocks() {
+    $$('.city-clock').forEach(el => {
+        const tz = el.dataset.tz;
+        if (tz) el.textContent = new Date().toLocaleTimeString('en-US', {timeZone:tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
+    });
+    updateNow();
+    // Also keep ruler NOW marker in sync
+    const n  = new Date();
+    const uH = n.getUTCHours() + n.getUTCMinutes() / 60 + n.getUTCSeconds() / 3600;
+    const m  = toMaster(uH);
+    const rnow = $('#ruler-now');
+    if (rnow) rnow.style.left = `calc(var(--label-w) + (100% - var(--label-w)) * ${m/24})`;
+}
+
+let _lastDate = '';
+function updateHeaderDate() {
+    const today = new Date().toISOString().slice(0,10);
+    if (today === _lastDate) return;
+    _lastDate = today;
+    const greg = new Date().toLocaleDateString('en-US', {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+    let hijri = '';
+    try { hijri = ' · ' + new Date().toLocaleDateString('en-u-ca-islamic-umalqura', {day:'numeric', month:'long', year:'numeric'}); } catch {}
+    const d = $('#header-date');
+    if (d) d.textContent = greg + hijri;
+}
+
+/* ── Countdown to next prayer ────────────────────────────────────── */
+async function updateCD() {
+    if (!userCity) return;
+    const pd  = await fetchPrayer(userCity);
+    const now = new Date();
+    const ls  = now.toLocaleString('en-US', {timeZone:userCity.tz});
+    const ld  = new Date(ls);
+    const lh  = ld.getHours() + ld.getMinutes() / 60 + ld.getSeconds() / 3600;
+
+    const ps  = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+    let next = null, nt = null;
+    for (const n of ps) { const l = pd.loc[n]; if (l > lh) { next = n; nt = l; break; } }
+    if (!next) { next = 'Fajr'; nt = (pd.loc.Fajr || 5) + 24; }
+
+    const diff = Math.max(0, (nt - lh) * 3600);
+    const h = Math.floor(diff / 3600), m = Math.floor(diff % 3600 / 60), s = Math.floor(diff % 60);
+    const cdTxt = $('#cd-text');
+    if (cdTxt) cdTxt.textContent = `${t('next')} ${next} ${h}h ${m}m ${s}s`;
+}
+
+/* ── Drag & resize ────────────────────────────────────────────────── */
+function tlW() {
+    const lw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140;
+    const i  = $('#tl-inner');
+    return i ? (i.getBoundingClientRect().width - lw) : 960;
+}
+
+function startD(e, isL=false, isR=false) {
+    dragging = true; resL = isL; resR = isR;
+    $('#sel').classList.add('dragging');
+    dragX  = e.touches ? e.touches[0].clientX : e.clientX;
+    dragSL = selStart; dragSD = selDur;
+    document.body.style.cursor = isL || isR ? 'ew-resize' : 'grabbing';
+    e.preventDefault(); e.stopPropagation();
+}
+function moveD(e) {
+    if (!dragging) return;
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const dh = ((cx - dragX) / tlW()) * 24;
+    if (resL) {
+        let ns = dragSL + dh, ne = dragSL + dragSD;
+        if (ns >= ne - 0.5) ns = ne - 0.5;
+        ns = Math.round(ns * 2) / 2;
+        selStart = clamp(ns, 0, 24 - 0.5);
+        selDur   = clamp(ne - selStart, 0.5, 24);
+    } else if (resR) {
+        let ne = dragSL + dragSD + dh;
+        if (ne <= dragSL + 0.5) ne = dragSL + 0.5;
+        ne = Math.round(ne * 2) / 2;
+        selDur = clamp(ne - dragSL, 0.5, 24 - dragSL);
+    } else {
+        selStart = clamp(dragSL + dh, 0, 24 - selDur);
+    }
+    updateSel(); checkConflicts();
+    e.preventDefault();
+}
+function endD() {
+    if (!dragging) return;
+    dragging = resL = resR = false;
+    $('#sel').classList.remove('dragging');
+    document.body.style.cursor = '';
+    selStart = Math.round(selStart * 2) / 2;
+    selDur   = Math.round(selDur   * 2) / 2;
+    selStart = clamp(selStart, 0, 24 - selDur);
+    updateSel(); checkConflicts();
+}
+
+// Bind drag events
+$('#sel').onmousedown  = e => startD(e);
+$('#rz-l').onmousedown = e => startD(e, true, false);
+$('#rz-r').onmousedown = e => startD(e, false, true);
+$('#sel').addEventListener('touchstart',  e => startD(e),          {passive:false});
+$('#rz-l').addEventListener('touchstart', e => startD(e,true,false),{passive:false});
+$('#rz-r').addEventListener('touchstart', e => startD(e,false,true),{passive:false});
+document.onmousemove = moveD;
+document.onmouseup   = endD;
+document.addEventListener('touchmove', moveD, {passive:false});
+document.addEventListener('touchend',  endD);
+
+// Click ruler to jump selection
+$('#ruler').onclick = e => {
+    const r   = $('#ruler').getBoundingClientRect();
+    const lw  = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140;
+    const stripW = r.width - lw;
+    const clickX = e.clientX - r.left - lw;
+    if (clickX < 0) return;
+    selStart = clamp((clickX / stripW) * 24 - selDur / 2, 0, 24 - selDur);
+    updateSel(); checkConflicts();
 };
-$('#tl-scroll').onscroll=()=>{$('#ruler-scroll').scrollLeft=$('#tl-scroll').scrollLeft;};
-$('#ruler-scroll').onscroll=()=>{$('#tl-scroll').scrollLeft=$('#ruler-scroll').scrollLeft;};
 
-/* ── Enrolled ───────────────────────────────────── */
-function compCls(cls){
-    const[h,m]=cls.start.split(':').map(Number),[eh,em]=cls.end.split(':').map(Number);
-    const dur=(eh+em/60)-(h+m/60);const now=new Date();
-    const bn=new Date(now.toLocaleString('en-US',{timeZone:'Europe/London'}));
-    let d=cls.day-bn.getDay();if(d<0)d+=7;
-    const cd=new Date(Date.UTC(bn.getUTCFullYear(),bn.getUTCMonth(),bn.getUTCDate()+d,h,m));
-    return{utcStart:cd.getUTCHours()+cd.getUTCMinutes()/60,utcEnd:cd.getUTCHours()+cd.getUTCMinutes()/60+dur,ts:cd.getTime(),subject:cls.subject,teacher:cls.teacher};
+/*
+ * FIX: Scroll sync used direct assignment which can cause infinite loop
+ * if both handlers fire at once. Guard with a lock flag.
+ */
+let _scrollLock = false;
+$('#tl-scroll').addEventListener('scroll', () => {
+    if (_scrollLock) return;
+    _scrollLock = true;
+    $('#ruler-scroll').scrollLeft = $('#tl-scroll').scrollLeft;
+    _scrollLock = false;
+});
+$('#ruler-scroll').addEventListener('scroll', () => {
+    if (_scrollLock) return;
+    _scrollLock = true;
+    $('#tl-scroll').scrollLeft = $('#ruler-scroll').scrollLeft;
+    _scrollLock = false;
+});
+
+// Keyboard controls: arrow keys move, [ ] resize
+document.addEventListener('keydown', e => {
+    if (['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+    const step = e.shiftKey ? 1 : 0.5;
+    let changed = false;
+    if      (e.key === 'ArrowRight') { selStart = clamp(selStart + step, 0, 24 - selDur); changed = true; }
+    else if (e.key === 'ArrowLeft')  { selStart = clamp(selStart - step, 0, 24 - selDur); changed = true; }
+    else if (e.key === ']')          { selDur = clamp(selDur + step, 0.5, 24 - selStart); changed = true; }
+    else if (e.key === '[')          { selDur = clamp(selDur - step, 0.5, 24 - selStart); changed = true; }
+    if (changed) { e.preventDefault(); updateSel(); checkConflicts(); }
+});
+
+// Window resize: recalculate overlay and NOW line
+window.addEventListener('resize', () => { updateSel(); updateNow(); });
+
+/* ── Enrolled class schedule ─────────────────────────────────────── */
+function compCls(cls) {
+    const [h, m]    = cls.start.split(':').map(Number);
+    const [eh, em]  = cls.end.split(':').map(Number);
+    const dur = (eh + em / 60) - (h + m / 60);
+    const now = new Date();
+    const bn  = new Date(now.toLocaleString('en-US', {timeZone:'Europe/London'}));
+    let d = cls.day - bn.getDay(); // getDay() is correct here (bn is local London date)
+    if (d < 0) d += 7;
+    const cd = new Date(Date.UTC(bn.getUTCFullYear(), bn.getUTCMonth(), bn.getUTCDate() + d, h, m));
+    return { utcStart:cd.getUTCHours() + cd.getUTCMinutes()/60, utcEnd:cd.getUTCHours() + cd.getUTCMinutes()/60 + dur, ts:cd.getTime(), subject:cls.subject, teacher:cls.teacher };
 }
-function updateEnrolled(){enrolled=enrolled.map(c=>{const d=compCls(c);return{...c,utcStart:d.utcStart,utcEnd:d.utcEnd,ts:d.ts};});localStorage.setItem('wp_e',JSON.stringify(enrolled));}
-function renderToggles(){
-    const ct=$('#class-timetable');if(!ct)return;
-    const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const byDay={};CLASSES.forEach((c,i)=>{if(!byDay[c.day])byDay[c.day]=[];byDay[c.day].push({...c,idx:i});});
-    ct.innerHTML='';
-    [0,1,2,3,4,5,6].forEach(d=>{
-        if(!byDay[d])return;
-        const wrap=document.createElement('div');wrap.style.marginBottom='10px';
-        const dayHead=document.createElement('div');dayHead.style.cssText='font-size:0.65rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--border);';
-        dayHead.textContent=days[d];wrap.appendChild(dayHead);
-        byDay[d].forEach(c=>{
-            const ch=enrolled.some(e=>e.subject===c.subject&&e.teacher===c.teacher&&e.day===c.day);
-            const lbl=document.createElement('label');
-            lbl.style.cssText=`display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:0.7rem;transition:background 0.15s;background:${ch?'rgba(45,212,191,0.08)':'transparent'};`;
-            lbl.addEventListener('mouseenter',()=>lbl.style.background='rgba(45,212,191,0.05)');
-            lbl.addEventListener('mouseleave',()=>lbl.style.background=ch?'rgba(45,212,191,0.08)':'transparent');
-            const cb=document.createElement('input');cb.type='checkbox';cb.dataset.i=c.idx;if(ch)cb.checked=true;cb.style.cssText='accent-color:var(--accent);width:14px;height:14px;';
-            const info=document.createElement('span');info.style.flex='1';
-            const subj=document.createElement('span');subj.style.cssText='font-weight:600;color:var(--heading);';subj.textContent=c.subject;
-            const teach=document.createElement('span');teach.style.cssText='color:var(--muted);';teach.textContent=` • ${c.teacher}`;
-            info.appendChild(subj);info.appendChild(teach);
-            const time=document.createElement('span');time.style.cssText="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);";time.textContent=c.start;
-            lbl.appendChild(cb);lbl.appendChild(info);lbl.appendChild(time);
-            cb.onchange=()=>{const i=+cb.dataset.i,cls=CLASSES[i];
-                if(cb.checked){if(!enrolled.find(e=>e.subject===cls.subject&&e.teacher===cls.teacher&&e.day===cls.day))enrolled.push(cls);}
-                else enrolled=enrolled.filter(e=>!(e.subject===cls.subject&&e.teacher===cls.teacher&&e.day===cls.day));
-                updateEnrolled();renderToggles();renderAll();};
+function updateEnrolled() {
+    enrolled = enrolled.map(c => { const d = compCls(c); return {...c, ...d}; });
+    localStorage.setItem('wp_e', JSON.stringify(enrolled));
+}
+function renderToggles() {
+    const ct = $('#class-timetable');
+    if (!ct) return;
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const byDay = {};
+    CLASSES.forEach((c, i) => { if (!byDay[c.day]) byDay[c.day] = []; byDay[c.day].push({...c, idx:i}); });
+    ct.innerHTML = '';
+    [0,1,2,3,4,5,6].forEach(d => {
+        if (!byDay[d]) return;
+        const wrap = document.createElement('div'); wrap.style.marginBottom = '10px';
+        const dh = document.createElement('div');
+        dh.style.cssText = 'font-size:0.65rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--border);';
+        dh.textContent = days[d]; wrap.appendChild(dh);
+        byDay[d].forEach(c => {
+            const ch  = enrolled.some(e => e.subject===c.subject&&e.teacher===c.teacher&&e.day===c.day);
+            const lbl = document.createElement('label');
+            lbl.style.cssText = `display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:0.7rem;transition:background 0.15s;background:${ch?'rgba(45,212,191,0.08)':'transparent'};`;
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.dataset.i = c.idx; if (ch) cb.checked = true; cb.style.cssText = 'accent-color:var(--accent);width:14px;height:14px;';
+            const info = document.createElement('span'); info.style.flex = '1';
+            const subj = document.createElement('span'); subj.style.cssText = 'font-weight:600;color:var(--heading);'; subj.textContent = c.subject;
+            const teach = document.createElement('span'); teach.style.cssText = 'color:var(--muted);'; teach.textContent = ` • ${c.teacher}`;
+            info.appendChild(subj); info.appendChild(teach);
+            const time = document.createElement('span'); time.style.cssText = "font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);"; time.textContent = c.start;
+            lbl.appendChild(cb); lbl.appendChild(info); lbl.appendChild(time);
+            cb.onchange = () => {
+                const cls = CLASSES[parseInt(cb.dataset.i)];
+                if (cb.checked) { if (!enrolled.find(e => e.subject===cls.subject&&e.teacher===cls.teacher&&e.day===cls.day)) enrolled.push(cls); }
+                else enrolled = enrolled.filter(e => !(e.subject===cls.subject&&e.teacher===cls.teacher&&e.day===cls.day));
+                updateEnrolled(); renderToggles(); renderAll();
+            };
             wrap.appendChild(lbl);
         });
         ct.appendChild(wrap);
     });
     updateClsCountdown();
 }
-function updateClsCountdown(){
-    const now=Date.now(),up=enrolled.map(compCls).filter(e=>e.ts>now).sort((a,b)=>a.ts-b.ts);
-    const el=$('#next-cls');if(!el)return;
-    if(up.length){const n=up[0],d=n.ts-now;el.textContent=`${t('nextClass')} ${n.subject} in ${Math.floor(d/36e5)}h ${Math.floor(d%36e5/6e4)}m`;}
-    else el.textContent=t('noClass');
+function updateClsCountdown() {
+    const now = Date.now();
+    const up  = enrolled.map(compCls).filter(e => e.ts > now).sort((a,b) => a.ts - b.ts);
+    const el  = $('#next-cls');
+    if (!el) return;
+    if (up.length) {
+        const n = up[0], d = n.ts - now;
+        el.textContent = `${t('nextClass')} ${n.subject} in ${Math.floor(d/36e5)}h ${Math.floor(d%36e5/6e4)}m`;
+    } else {
+        el.textContent = t('noClass');
+    }
 }
-setInterval(updateClsCountdown,1000);
+setInterval(updateClsCountdown, 1000);
 
-/* ── Alarm ──────────────────────────────────────── */
-function playAlarm(){
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const s={
-        ting:[880,.08,0,.02,1100,.12],
-        chime:[523,.1,0,.03,659,.1,0,.03,784,.15],
-        bell:[440,.06,0,.02,554,.08,0,.02,659,.12]
+/* ── Alarm sound ─────────────────────────────────────────────────── */
+function playAlarm() {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const s = {
+        ting:  [880,.08,0,.02,1100,.12],
+        chime: [523,.1,0,.03,659,.1,0,.03,784,.15],
+        bell:  [440,.06,0,.02,554,.08,0,.02,659,.12],
     };
-    const p=s[alarm]||s.ting;let t=ctx.currentTime;
-    for(let i=0;i<p.length;i+=2){
-        if(p[i]===0){t+=p[i+1];continue;}
-        const o=ctx.createOscillator();o.type='sine';o.frequency.setValueAtTime(p[i],t);
-        o.connect(ctx.destination);o.start(t);o.stop(t+p[i+1]);t+=p[i+1]+.02;
+    const p = s[alarm] || s.ting;
+    let t = ctx.currentTime;
+    for (let i = 0; i < p.length; i += 2) {
+        if (p[i] === 0) { t += p[i+1]; continue; }
+        const o = ctx.createOscillator(); o.type = 'sine';
+        o.frequency.setValueAtTime(p[i], t); o.connect(ctx.destination);
+        o.start(t); o.stop(t + p[i+1]); t += p[i+1] + 0.02;
     }
 }
-setInterval(()=>{const now=Date.now();enrolled.forEach(c=>{const{ts}=compCls(c);if(Math.abs(now-ts)<3e4&&!c.alarmFired){c.alarmFired=true;playAlarm();setTimeout(()=>c.alarmFired=false,12e4);}});},15000);
-$('#alarm-sel').onchange=function(){alarm=this.value;localStorage.setItem('wp_a',alarm);};
-$('#alarm-sel').value=alarm;
-$('#test-chime').onclick=()=>playAlarm();
+setInterval(() => {
+    const now = Date.now();
+    enrolled.forEach(c => {
+        const {ts} = compCls(c);
+        if (Math.abs(now - ts) < 3e4 && !c.alarmFired) {
+            c.alarmFired = true; playAlarm();
+            setTimeout(() => { c.alarmFired = false; }, 12e4);
+        }
+    });
+}, 15000);
 
-/* ── Modals ─────────────────────────────────────── */
-function openM(id){$(id).classList.add('open');}
-function closeM(id){$(id).classList.remove('open');}
-$$('[data-close]').forEach(b=>b.onclick=()=>closeM('#'+b.dataset.close));
-// Privacy banner
-(function(){
-    if(localStorage.getItem('wp_privacy_ok'))return;
-    const banner=$('#privacy-banner');
-    $('#privacy-ok').onclick=()=>{localStorage.setItem('wp_privacy_ok','1');banner.classList.add('hidden');};
-    $('#privacy-link').onclick=e=>{e.preventDefault();openM('#m-privacy');};
+/* ── Modal helpers ───────────────────────────────────────────────── */
+function openM(id)  { $(id).classList.add('open');    }
+function closeM(id) { $(id).classList.remove('open'); }
+$$('[data-close]').forEach(b => b.onclick = () => closeM('#' + b.dataset.close));
+$$('.modal-bg').forEach(m => m.onclick = e => { if (e.target === m) closeM('#' + m.id); });
+
+/* ── Privacy banner ──────────────────────────────────────────────── */
+(function() {
+    if (localStorage.getItem('wp_privacy_ok')) return;
+    const banner = $('#privacy-banner');
+    if (!banner) return;
+    $('#privacy-ok').onclick  = () => { localStorage.setItem('wp_privacy_ok','1'); banner.classList.add('hidden'); };
+    $('#privacy-link').onclick = e => { e.preventDefault(); openM('#m-privacy'); };
 })();
-$$('.modal-bg').forEach(m=>m.onclick=e=>{if(e.target===m)closeM('#'+m.id);});
+if (localStorage.getItem('wp_privacy_ok')) { const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); }
 
-/* ── Settings ───────────────────────────────────── */
-$('#btn-settings').onclick=()=>openM('#m-settings');
-$('#btn-help').onclick=()=>openM('#m-help');
-$('#btn-howto').onclick=()=>{closeM('#m-settings');openM('#m-help');};
-$('#theme-btn').onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');localStorage.setItem('wp_t',dark?'dark':'light');$('#theme-btn').textContent=dark?'Dark':'Light';};
-$('#theme-btn').textContent=dark?'Dark':'Light';
-$('#fmt-btn').onclick=()=>{h24=!h24;localStorage.setItem('wp_24',h24?'1':'0');$('#fmt-btn').textContent=h24?'12h':'24h';renderRuler();updateSel();renderAll();};
-$('#fmt-btn').textContent=h24?'12h':'24h';
-$('#lang-sel').onchange=function(){lang=this.value;localStorage.setItem('wp_l',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';checkConflicts();updateClsCountdown();updateLegend();};
-$('#lang-sel').value=lang;
+/* ── Settings ────────────────────────────────────────────────────── */
+$('#btn-settings').onclick = () => openM('#m-settings');
+$('#btn-help').onclick     = () => openM('#m-help');
+$('#btn-howto').onclick    = () => { closeM('#m-settings'); openM('#m-help'); };
+$('#btn-now').onclick      = () => scrollToNow();
 
-/* ── Share ──────────────────────────────────────── */
-function genShareLink(){
-    const ids=cities.map(c=>c.id.toLowerCase().replace(/[^a-z0-9]/g,'')).join(',');
-    const p=new URLSearchParams({cities:ids,start:selStart.toFixed(2),dur:selDur.toFixed(2)});
-    if(lang==='ar')p.set('lang','ar');
-    return`${window.location.origin}${window.location.pathname}?${p.toString()}`;
+$('#theme-btn').onclick = () => {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    localStorage.setItem('wp_t', dark ? 'dark' : 'light');
+    $('#theme-btn').textContent = dark ? 'Dark' : 'Light';
+    drawBG();
+};
+$('#theme-btn').textContent = dark ? 'Dark' : 'Light';
+
+$('#fmt-btn').onclick = () => {
+    h24 = !h24;
+    localStorage.setItem('wp_24', h24 ? '1' : '0');
+    $('#fmt-btn').textContent = h24 ? '12h' : '24h';
+    renderRuler(); updateSel(); renderAll();
+};
+$('#fmt-btn').textContent = h24 ? '12h' : '24h';
+
+$('#lang-sel').onchange = function() {
+    lang = this.value; localStorage.setItem('wp_l', lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+    checkConflicts(); updateClsCountdown(); updateLegend();
+};
+
+// Quick language toggle button in header
+$('#btn-lang').onclick = () => {
+    lang = lang === 'en' ? 'ar' : 'en';
+    localStorage.setItem('wp_l', lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+    $('#lang-sel').value = lang;
+    $('#lang-icon').textContent = lang === 'en' ? 'EN' : 'AR';
+    checkConflicts(); updateClsCountdown(); updateLegend();
+};
+$('#lang-icon').textContent = lang === 'en' ? 'EN' : 'AR';
+
+$('#alarm-sel').onchange = function() { alarm = this.value; localStorage.setItem('wp_a', alarm); };
+$('#test-chime').onclick  = () => playAlarm();
+
+/* ── Share & iCal ────────────────────────────────────────────────── */
+function genShareLink() {
+    const ids = cities.map(c => c.id.toLowerCase().replace(/[^a-z0-9]/g,'')).join(',');
+    const p   = new URLSearchParams({cities:ids, start:selStart.toFixed(2), dur:selDur.toFixed(2)});
+    if (lang === 'ar') p.set('lang','ar');
+    return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
 }
-$('#btn-share').onclick=async()=>{try{await navigator.clipboard.writeText(genShareLink());toast('Link copied!');}catch(e){window.prompt('Share link:',genShareLink());}};
-$('#btn-ical').onclick=()=>exportICal();
-function normCity(s){return s.toLowerCase().replace(/[^a-z0-9]/g,'');}
-function loadFromURL(){
-    const p=new URLSearchParams(window.location.search);
-    if(p.has('cities')){
-        const raw=p.get('cities').split(',').map(s=>normCity(s.trim()));
-        const matched=raw.flatMap(id=>POOL.filter(c=>normCity(c.id)===id||normCity(c.name)===id));
-        if(matched.length>0)cities=[...new Map(matched.map(c=>[c.id,c])).values()].map(c=>({...c}));
+$('#btn-share').onclick = async () => {
+    try { await navigator.clipboard.writeText(genShareLink()); toast('Link copied! 🔗'); }
+    catch { window.prompt('Share link:', genShareLink()); }
+};
+$('#btn-ical').onclick = () => exportICal();
+function fmtICal(d) { return d.toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z'; }
+function exportICal() {
+    const now   = new Date();
+    const start = new Date(now); start.setHours(Math.floor(selStart), Math.round((selStart%1)*60), 0);
+    const end   = new Date(now); end.setHours(Math.floor(selStart+selDur), Math.round(((selStart+selDur)%1)*60), 0);
+    const ics = [
+        'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Prayer Times//EN','CALSCALE:GREGORIAN',
+        'BEGIN:VEVENT','SUMMARY:Safe Meeting Window (No Salah Conflict)',
+        `DTSTART:${fmtICal(start)}`,`DTEND:${fmtICal(end)}`,
+        `DESCRIPTION:Coordinated safe time across: ${cities.map(c=>c.name).join(', ')}`,
+        `UID:${Date.now()}@prayer.mscarabia.com`,
+        'END:VEVENT','END:VCALENDAR',
+    ].join('\r\n');
+    const blob = new Blob([ics], {type:'text/calendar'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a'); a.href = url; a.download = `prayer-safe-${now.toISOString().slice(0,10)}.ics`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function normCity(s) { return s.toLowerCase().replace(/[^a-z0-9]/g,''); }
+function loadFromURL() {
+    const p = new URLSearchParams(window.location.search);
+    if (p.has('cities')) {
+        const raw     = p.get('cities').split(',').map(s => normCity(s.trim()));
+        const matched = raw.flatMap(id => POOL.filter(c => normCity(c.id)===id || normCity(c.name)===id));
+        if (matched.length > 0) cities = [...new Map(matched.map(c=>[c.id,c])).values()].map(c=>({...c}));
     }
-    if(p.has('start'))selStart=parseFloat(p.get('start'))||9;
-    if(p.has('dur'))selDur=parseFloat(p.get('dur'))||1;
-    if(p.has('lang')){lang=p.get('lang')==='ar'?'ar':'en';localStorage.setItem('wp_l',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';$('#lang-sel').value=lang;}
+    if (p.has('start')) selStart = parseFloat(p.get('start')) || 9;
+    if (p.has('dur'))   selDur   = parseFloat(p.get('dur'))   || 1;
+    if (p.has('lang'))  { lang = p.get('lang')==='ar'?'ar':'en'; localStorage.setItem('wp_l',lang); document.documentElement.lang=lang; document.documentElement.dir=lang==='ar'?'rtl':'ltr'; if($('#lang-sel'))$('#lang-sel').value=lang; }
 }
 
-/* ── iCal Export ─────────────────────────────────── */
-function fmtICal(d){return d.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';}
-function exportICal(){
-    const now=new Date();
-    const start=new Date(now);start.setHours(Math.floor(selStart),Math.round((selStart%1)*60),0);
-    const end=new Date(now);end.setHours(Math.floor(selStart+selDur),Math.round(((selStart+selDur)%1)*60),0);
-    const cityNames=cities.map(c=>c.name).join(', ');
-    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Prayer Times//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT','SUMMARY:Safe Meeting Window (No Salah Conflict)',`DTSTART:${fmtICal(start)}`,`DTEND:${fmtICal(end)}`,`DESCRIPTION:Coordinated safe time across: ${cityNames}`,`UID:${Date.now()}@prayer.mscarabia.com`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
-    const blob=new Blob([ics],{type:'text/calendar'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download=`prayer-safe-${now.toISOString().slice(0,10)}.ics`;
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-}
-
-/* ── Course panel + password gate ──────────────── */
-// Password is hashed at runtime — never stored in plain text after check
-const COURSE_PW_HASH='d4f8c3b2a1e5f9d7c6b4a3e2f1d0c9b8a7e6f5d4c3b2a1e0f9d8c7b6a5e4f3';
-function hashStr(s){// Simple deterministic hash for client-side gating (not cryptographic)
-    let h=0;for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;}return(h>>>0).toString(16).padStart(8,'0');}
-const COURSE_PW_CHECK=hashStr('thequrangroup');
-function isCourseUnlocked(){return sessionStorage.getItem('wp_course')==='1';}
-function unlockCourse(){
+/* ── Course panel + password gate ────────────────────────────────── */
+function hashStr(s) { let h=0; for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;} return (h>>>0).toString(16).padStart(8,'0'); }
+const COURSE_PW_CHECK = hashStr('thequrangroup');
+function isCourseUnlocked() { return sessionStorage.getItem('wp_course') === '1'; }
+function unlockCourse() {
     sessionStorage.setItem('wp_course','1');
-    $('#course-locked-view').style.display='none';
+    $('#course-locked-view').style.display = 'none';
     $('#course-unlocked-view').classList.add('unlocked');
 }
-function lockCourse(){
+function lockCourse() {
     sessionStorage.removeItem('wp_course');
-    $('#course-locked-view').style.display='';
+    $('#course-locked-view').style.display = '';
     $('#course-unlocked-view').classList.remove('unlocked');
-    $('#course-pw-input').value='';
-    $('#course-pw-hint').textContent='';
+    $('#course-pw-input').value = '';
+    if ($('#course-pw-hint')) $('#course-pw-hint').textContent = '';
 }
-$('#btn-course').onclick=()=>{
-    if(isCourseUnlocked())unlockCourse();
-    else lockCourse();
-    $('#course-panel').classList.add('open');$('#panel-bg').classList.add('open');
-};
-$('#close-panel').onclick=$('#panel-bg').onclick=()=>{
-    $('#course-panel').classList.remove('open');$('#panel-bg').classList.remove('open');
-};
-function attemptUnlock(){
-    const val=$('#course-pw-input').value.trim();
-    if(hashStr(val)===COURSE_PW_CHECK){
-        unlockCourse();$('#course-pw-hint').textContent='';
+function attemptUnlock() {
+    const val = $('#course-pw-input').value.trim();
+    if (hashStr(val) === COURSE_PW_CHECK) {
+        unlockCourse(); $('#course-pw-hint').textContent = '';
     } else {
         $('#course-pw-input').classList.add('error');
-        $('#course-pw-hint').textContent='Incorrect password. Ask your teacher.';
-        setTimeout(()=>$('#course-pw-input').classList.remove('error'),400);
+        $('#course-pw-hint').textContent = 'Incorrect password. Ask your teacher.';
+        setTimeout(() => $('#course-pw-input').classList.remove('error'), 400);
     }
 }
-$('#course-pw-btn').onclick=attemptUnlock;
-$('#course-pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')attemptUnlock();});
-$('#course-lock-btn').onclick=lockCourse;
-// Restore unlocked state within the same browser session
-if(isCourseUnlocked())unlockCourse();
-$('#enroll-toggle').onchange=function(){$('#enroll-content').classList.toggle('hidden',!this.checked);if(this.checked)renderToggles();};
-
-/* ── Add city ───────────────────────────────────── */
-$('#add-row').onclick=()=>{openM('#m-addcity');renderPopular();$('#city-search').value='';$('#search-results').innerHTML='';};
-function renderPopular(){
-    const ex=new Set([...cities.map(c=>c.id),'user']);
-    $('#popular-chips').innerHTML=POOL.filter(c=>!ex.has(c.id)).slice(0,8).map(c=>`<span class="chip" data-id="${c.id}">+ ${c.name}</span>`).join('');
-    $$('#popular-chips .chip').forEach(ch=>ch.onclick=()=>{const city=POOL.find(c=>c.id===ch.dataset.id);if(city)addCity(city);});
-}
-function saveCities(){localStorage.setItem(STORAGE_CITIES,JSON.stringify(cities.map(c=>c.id)));}
-function loadSavedCities(){
-    const s=localStorage.getItem(STORAGE_CITIES);
-    if(s){const ids=JSON.parse(s);cities=ids.map(id=>POOL.find(c=>c.id===id)||CITIES.find(c=>c.id===id)).filter(Boolean);if(!cities.length)cities=[...CITIES];}
-    else cities=[...CITIES];
-    // Also restore any custom geocoded cities
-    const custom=localStorage.getItem('wp_custom_cities');
-    if(custom){try{const cc=JSON.parse(custom);cc.forEach(c=>{if(!POOL.find(p=>p.id===c.id)&&cities.find(ci=>ci.id===c.id))POOL.push(c);});}catch{}}
-}
-function addCity(city){
-    if(cities.find(c=>c.id===city.id))return;
-    cities.push({...city});
-    // Persist custom geocoded cities to pool
-    if(!POOL.find(p=>p.id===city.id)){POOL.push({...city});const custom=JSON.parse(localStorage.getItem('wp_custom_cities')||'[]');custom.push(city);localStorage.setItem('wp_custom_cities',JSON.stringify(custom));}
-    saveCities();cache={};renderAll();closeM('#m-addcity');
-}
-function calculateQibla(lat,lng){const mLat=21.4225,mLng=39.8262,dLng=mLng-lng;return(Math.atan2(Math.sin(dLng*Math.PI/180)*Math.cos(mLat*Math.PI/180),Math.cos(lat*Math.PI/180)*Math.sin(mLat*Math.PI/180)-Math.sin(lat*Math.PI/180)*Math.cos(mLat*Math.PI/180)*Math.cos(dLng*Math.PI/180))*180/Math.PI+360)%360;}
-
-let geoSearchTimer=null;
-$('#city-search').oninput=()=>{
-    const q=$('#city-search').value.trim();
-    const sr=$('#search-results');
-    clearTimeout(geoSearchTimer);
-    // First show instant local matches
-    const ex=new Set([...cities.map(c=>c.id),'user']);
-    const local=POOL.filter(c=>!ex.has(c.id)&&c.name.toLowerCase().includes(q.toLowerCase()));
-    if(q.length<2){sr.innerHTML='';return;}
-    if(local.length){renderSearchItems(local,sr);}
-    else{sr.innerHTML='<div class="search-spinner">Searching...</div>';}
-    // Then fetch from Nominatim after 400ms debounce
-    geoSearchTimer=setTimeout(async()=>{
-        try{
-            const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
-            const r=await fetch(url,{headers:{'Accept-Language':'en'}});
-            const data=await r.json();
-            const results=[];
-            const seen=new Set(local.map(c=>c.id));
-            data.forEach(d=>{
-                const name=sanitizeName(d.address?.city||d.address?.town||d.address?.village||d.name||'').trim();
-                const country=d.address?.country||'';
-                if(!name)return;
-                const id='geo_'+name.toLowerCase().replace(/[^a-z0-9]/g,'_')+'_'+Math.round(parseFloat(d.lat))+'_'+Math.round(parseFloat(d.lon));
-                if(seen.has(id)||ex.has(id))return;
-                seen.add(id);
-                results.push({id,name,country,lat:parseFloat(d.lat),lng:parseFloat(d.lon),tz:Intl.DateTimeFormat().resolvedOptions().timeZone,method:3,geo:true});
-            });
-            renderSearchItems([...local,...results],sr,true);
-        }catch{if(!local.length)sr.innerHTML='<div class="search-spinner">No results found</div>';}
-    },400);
+$('#btn-course').onclick = () => {
+    if (isCourseUnlocked()) unlockCourse(); else lockCourse();
+    $('#course-panel').classList.add('open'); $('#panel-bg').classList.add('open');
 };
-function renderSearchItems(items,sr,showCountry=false){
-    if(!items.length){sr.innerHTML='<div class="search-spinner">No results</div>';return;}
-    sr.innerHTML=items.map(c=>`<div class="search-item" data-id="${c.id}">
-        <span>${c.name}${c.country&&showCountry?`<span class="city-country"> — ${c.country}</span>`:''}</span>
-        <span class="plus">+</span>
-    </div>`).join('');
-    $$('#search-results .search-item').forEach(el=>el.onclick=()=>{
-        // Check pool first, else build from geocode result
-        let city=POOL.find(c=>c.id===el.dataset.id)||items.find(c=>c.id===el.dataset.id);
-        if(city)addCity(city);
+$('#close-panel').onclick = $('#panel-bg').onclick = () => {
+    $('#course-panel').classList.remove('open'); $('#panel-bg').classList.remove('open');
+};
+$('#course-pw-btn').onclick = attemptUnlock;
+$('#course-pw-input').addEventListener('keydown', e => { if (e.key==='Enter') attemptUnlock(); });
+$('#course-lock-btn').onclick = lockCourse;
+if (isCourseUnlocked()) unlockCourse();
+$('#enroll-toggle').onchange = function() {
+    $('#enroll-content').classList.toggle('hidden', !this.checked);
+    if (this.checked) renderToggles();
+};
+
+/* ── Add city ────────────────────────────────────────────────────── */
+$('#add-row').onclick = () => { openM('#m-addcity'); renderPopular(); $('#city-search').value=''; $('#search-results').innerHTML=''; };
+
+function renderPopular() {
+    const ex = new Set([...cities.map(c=>c.id), 'user']);
+    const chips = POOL.filter(c => !ex.has(c.id)).slice(0,8);
+    $('#popular-chips').innerHTML = '';
+    chips.forEach(c => {
+        const sp = document.createElement('span'); sp.className = 'chip'; sp.dataset.id = c.id;
+        sp.textContent = '+ ' + c.name;
+        sp.onclick = () => addCity(c);
+        $('#popular-chips').appendChild(sp);
     });
 }
-$('#rows').onclick=e=>{const b=e.target.closest('.remove-btn');if(b&&cities.length>1){cities=cities.filter(c=>c.id!==b.dataset.id);saveCities();cache={};renderAll();}};
 
-/* ── User location ──────────────────────────────── */
-async function detectUser(){
-    const sv=localStorage.getItem('wp_u');
-    if(sv){userCity=JSON.parse(sv);mOffset=getOff(userCity.tz);return;}
-    try{
-        const pos=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(r,j,{timeout:4000}));
-        const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
-        userCity={id:'user',name:'You',tz,lat:pos.coords.latitude,lng:pos.coords.longitude,method:3,isUser:true};
-    }catch{
-        const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
-        userCity={id:'user',name:'You',tz,lat:51.51,lng:-0.13,method:3,isUser:true};
+function saveCities() { localStorage.setItem(STORAGE_CITIES, JSON.stringify(cities.map(c=>c.id))); }
+function loadSavedCities() {
+    const s = localStorage.getItem(STORAGE_CITIES);
+    if (s) {
+        const ids = JSON.parse(s);
+        cities = ids.map(id => POOL.find(c=>c.id===id) || CITIES.find(c=>c.id===id)).filter(Boolean);
+        if (!cities.length) cities = [...CITIES];
+    } else {
+        cities = [...CITIES];
     }
-    mOffset=getOff(userCity.tz);localStorage.setItem('wp_u',JSON.stringify({id:userCity.id,name:userCity.name,tz:userCity.tz,lat:Math.round(userCity.lat*10)/10,lng:Math.round(userCity.lng*10)/10,method:userCity.method,isUser:userCity.isUser}));
+    // Restore persisted custom (geocoded) cities
+    const custom = localStorage.getItem('wp_custom_cities');
+    if (custom) {
+        try {
+            const cc = JSON.parse(custom);
+            cc.forEach(c => {
+                if (!POOL.find(p=>p.id===c.id)) POOL.push(c);
+            });
+        } catch {}
+    }
 }
 
-/* ── Live clocks ────────────────────────────────── */
-function tickClocks(){
-    $$('.city-clock').forEach(el=>{const tz=el.dataset.tz;if(tz)el.textContent=new Date().toLocaleTimeString('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!h24});});
-    updateNow();
-    updateHeaderDate();
-}
-let _lastDateStr='';
-function updateHeaderDate(){const today=new Date().toISOString().slice(0,10);if(today===_lastDateStr)return;_lastDateStr=today;const greg=new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});let hijri='';try{hijri=' · '+new Date().toLocaleDateString('en-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'});}catch{};const d=$('#header-date');if(d)d.textContent=greg+hijri;}
-async function updateCD(){
-    if(!userCity)return;const pd=await fetchPrayer(userCity);const now=new Date();
-    const ls=now.toLocaleString('en-US',{timeZone:userCity.tz});const ld=new Date(ls);
-    const lh=ld.getHours()+ld.getMinutes()/60+ld.getSeconds()/3600;
-    const ps=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];let next=null,nt=null;
-    for(let n of ps){const l=pd.loc[n];if(l>lh){next=n;nt=l;break;}}
-    if(!next){next='Fajr';nt=(pd.loc.Fajr||5)+24;}
-    const diff=Math.max(0,(nt-lh)*3600);const h=Math.floor(diff/3600),m=Math.floor(diff%3600/60),s=Math.floor(diff%60);
-    const el=$('#cd-text');if(el)el.textContent=`${t('next')} ${next} ${h}h ${m}m ${s}s`;
+function addCity(city) {
+    if (cities.find(c=>c.id===city.id)) return;
+    cities.push({...city});
+    if (!POOL.find(p=>p.id===city.id)) {
+        POOL.push({...city});
+        const custom = JSON.parse(localStorage.getItem('wp_custom_cities') || '[]');
+        custom.push(city);
+        localStorage.setItem('wp_custom_cities', JSON.stringify(custom));
+    }
+    saveCities(); cache = {}; renderAll(); closeM('#m-addcity');
 }
 
-/* ── Islamic background ─────────────────────────── */
-function drawBG(){
-    const cv=$('#bg-canvas'),ctx=cv.getContext('2d');
-    cv.width=window.innerWidth;cv.height=window.innerHeight;
-    ctx.clearRect(0,0,cv.width,cv.height);
-    const isDark=document.documentElement.getAttribute('data-theme')==='dark';
-    // Teal/cyan color for Islamic pattern
-    const baseColor=isDark?'rgba(45,212,191,0.12)':'rgba(13,148,136,0.08)';
-    ctx.strokeStyle=baseColor;ctx.lineWidth=0.4;
-    // Islamic geometric pattern - interlocking octagonal stars
-    const s=80;const r=s*0.35;
-    for(let x=0;x<cv.width+s;x+=s){
-        for(let y=0;y<cv.height+s;y+=s){
-            // Outer octagon
-            ctx.beginPath();
-            for(let i=0;i<8;i++){
-                const a=(Math.PI*2*i/8)-Math.PI/8;
-                const px=x+Math.cos(a)*r,py=y+Math.sin(a)*r;
-                if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
-            }
-            ctx.closePath();ctx.stroke();
-            // Inner star
-            ctx.beginPath();
-            for(let i=0;i<8;i++){
-                const a=(Math.PI*2*i/8)-Math.PI/8;
-                const ri=r*0.5;
-                ctx.lineTo(x+Math.cos(a)*ri,y+Math.sin(a)*ri);
-                const a2=a+Math.PI/8;
-                ctx.lineTo(x+Math.cos(a2)*r*0.8,y+Math.sin(a2)*r*0.8);
-            }
-            ctx.closePath();ctx.stroke();
+// Geocoding search (Nominatim) with 400ms debounce
+let _geoTimer = null;
+$('#city-search').oninput = () => {
+    const q  = $('#city-search').value.trim();
+    const sr = $('#search-results');
+    clearTimeout(_geoTimer);
+    const ex = new Set([...cities.map(c=>c.id), 'user']);
+    const local = POOL.filter(c => !ex.has(c.id) && c.name.toLowerCase().includes(q.toLowerCase()));
+    if (q.length < 2) { sr.innerHTML = ''; return; }
+    if (local.length) renderSearchItems(local, sr); else sr.innerHTML = '<div class="search-spinner">Searching…</div>';
+    _geoTimer = setTimeout(async () => {
+        try {
+            const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
+            const data = await (await fetch(url, {headers:{'Accept-Language':'en'}})).json();
+            const results = [], seen = new Set(local.map(c=>c.id));
+            data.forEach(d => {
+                const name    = sanitizeName(d.address?.city || d.address?.town || d.address?.village || d.name || '').trim();
+                const country = d.address?.country || '';
+                if (!name) return;
+                const id = 'geo_' + name.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_' + Math.round(parseFloat(d.lat)) + '_' + Math.round(parseFloat(d.lon));
+                if (seen.has(id) || ex.has(id)) return;
+                seen.add(id);
+                /*
+                 * FIX: Geocoded cities had tz set to the user's current local timezone.
+                 * Set tz to a best-guess from the city's UTC offset (computed later from
+                 * the Aladhan API response in renderRow). For now, use 'UTC' as placeholder;
+                 * renderRow will update city.tz with the correct tz from pd.tz.
+                 */
+                results.push({ id, name, country, lat:parseFloat(d.lat), lng:parseFloat(d.lon), tz:'UTC', method:3, geo:true });
+            });
+            renderSearchItems([...local, ...results], sr, true);
+        } catch {
+            if (!local.length) sr.innerHTML = '<div class="search-spinner">No results</div>';
         }
-    }
-}
-drawBG();
-
-/* ── Init ───────────────────────────────────────── */
-dark=(localStorage.getItem('wp_t')||'dark')==='dark';
-document.documentElement.setAttribute('data-theme',dark?'dark':'light');
-h24=localStorage.getItem('wp_24')==='1';
-lang=localStorage.getItem('wp_l')||'en';
-document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
-$('#lang-sel').value=lang;
-loadFromURL();
-loadSavedCities();
-
-// Notifications
-let notifEnabled=localStorage.getItem('wp_notif')==='1';
-$('#btn-notify').onclick=async()=>{
-    if(!('Notification' in window)){alert('Notifications not supported');return;}
-    if(notifEnabled){notifEnabled=false;localStorage.setItem('wp_notif','0');$('#btn-notify').style.color='';return;}
-    const p=await Notification.requestPermission();
-    if(p==='granted'){notifEnabled=true;localStorage.setItem('wp_notif','1');$('#btn-notify').style.color='var(--accent)';schedulePrayerNotifs();}else{alert('Enable notifications to get prayer alerts');}
+    }, 400);
 };
-if(notifEnabled&&'Notification' in window&&Notification.permission==='granted')$('#btn-notify').style.color='var(--accent)';
 
-// Quick language toggle
-$('#btn-lang').onclick=()=>{lang=lang==='en'?'ar':'en';localStorage.setItem('wp_l',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';$('#lang-sel').value=lang;$('#lang-icon').textContent=lang==='en'?'EN':'AR';checkConflicts();updateClsCountdown();updateLegend();};
-$('#lang-icon').textContent=lang==='en'?'EN':'AR';
+function renderSearchItems(items, sr, showCountry=false) {
+    if (!items.length) { sr.innerHTML = '<div class="search-spinner">No results</div>'; return; }
+    sr.innerHTML = '';
+    items.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'search-item';
+        const nameEl = document.createElement('span');
+        nameEl.textContent = c.name;
+        if (c.country && showCountry) {
+            const cc = document.createElement('span'); cc.className = 'city-country';
+            cc.textContent = ' — ' + c.country; nameEl.appendChild(cc);
+        }
+        const plus = document.createElement('span'); plus.className = 'plus'; plus.textContent = '+';
+        div.appendChild(nameEl); div.appendChild(plus);
+        div.onclick = () => { const city = POOL.find(p=>p.id===c.id) || c; addCity(city); };
+        sr.appendChild(div);
+    });
+}
 
-function schedulePrayerNotifs(){
-    if(!userCity||!notifEnabled)return;
-    fetchPrayer(userCity).then(pd=>{
-        const now=new Date();const tz=userCity.tz;
-        const localNow=new Date(now.toLocaleString('en-US',{timeZone:tz}));
-        const lh=localNow.getHours()+localNow.getMinutes()/60;
-        ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name=>{
-            const pt=pd.loc[name];if(!pt||pt<lh)return;
-            const ms=(pt-lh)*3600000-300000;// 5 min before
-            if(ms>0)setTimeout(()=>{if(notifEnabled)new Notification(`${PRAYER_NAMES[lang]?.[name]||name} Prayer`,{body:`Time for ${name} prayer`,icon:'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' rx=\'20\' fill=\'%23091117\'/%3E%3Ccircle cx=\'50\' cy=\'35\' r=\'12\' fill=\'none\' stroke=\'%232dd4bf\' stroke-width=\'3\'/%3E%3Cpath d=\'M50 47 v-28\' stroke=\'%232dd4bf\' stroke-width=\'3\'/%3E%3C/svg%3E'});},ms);
+// Remove city via row button
+$('#rows').onclick = e => {
+    const b = e.target.closest('.remove-btn');
+    if (b && cities.length > 1) {
+        cities = cities.filter(c => c.id !== b.dataset.id);
+        saveCities(); cache = {}; renderAll();
+    }
+};
+
+/* ── User location detection ─────────────────────────────────────── */
+async function detectUser() {
+    const sv = localStorage.getItem('wp_u');
+    if (sv) { try { userCity = JSON.parse(sv); mOffset = getOff(userCity.tz); return; } catch {} }
+    try {
+        const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, {timeout:4000}));
+        const tz  = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        userCity  = { id:'user', name:'You', tz, lat:pos.coords.latitude, lng:pos.coords.longitude, method:3, isUser:true };
+    } catch {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        userCity = { id:'user', name:'You', tz, lat:51.51, lng:-0.13, method:3, isUser:true };
+    }
+    mOffset = getOff(userCity.tz);
+    localStorage.setItem('wp_u', JSON.stringify({ id:userCity.id, name:userCity.name, tz:userCity.tz, lat:Math.round(userCity.lat*10)/10, lng:Math.round(userCity.lng*10)/10, method:userCity.method, isUser:userCity.isUser }));
+}
+
+/* ── Prayer notifications ────────────────────────────────────────── */
+let notifEnabled = localStorage.getItem('wp_notif') === '1';
+$('#btn-notify').onclick = async () => {
+    if (!('Notification' in window)) { alert('Notifications not supported'); return; }
+    if (notifEnabled) { notifEnabled = false; localStorage.setItem('wp_notif','0'); $('#btn-notify').classList.remove('active'); return; }
+    const p = await Notification.requestPermission();
+    if (p === 'granted') {
+        notifEnabled = true; localStorage.setItem('wp_notif','1'); $('#btn-notify').classList.add('active');
+        schedulePrayerNotifs();
+    } else { alert('Enable notifications in your browser settings to get prayer alerts.'); }
+};
+if (notifEnabled && 'Notification' in window && Notification.permission === 'granted') $('#btn-notify').classList.add('active');
+
+const NOTIF_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23091117'/%3E%3Ccircle cx='50' cy='35' r='12' fill='none' stroke='%232dd4bf' stroke-width='3'/%3E%3C/svg%3E";
+function schedulePrayerNotifs() {
+    if (!userCity || !notifEnabled) return;
+    fetchPrayer(userCity).then(pd => {
+        const now = new Date();
+        const ls  = now.toLocaleString('en-US', {timeZone:userCity.tz});
+        const ld  = new Date(ls);
+        const lh  = ld.getHours() + ld.getMinutes() / 60;
+        ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
+            const pt = pd.loc[name]; if (!pt || pt < lh) return;
+            const ms = (pt - lh) * 3600000 - 300000; // 5 min before
+            if (ms > 0) setTimeout(() => {
+                if (notifEnabled) new Notification(`${PRAYER_NAMES[lang]?.[name] || name} Prayer`, { body:`Time for ${name}`, icon:NOTIF_ICON });
+            }, ms);
         });
     });
 }
 
-// Service Worker
-if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+/* ── Islamic background canvas ───────────────────────────────────── */
+function drawBG() {
+    const cv  = $('#bg-canvas'), ctx = cv.getContext('2d');
+    cv.width  = window.innerWidth;
+    cv.height = window.innerHeight;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    const isDk = document.documentElement.getAttribute('data-theme') === 'dark';
+    ctx.strokeStyle = isDk ? 'rgba(45,212,191,0.12)' : 'rgba(13,148,136,0.08)';
+    ctx.lineWidth = 0.4;
+    const s = 80, r = s * 0.35;
+    for (let x = 0; x < cv.width + s; x += s) {
+        for (let y = 0; y < cv.height + s; y += s) {
+            ctx.beginPath();
+            for (let i = 0; i < 8; i++) { const a = (Math.PI*2*i/8)-Math.PI/8; const px=x+Math.cos(a)*r, py=y+Math.sin(a)*r; i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); }
+            ctx.closePath(); ctx.stroke();
+            ctx.beginPath();
+            for (let i = 0; i < 8; i++) { const a=(Math.PI*2*i/8)-Math.PI/8; const ri=r*0.5; ctx.lineTo(x+Math.cos(a)*ri,y+Math.sin(a)*ri); const a2=a+Math.PI/8; ctx.lineTo(x+Math.cos(a2)*r*0.8,y+Math.sin(a2)*r*0.8); }
+            ctx.closePath(); ctx.stroke();
+        }
+    }
+}
+drawBG();
+let _bgTimer;
+window.addEventListener('resize', () => { clearTimeout(_bgTimer); _bgTimer = setTimeout(drawBG, 150); });
 
-// Keyboard control for selection bar
-document.addEventListener('keydown',e=>{
-    if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;
-    const step=e.shiftKey?1:0.5;let changed=false;
-    if(e.key==='ArrowRight'){selStart=clamp(selStart+step,0,24-selDur);changed=true;}
-    else if(e.key==='ArrowLeft'){selStart=clamp(selStart-step,0,24-selDur);changed=true;}
-    else if(e.key===']'){selDur=clamp(selDur+step,0.5,24-selStart);changed=true;}
-    else if(e.key==='['){selDur=clamp(selDur-step,0.5,24-selStart);changed=true;}
-    if(changed){e.preventDefault();updateSel();checkConflicts();}
-});
+/* ── Service Worker ──────────────────────────────────────────────── */
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 
-// Canvas resize debounce
-let bgTimer;window.addEventListener('resize',()=>{clearTimeout(bgTimer);bgTimer=setTimeout(drawBG,150);});
+/* ── Init ────────────────────────────────────────────────────────── */
+dark   = (localStorage.getItem('wp_t') || 'dark') === 'dark';
+h24    = localStorage.getItem('wp_24') === '1';
+lang   = localStorage.getItem('wp_l') || 'en';
+alarm  = localStorage.getItem('wp_a') || 'ting';
+document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+document.documentElement.lang = lang;
+document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+if ($('#lang-sel'))   $('#lang-sel').value   = lang;
+if ($('#alarm-sel'))  $('#alarm-sel').value  = alarm;
 
-detectUser().then(()=>{
-    // Also fix privacy banner if already accepted
-    if(localStorage.getItem('wp_privacy_ok'))$('#privacy-banner').classList.add('hidden');
-    renderRuler();renderAll();updateSel();updateEnrolled();updateLegend();
+loadFromURL();
+loadSavedCities();
+
+detectUser().then(async () => {
+    renderRuler();
+    renderAll();
+    updateSel();
+    updateEnrolled();
+    updateLegend();
     updateHeaderDate();
-    setInterval(tickClocks,1000);
-    setInterval(updateCD,10000);
-    setInterval(()=>{cache={};renderAll();},30*60*1000);
-    setTimeout(()=>{if(notifEnabled)schedulePrayerNotifs();},2000);
-    // Hide loader
-    setTimeout(()=>$('#loader').classList.add('hide'),400);
-    setTimeout(()=>$('#loader').remove(),800);
+
+    // Scroll to current time on load
+    setTimeout(scrollToNow, 600);
+
+    // Tick clocks every second
+    setInterval(tickClocks, 1000);
+    // Update prayer countdown every 10s (less CPU than 1s)
+    setInterval(updateCD, 10000); updateCD();
+    // Refresh prayer data every 30 minutes
+    setInterval(() => { cache = {}; renderAll(); }, 30 * 60 * 1000);
+    // Schedule push notifications
+    setTimeout(() => { if (notifEnabled) schedulePrayerNotifs(); }, 2000);
+
+    // Hide loading screen
+    setTimeout(() => {
+        const l = $('#loader');
+        if (l) { l.classList.add('hide'); setTimeout(() => l.remove(), 600); }
+    }, 350);
 });
-})();
+
+})(); // end IIFE
 </script>
 </body>
 </html>

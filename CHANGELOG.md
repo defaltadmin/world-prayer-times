@@ -2,6 +2,22 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.6.1] – 2026-06-15
+
+### Fixed
+- **Ruler misalignment** — Hour marks now align correctly with prayer blocks using `(100% - label-w)` formula
+- **Prayer block widths** — Uses actual API prayer windows instead of hardcoded 18-min fallback
+- **Geocoded city timezone** — Shows city's timezone, not user's local timezone
+- **Conflict detection** — Uses actual prayer window durations instead of hardcoded 18-min windows
+- **Scroll sync infinite loop** — Added lock flag to prevent ruler/timeline scroll fighting
+- **Conflict badge** — Correct X icon and deduplicated conflict list with overflow count
+
+### Added
+- **Scroll to Now button** — Clock icon in header to jump timeline to current time
+
+### Removed
+- **Qibla direction** — Compass icon removed (not useful on desktop)
+
 ## [1.6.0] – 2026-06-15
 
 ### Added
