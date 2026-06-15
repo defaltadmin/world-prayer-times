@@ -2,6 +2,16 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.6.3] – 2026-06-15
+
+### Added
+- **Wireframe globe** — Canvas-based Earth visualization below city list
+  - Coastlines, latitude/longitude grid, city dots
+  - Red dots with pulsing antenna lines during prayer time
+  - Teal dots for cities outside prayer time
+  - Slow rotation (pauses on prefers-reduced-motion)
+  - Responsive to dark/light theme
+
 ## [1.6.2] – 2026-06-15
 
 ### Fixed
