@@ -1184,9 +1184,8 @@ async function updateCD() {
     if (!userCity) return;
     const pd  = await fetchPrayer(userCity);
     const now = new Date();
-    const ls  = now.toLocaleString('en-US', {timeZone:userCity.tz});
-    const ld  = new Date(ls);
-    const lh  = ld.getHours() + ld.getMinutes() / 60 + ld.getSeconds() / 3600;
+    const uH  = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
+    const lh  = (uH + pd.off + 24) % 24;
 
     const ps  = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
     let next = null, nt = null;

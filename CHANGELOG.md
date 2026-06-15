@@ -11,6 +11,7 @@ All notable changes to World Prayer Times are documented here.
 - **Conflict detection** — Uses actual prayer window durations instead of hardcoded 18-min windows
 - **Scroll sync infinite loop** — Added lock flag to prevent ruler/timeline scroll fighting
 - **Conflict badge** — Correct X icon and deduplicated conflict list with overflow count
+- **Prayer countdown** — Fixed incorrect time calculation using UTC-based conversion instead of broken Date parsing
 
 ### Added
 - **Scroll to Now button** — Clock icon in header to jump timeline to current time
