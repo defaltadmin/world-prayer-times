@@ -476,9 +476,6 @@
             <button class="icon-btn" id="btn-notify" title="Prayer notifications" aria-label="Prayer notifications">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             </button>
-            <button class="icon-btn" id="btn-lang" title="Change language" aria-label="Change language" style="font-size:0.7rem;font-weight:700;font-family:'Inter',sans-serif;">
-                <span id="lang-icon">EN</span>
-            </button>
             <button class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
@@ -739,8 +736,26 @@ function sanitizeName(s) {
 
 /* ── i18n ──────────────────────────────────────────────────────────  */
 const i18n = {
-    en: {safe:'Safe Window',conflict:'Conflict',next:'Next:',noClass:'No upcoming classes',nextClass:'Next class:',sunrise:'Sunrise',now:'NOW',selection:'Selection'},
-    ar: {safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:',sunrise:'شروق',now:'الآن',selection:'التحديد'},
+    en: {
+        safe:'Safe Window',conflict:'Conflict',next:'Next:',noClass:'No upcoming classes',nextClass:'Next class:',sunrise:'Sunrise',now:'NOW',selection:'Selection',
+        headerTitle:'Prayer Times',settings:'Settings',theme:'Theme',dark:'Dark',light:'Light',timeFormat:'Time Format',language:'Language',alarmSound:'Alarm Sound',
+        howToUse:'How to Use',addCity:'Add City',searchCity:'Search any city worldwide...',searchHint:'Searches all cities via OpenStreetMap',
+        privacyTitle:'Privacy & Data',gotIt:'Got it',ok:'OK',learnMore:'Learn more',share:'Share link',exportCal:'Export calendar',notifications:'Prayer notifications',
+        settingsGear:'Settings',dragToSelect:'Drag the bar to select',close:'Close',test:'Test',unlock:'Unlock',lock:'lock',memberAccess:'Member access',
+        attendance:'Attendance',deposit:'Deposit',quickLinks:'Quick Links',imEnrolled:"I'm Enrolled",enrolledStudents:'For enrolled students only.',
+        enterPassword:'Enter the group password to access course links and class schedule.',passwordPlaceholder:'Enter password...',incorrectPw:'Incorrect password. Ask your teacher.',
+        privacyBanner:'Preferences stored locally only. No cookies, no tracking.'
+    },
+    ar: {
+        safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:',sunrise:'شروق',now:'الآن',selection:'التحديد',
+        headerTitle:'أوقات الصلاة',settings:'الإعدادات',theme:'المظهر',dark:'داكن',light:'فاتح',timeFormat:'تنسيق الوقت',language:'اللغة',alarmSound:'صوت المنبه',
+        howToUse:'كيف تستخدم',addCity:'أضف مدينة',searchCity:'ابحث عن أي مدينة في العالم...',searchHint:'بحث عبر خرائط شارع مفتوح',
+        privacyTitle:'الخصوصية والبيانات',gotIt:'فهمت',ok:'موافق',learnMore:'اعرف المزيد',share:'مشاركة رابط',exportCal:'تصدير التقويم',notifications:'إشعارات الصلاة',
+        settingsGear:'الإعدادات',dragToSelect:'اسحب الشريط للتحديد',close:'إغلاق',test:'تجربة',unlock:'فتح',lock:'قفل',memberAccess:'وصول الأعضاء',
+        attendance:'الحضور',deposit:'الوديعة',quickLinks:'روابط سريعة',imEnrolled:'أنا مسجل',enrolledStudents:'للمسجلين فقط.',
+        enterPassword:'أدخل كلمة مرور المجموعة للوصول إلى روابط الدورة والجدول.',passwordPlaceholder:'أدخل كلمة المرور...',incorrectPw:'كلمة مرور خاطئة. اسأل معلمك.',
+        privacyBanner:'التفضيلات محفوظة محلياً فقط. لا ملفات تعريف ارتباط، لا تتبع.'
+    },
 };
 const t = k => i18n[lang]?.[k] || i18n.en[k] || k;
 const PRAYER_NAMES = {
@@ -756,6 +771,53 @@ function updateLegend() {
     if ($('#lg-sunrise')) $('#lg-sunrise').textContent = t('sunrise');
     if ($('#lg-now'))     $('#lg-now').textContent     = t('now');
     if ($('#lg-sel'))     $('#lg-sel').textContent     = t('selection');
+}
+function updateUI() {
+    updateLegend();
+    // Header
+    const ht = $('.header-title'); if (ht) ht.textContent = t('headerTitle');
+    // Status bar
+    const sd = $('#sel-display'); if (sd) sd.textContent = t('dragToSelect');
+    // Settings modal
+    const st = $('#m-settings .modal-title'); if (st) st.textContent = t('settings');
+    const sl = $$('#m-settings .setting-label');
+    if (sl[0]) sl[0].textContent = t('theme');
+    if (sl[1]) sl[1].textContent = t('timeFormat');
+    if (sl[2]) sl[2].textContent = t('language');
+    if (sl[3]) sl[3].textContent = t('alarmSound');
+    const htBtn = $('#btn-howto'); if (htBtn) htBtn.textContent = t('howToUse');
+    const themeBtn = $('#theme-btn'); if (themeBtn) themeBtn.textContent = dark ? t('dark') : t('light');
+    // Help modal
+    const hlpt = $('#m-help .modal-title'); if (hlpt) hlpt.textContent = t('howToUse');
+    // Add city modal
+    const act = $('#m-addcity .modal-title'); if (act) act.textContent = t('addCity');
+    const acs = $('#city-search'); if (acs) acs.placeholder = t('searchCity');
+    const ach = $('.search-hint'); if (ach) ach.textContent = t('searchHint');
+    // Privacy modal
+    const prt = $('#m-privacy .modal-title'); if (prt) prt.textContent = t('privacyTitle');
+    const prb = $('#m-privacy .btn-accent'); if (prb) prb.textContent = t('gotIt');
+    // Privacy banner
+    const pbl = $('#privacy-link'); if (pbl) pbl.textContent = t('learnMore');
+    const pbo = $('#privacy-ok'); if (pbo) pbo.textContent = t('ok');
+    const pbs = $('#privacy-banner span'); if (pbs) pbs.textContent = t('privacyBanner') + ' ';
+    // Add city button
+    const acr = $('#add-row'); if (acr) { const sv = acr.querySelector('svg'); acr.innerHTML = ''; if (sv) acr.appendChild(sv); acr.append(' ' + t('addCity')); }
+    // Course panel
+    const cpLock = $('.course-locked p'); if (cpLock) cpLock.innerHTML = t('enrolledStudents') + '<br>' + t('enterPassword');
+    const cpUnlock = $('#course-pw-btn'); if (cpUnlock) cpUnlock.textContent = t('unlock');
+    const cpInput = $('#course-pw-input'); if (cpInput) cpInput.placeholder = t('passwordPlaceholder');
+    const cpBadge = $('.unlock-badge'); if (cpBadge) { const lb = cpBadge.querySelector('#course-lock-btn'); cpBadge.textContent = ''; cpBadge.appendChild(document.createTextNode('✓ ' + t('memberAccess') + ' ')); if (lb) cpBadge.appendChild(lb); }
+    // Buttons
+    const btnSettings = $('#btn-settings'); if (btnSettings) btnSettings.title = t('settingsGear');
+    const btnShare = $('#btn-share'); if (btnShare) btnShare.title = t('share');
+    const btnIcal = $('#btn-ical'); if (btnIcal) btnIcal.title = t('exportCal');
+    const btnNotify = $('#btn-notify'); if (btnNotify) btnNotify.title = t('notifications');
+    const btnHelp = $('#btn-help'); if (btnHelp) btnHelp.title = t('howToUse');
+    const btnCourse = $('#btn-course'); if (btnCourse) btnCourse.title = t('settings');
+    // Close buttons
+    $$('.modal-close').forEach(b => { const par = b.closest('.modal-head'); const title = par?.querySelector('.modal-title'); if (title && !title.dataset.i18n) { /* keep as is */ } });
+    const closePanel = $('#close-panel'); if (closePanel) closePanel.title = t('close');
+    const testChime = $('#test-chime'); if (testChime) testChime.textContent = '🔊 ' + t('test');
 }
 
 /* ── Toast ────────────────────────────────────────────────────────── */
@@ -1421,10 +1483,10 @@ $('#theme-btn').onclick = () => {
     dark = !dark;
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
     localStorage.setItem('wp_t', dark ? 'dark' : 'light');
-    $('#theme-btn').textContent = dark ? 'Dark' : 'Light';
     drawBG();
+    updateUI();
 };
-$('#theme-btn').textContent = dark ? 'Dark' : 'Light';
+$('#theme-btn').textContent = dark ? t('dark') : t('light');
 
 $('#fmt-btn').onclick = () => {
     h24 = !h24;
@@ -1438,20 +1500,8 @@ $('#lang-sel').onchange = function() {
     lang = this.value; localStorage.setItem('wp_l', lang);
     document.documentElement.lang = lang;
     document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
-    checkConflicts(); updateClsCountdown(); updateLegend();
+    checkConflicts(); updateClsCountdown(); updateUI();
 };
-
-// Quick language toggle button in header
-$('#btn-lang').onclick = () => {
-    lang = lang === 'en' ? 'ar' : 'en';
-    localStorage.setItem('wp_l', lang);
-    document.documentElement.lang = lang;
-    document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
-    $('#lang-sel').value = lang;
-    $('#lang-icon').textContent = lang === 'en' ? 'EN' : 'AR';
-    checkConflicts(); updateClsCountdown(); updateLegend();
-};
-$('#lang-icon').textContent = lang === 'en' ? 'EN' : 'AR';
 
 $('#alarm-sel').onchange = function() { alarm = this.value; localStorage.setItem('wp_a', alarm); };
 $('#test-chime').onclick  = () => playAlarm();
@@ -1498,7 +1548,7 @@ function loadFromURL() {
     }
     if (p.has('start')) selStart = parseFloat(p.get('start')) || 9;
     if (p.has('dur'))   selDur   = parseFloat(p.get('dur'))   || 1;
-    if (p.has('lang'))  { lang = p.get('lang')==='ar'?'ar':'en'; localStorage.setItem('wp_l',lang); document.documentElement.lang=lang; document.documentElement.dir=lang==='ar'?'rtl':'ltr'; if($('#lang-sel'))$('#lang-sel').value=lang; }
+    if (p.has('lang'))  { lang = p.get('lang')==='ar'?'ar':'en'; localStorage.setItem('wp_l',lang); document.documentElement.lang=lang; document.documentElement.dir=lang==='ar'?'rtl':'ltr'; if($('#lang-sel'))$('#lang-sel').value=lang; updateUI(); }
 }
 
 /* ── Course panel + password gate ────────────────────────────────── */
@@ -1751,7 +1801,7 @@ detectUser().then(async () => {
     renderAll();
     updateSel();
     updateEnrolled();
-    updateLegend();
+    updateUI();
     updateHeaderDate();
 
     // Scroll to current time on load

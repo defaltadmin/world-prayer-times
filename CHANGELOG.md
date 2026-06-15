@@ -13,6 +13,10 @@ All notable changes to World Prayer Times are documented here.
 - **Conflict badge** — Correct X icon and deduplicated conflict list with overflow count
 - **Prayer countdown** — Fixed incorrect time calculation using UTC-based conversion instead of broken Date parsing
 
+### Changed
+- **Arabic i18n expanded** — All UI elements now translate to Arabic (settings, modals, buttons, labels)
+- **Language toggle removed** — Header language button removed; language selection only in Settings
+
 ### Added
 - **Scroll to Now button** — Clock icon in header to jump timeline to current time
 
