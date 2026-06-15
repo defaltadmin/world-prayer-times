@@ -16,6 +16,8 @@ All notable changes to World Prayer Times are documented here.
 ### Changed
 - **Arabic i18n expanded** — All UI elements now translate to Arabic (settings, modals, buttons, labels)
 - **Language toggle removed** — Header language button removed; language selection only in Settings
+- **Geolocation optional** — Site loads immediately with browser timezone; geolocation runs in background
+- **Faster load** — No longer blocks on geolocation permission dialog
 
 ### Added
 - **Scroll to Now button** — Clock icon in header to jump timeline to current time

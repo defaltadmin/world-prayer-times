@@ -830,6 +830,14 @@ function toast(msg) {
 }
 
 /* ── Time utilities ────────────────────────────────────────────────  */
+function getLocalHours(tz) {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat('en-US', {timeZone:tz, hour:'numeric', minute:'numeric', second:'numeric', hour12:false}).formatToParts(now);
+    const h = parseInt(parts.find(p=>p.type==='hour').value)||0;
+    const m = parseInt(parts.find(p=>p.type==='minute').value)||0;
+    const s = parseInt(parts.find(p=>p.type==='second').value)||0;
+    return h + m/60 + s/3600;
+}
 function getOff(tz) {
     const n = new Date();
     const u = new Date(n.toLocaleString('en-US', {timeZone:'UTC'}));
@@ -1245,9 +1253,7 @@ function updateHeaderDate() {
 async function updateCD() {
     if (!userCity) return;
     const pd  = await fetchPrayer(userCity);
-    const now = new Date();
-    const uH  = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
-    const lh  = (uH + pd.off + 24) % 24;
+    const lh  = getLocalHours(userCity.tz);
 
     const ps  = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
     let next = null, nt = null;
@@ -1257,7 +1263,7 @@ async function updateCD() {
     const diff = Math.max(0, (nt - lh) * 3600);
     const h = Math.floor(diff / 3600), m = Math.floor(diff % 3600 / 60), s = Math.floor(diff % 60);
     const cdTxt = $('#cd-text');
-    if (cdTxt) cdTxt.textContent = `${t('next')} ${next} ${h}h ${m}m ${s}s`;
+    if (cdTxt) cdTxt.textContent = `${t('next')} ${PRAYER_NAMES[lang]?.[next]||next} ${h}h ${m}m ${s}s`;
 }
 
 /* ── Drag & resize ────────────────────────────────────────────────── */
@@ -1711,16 +1717,22 @@ $('#rows').onclick = e => {
 async function detectUser() {
     const sv = localStorage.getItem('wp_u');
     if (sv) { try { userCity = JSON.parse(sv); mOffset = getOff(userCity.tz); return; } catch {} }
+    // Use browser timezone for immediate detection (no permission needed)
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    userCity = { id:'user', name:'You', tz, lat:51.51, lng:-0.13, method:3, isUser:true };
+    mOffset = getOff(tz);
+    // Try geolocation in background (non-blocking, 2s timeout)
     try {
-        const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, {timeout:4000}));
-        const tz  = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        userCity  = { id:'user', name:'You', tz, lat:pos.coords.latitude, lng:pos.coords.longitude, method:3, isUser:true };
-    } catch {
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        userCity = { id:'user', name:'You', tz, lat:51.51, lng:-0.13, method:3, isUser:true };
-    }
-    mOffset = getOff(userCity.tz);
-    localStorage.setItem('wp_u', JSON.stringify({ id:userCity.id, name:userCity.name, tz:userCity.tz, lat:Math.round(userCity.lat*10)/10, lng:Math.round(userCity.lng*10)/10, method:userCity.method, isUser:userCity.isUser }));
+        const pos = await new Promise((res, rej) => {
+            navigator.geolocation.getCurrentPosition(res, rej, {timeout:2000, maximumAge:600000});
+            // Don't block - resolve after timeout if no response
+            setTimeout(() => rej('timeout'), 2100);
+        });
+        userCity = { id:'user', name:'You', tz, lat:pos.coords.latitude, lng:pos.coords.longitude, method:3, isUser:true };
+        localStorage.setItem('wp_u', JSON.stringify({ id:userCity.id, name:userCity.name, tz:userCity.tz, lat:Math.round(userCity.lat*10)/10, lng:Math.round(userCity.lng*10)/10, method:userCity.method, isUser:userCity.isUser }));
+        // Re-render with accurate coordinates
+        renderAll();
+    } catch {}
 }
 
 /* ── Prayer notifications ────────────────────────────────────────── */
@@ -1740,10 +1752,7 @@ const NOTIF_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 function schedulePrayerNotifs() {
     if (!userCity || !notifEnabled) return;
     fetchPrayer(userCity).then(pd => {
-        const now = new Date();
-        const ls  = now.toLocaleString('en-US', {timeZone:userCity.tz});
-        const ld  = new Date(ls);
-        const lh  = ld.getHours() + ld.getMinutes() / 60;
+        const lh = getLocalHours(userCity.tz);
         ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
             const pt = pd.loc[name]; if (!pt || pt < lh) return;
             const ms = (pt - lh) * 3600000 - 300000; // 5 min before
@@ -1796,31 +1805,31 @@ if ($('#alarm-sel'))  $('#alarm-sel').value  = alarm;
 loadFromURL();
 loadSavedCities();
 
+// Set userCity immediately with browser timezone (no geolocation needed)
+const initTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+userCity = { id:'user', name:'You', tz:initTz, lat:51.51, lng:-0.13, method:3, isUser:true };
+mOffset = getOff(initTz);
+
+// Hide loader immediately
+setTimeout(() => { const l = $('#loader'); if (l) { l.classList.add('hide'); setTimeout(() => l.remove(), 600); } }, 100);
+
+// Render right away (no waiting for geolocation)
+renderRuler();
+renderAll();
+updateSel();
+updateEnrolled();
+updateUI();
+updateHeaderDate();
+setTimeout(scrollToNow, 600);
+setInterval(tickClocks, 1000);
+setInterval(updateCD, 10000); updateCD();
+setInterval(() => { cache = {}; renderAll(); }, 30 * 60 * 1000);
+setTimeout(() => { if (notifEnabled) schedulePrayerNotifs(); }, 2000);
+
+// Try geolocation in background (non-blocking, 2s timeout)
 detectUser().then(async () => {
-    renderRuler();
+    // Re-render with accurate coordinates if they changed
     renderAll();
-    updateSel();
-    updateEnrolled();
-    updateUI();
-    updateHeaderDate();
-
-    // Scroll to current time on load
-    setTimeout(scrollToNow, 600);
-
-    // Tick clocks every second
-    setInterval(tickClocks, 1000);
-    // Update prayer countdown every 10s (less CPU than 1s)
-    setInterval(updateCD, 10000); updateCD();
-    // Refresh prayer data every 30 minutes
-    setInterval(() => { cache = {}; renderAll(); }, 30 * 60 * 1000);
-    // Schedule push notifications
-    setTimeout(() => { if (notifEnabled) schedulePrayerNotifs(); }, 2000);
-
-    // Hide loading screen
-    setTimeout(() => {
-        const l = $('#loader');
-        if (l) { l.classList.add('hide'); setTimeout(() => l.remove(), 600); }
-    }, 350);
 });
 
 })(); // end IIFE
