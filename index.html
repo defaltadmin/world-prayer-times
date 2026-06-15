@@ -178,7 +178,7 @@
         }
         .remove-btn {
             position: absolute; top: 3px; right: 3px;
-            width: 16px; height: 16px; border-radius: 50%; border: none;
+            width: 28px; height: 28px; border-radius: 50%; border: none;
             background: transparent; color: var(--muted); cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             opacity: 0; transition: all 0.15s;
@@ -814,8 +814,6 @@ function updateUI() {
     const btnNotify = $('#btn-notify'); if (btnNotify) btnNotify.title = t('notifications');
     const btnHelp = $('#btn-help'); if (btnHelp) btnHelp.title = t('howToUse');
     const btnCourse = $('#btn-course'); if (btnCourse) btnCourse.title = t('settings');
-    // Close buttons
-    $$('.modal-close').forEach(b => { const par = b.closest('.modal-head'); const title = par?.querySelector('.modal-title'); if (title && !title.dataset.i18n) { /* keep as is */ } });
     const closePanel = $('#close-panel'); if (closePanel) closePanel.title = t('close');
     const testChime = $('#test-chime'); if (testChime) testChime.textContent = '🔊 ' + t('test');
 }
@@ -935,6 +933,10 @@ async function renderRow(city) {
      */
     if (city.geo && pd.tz && city.tz !== pd.tz) {
         city.tz = pd.tz;
+    }
+    if (city.isUser && pd.tz && city.tz !== pd.tz) {
+        city.tz = pd.tz;
+        mOffset = getOff(pd.tz);
     }
 
     const row = document.createElement('div');
@@ -1253,7 +1255,7 @@ function updateHeaderDate() {
 async function updateCD() {
     if (!userCity) return;
     const pd  = await fetchPrayer(userCity);
-    const lh  = getLocalHours(userCity.tz);
+    const lh  = getLocalHours(pd.tz || userCity.tz);
 
     const ps  = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
     let next = null, nt = null;
@@ -1527,12 +1529,15 @@ $('#btn-ical').onclick = () => exportICal();
 function fmtICal(d) { return d.toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z'; }
 function exportICal() {
     const now   = new Date();
-    const start = new Date(now); start.setHours(Math.floor(selStart), Math.round((selStart%1)*60), 0);
-    const end   = new Date(now); end.setHours(Math.floor(selStart+selDur), Math.round(((selStart+selDur)%1)*60), 0);
+    const startH = Math.floor(selStart), startM = Math.round((selStart%1)*60);
+    const endH = Math.floor(selStart+selDur), endM = Math.round(((selStart+selDur)%1)*60);
+    const start = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), startH, startM);
+    const end = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), endH, endM);
+    const fmtUTC = ts => new Date(ts).toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z';
     const ics = [
         'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Prayer Times//EN','CALSCALE:GREGORIAN',
         'BEGIN:VEVENT','SUMMARY:Safe Meeting Window (No Salah Conflict)',
-        `DTSTART:${fmtICal(start)}`,`DTEND:${fmtICal(end)}`,
+        `DTSTART:${fmtUTC(start)}`,`DTEND:${fmtUTC(end)}`,
         `DESCRIPTION:Coordinated safe time across: ${cities.map(c=>c.name).join(', ')}`,
         `UID:${Date.now()}@prayer.mscarabia.com`,
         'END:VEVENT','END:VCALENDAR',
@@ -1579,7 +1584,7 @@ function attemptUnlock() {
         unlockCourse(); $('#course-pw-hint').textContent = '';
     } else {
         $('#course-pw-input').classList.add('error');
-        $('#course-pw-hint').textContent = 'Incorrect password. Ask your teacher.';
+        $('#course-pw-hint').textContent = t('incorrectPw');
         setTimeout(() => $('#course-pw-input').classList.remove('error'), 400);
     }
 }
@@ -1786,7 +1791,7 @@ function drawBG() {
 }
 drawBG();
 let _bgTimer;
-window.addEventListener('resize', () => { clearTimeout(_bgTimer); _bgTimer = setTimeout(drawBG, 150); });
+window.addEventListener('resize', () => { clearTimeout(_bgTimer); _bgTimer = setTimeout(drawBG, 300); });
 
 /* ── Service Worker ──────────────────────────────────────────────── */
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});

@@ -2,6 +2,17 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.6.2] – 2026-06-15
+
+### Fixed
+- **Countdown timezone** — Uses API timezone (pd.tz) instead of userCity.tz for accurate countdown
+- **User city tz update** — User's city now updates timezone from API response
+- **Remove button touch target** — Increased from 16px to 28px for mobile accessibility
+- **iCal export** — Uses UTC timestamps instead of local time (was off by timezone offset)
+- **Course password error** — Now translated to Arabic when lang=ar
+- **Canvas resize** — Debounced to 300ms (was 150ms)
+- **Dead code removed** — Empty forEach in updateUI
+
 ## [1.6.1] – 2026-06-15
 
 ### Fixed
