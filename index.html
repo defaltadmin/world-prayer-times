@@ -1536,7 +1536,8 @@ function renderToggles() {
         dh.style.cssText = 'font-size:0.65rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--border);';
         dh.textContent = days[d]; wrap.appendChild(dh);
         byDay[d].forEach(c => {
-            const ch  = enrolled.some(e => e.subject===c.subject&&e.teacher===c.teacher&&e.day===c.day);
+            const clsKey = cls => `${cls.day}:${cls.start}:${cls.subject}:${cls.teacher}`;
+            const ch  = enrolled.some(e => clsKey(e) === clsKey(c));
             const lbl = document.createElement('label');
             lbl.style.cssText = `display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:0.7rem;transition:background 0.15s;background:${ch?'rgba(45,212,191,0.08)':'transparent'};`;
             const cb = document.createElement('input'); cb.type = 'checkbox'; cb.dataset.i = c.idx; if (ch) cb.checked = true; cb.style.cssText = 'accent-color:var(--accent);width:14px;height:14px;';
@@ -1548,8 +1549,9 @@ function renderToggles() {
             lbl.appendChild(cb); lbl.appendChild(info); lbl.appendChild(time);
             cb.onchange = () => {
                 const cls = CLASSES[parseInt(cb.dataset.i)];
-                if (cb.checked) { if (!enrolled.find(e => e.subject===cls.subject&&e.teacher===cls.teacher&&e.day===cls.day)) enrolled.push(cls); }
-                else enrolled = enrolled.filter(e => !(e.subject===cls.subject&&e.teacher===cls.teacher&&e.day===cls.day));
+                const key = clsKey(cls);
+                if (cb.checked) { if (!enrolled.some(e => clsKey(e) === key)) enrolled.push(cls); }
+                else enrolled = enrolled.filter(e => clsKey(e) !== key);
                 updateEnrolled(); renderToggles(); renderAll();
             };
             wrap.appendChild(lbl);
