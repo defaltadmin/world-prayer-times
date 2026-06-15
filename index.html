@@ -6,9 +6,8 @@
     <title>Prayer Times – Coordinate Salah Across Cities</title>
     <meta name="description" content="Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.">
     <meta name="theme-color" content="#0a0f1e">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org; img-src 'self' data: blob:; media-src 'self' blob:; manifest-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org; img-src 'self' data: blob:; media-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests;">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0f1e'/%3E%3Ccircle cx='50' cy='35' r='12' fill='none' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 v-28' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 l18 20 H32z' fill='%2338bdf8' opacity='0.3'/%3E%3Cpath d='M25 67 Q50 55 75 67' fill='none' stroke='%2338bdf8' stroke-width='2'/%3E%3C/svg%3E">
-    <link rel="manifest" href="manifest.json">
 
     <meta property="og:title" content="Prayer Times – Coordinate Salah Across Cities">
     <meta property="og:description" content="Visual timeline to find safe meeting windows that don't conflict with prayer times for Muslims worldwide.">
@@ -235,6 +234,8 @@
             transition: left 0.05s ease-out, width 0.08s;
         }
         .sel-overlay.dragging { transition: none; cursor: grabbing; background: rgba(34,211,238,0.16); }
+        .sel-overlay:focus { outline: none; box-shadow: 0 0 0 2px var(--selection), 0 0 20px rgba(34,211,238,0.3); }
+        .sel-overlay:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--selection), 0 0 20px rgba(34,211,238,0.3); }
         .resize-h { position: absolute; top: 0; bottom: 0; width: 12px; cursor: ew-resize; z-index: 12; }
         .resize-h.l { left: -6px; } .resize-h.r { right: -6px; }
         .sel-handle {
@@ -524,7 +525,7 @@
                 Add City
             </div>
             <!-- Selection bar -->
-            <div class="sel-overlay" id="sel" style="left:41.67%;width:4.167%;top:0;bottom:0;">
+            <div class="sel-overlay" id="sel" style="left:41.67%;width:4.167%;top:0;bottom:0;" tabindex="0" role="slider" aria-label="Meeting window selector" aria-valuemin="0" aria-valuemax="24" aria-valuenow="9" aria-valuetext="9:00 AM to 10:00 AM">
                 <div class="resize-h l" id="rz-l"></div>
                 <div class="resize-h r" id="rz-r"></div>
                 <div class="sel-handle t" id="h-top"></div>
@@ -865,6 +866,9 @@ async function fetchPrayer(city) {
     const ck  = `${city.id}-${dk}`;
     if (cache[ck]) return cache[ck];
 
+    // Prune stale day-keys
+    Object.keys(cache).forEach(k => { if (!k.endsWith(`-${dk}`)) delete cache[k]; });
+
     const url = `https://api.aladhan.com/v1/timings/${dk}?latitude=${city.lat}&longitude=${city.lng}&method=${city.method}`;
     try {
         const r = await fetch(url), j = await r.json();
@@ -1169,6 +1173,14 @@ function updateSel() {
 
     if ($('#sel-display'))
         $('#sel-display').textContent = `${fmtH(selStart)} – ${fmtH(selStart + selDur)} (${selDur.toFixed(1)}h)`;
+    updateSelA11y();
+}
+
+function updateSelA11y() {
+    const sel = $('#sel');
+    if (!sel) return;
+    sel.setAttribute('aria-valuenow', selStart.toFixed(2));
+    sel.setAttribute('aria-valuetext', `${fmtH(selStart)} to ${fmtH(selStart + selDur)}, ${selDur.toFixed(1)} hour window`);
 }
 
 /* ── Conflict detection ───────────────────────────────────────────── */

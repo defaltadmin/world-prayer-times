@@ -22,6 +22,14 @@ All notable changes to World Prayer Times are documented here.
 
 ### Changed
 - **Islamic background** — Now CSS SVG data-URI instead of canvas (faster, sharper, no resize redraw)
+- **Dead PWA refs removed** — manifest link and CSP worker-src/manifest-src removed (no sw.js exists)
+
+### Security
+- **CSP tightened** — Removed unused worker-src and manifest-src directives
+
+### Accessibility
+- **Selection bar a11y** — Added role="slider", aria-label, aria-valuenow/valuetext, focus ring
+- **Cache eviction** — Stale day-keys pruned on each fetch to prevent memory leak
 
 ## [1.6.1] – 2026-06-15
 
