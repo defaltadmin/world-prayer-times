@@ -6,11 +6,27 @@ All notable changes to World Prayer Times are documented here.
 
 ### Added
 - **Wireframe globe** — Canvas-based Earth visualization below city list
-  - Coastlines, latitude/longitude grid, city dots
+  - Coastlines, latitude/longitude grid, city dots at correct positions
   - Red dots with pulsing antenna lines during prayer time
   - Teal dots for cities outside prayer time
-  - Slow rotation (pauses on prefers-reduced-motion)
+  - Slow rotation (pauses on prefers-reduced-motion, pauses when off-screen)
   - Responsive to dark/light theme
+
+### Fixed
+- **Timezone offset** — Replaced getOff() with proper Intl UTC-parts calculation
+- **Cache key** — Now includes coordinates, method, and local date (not just city ID)
+- **Light mode labels** — City name/clock/offset use CSS vars instead of hardcoded colors
+- **fmtH 9:60** — Fixed rounding that could produce invalid times
+- **compCls** — Uses Intl for London date (works from any timezone)
+- **hidden class** — Added missing `.hidden { display: none !important }`
+- **Course button title** — Fixed to say "Course info" not "Settings"
+- **mOffset refresh** — Updates before renderAll to prevent race condition
+- **Globe battery** — Pauses when off-screen via IntersectionObserver
+- **Touch targets** — All buttons/chips 44px on coarse pointer devices
+- **Modal Escape** — Pressing Escape closes open modals
+- **Status bar a11y** — Added aria-live="polite" for screen readers
+- **Canvas a11y** — Added aria-hidden="true" to decorative globe
+- **Footer links** — Added noreferrer to external links
 
 ## [1.6.2] – 2026-06-15
 

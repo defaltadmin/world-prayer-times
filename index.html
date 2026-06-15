@@ -173,9 +173,9 @@
             position: sticky; left: 0; z-index: 20; gap: 3px;
             overflow: hidden; position: relative;
         }
-        .city-name { font-weight: 600; font-size: 0.85rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; display: flex; align-items: center; gap: 3px; }
-        .city-clock { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #e2e8f0; line-height: 1.3; }
-        .city-offset { font-size: 0.52rem; color: #64748b; line-height: 1.3; }
+        .city-name { font-weight: 600; font-size: 0.85rem; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; display: flex; align-items: center; gap: 3px; }
+        .city-clock { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text); line-height: 1.3; }
+        .city-offset { font-size: 0.52rem; color: var(--muted); line-height: 1.3; }
         .you-badge {
             font-size: 0.5rem; background: rgba(56,189,248,0.15); color: var(--accent);
             padding: 1px 5px; border-radius: 8px; font-weight: 700; flex-shrink: 0;
@@ -350,6 +350,7 @@
         .course-locked p { font-size: 0.8rem; color: var(--muted); text-align: center; }
         .course-content { display: none; }
         .course-content.unlocked { display: block; }
+        .hidden { display: none !important; }
         .unlock-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.65rem; color: var(--safe); background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); padding: 3px 8px; border-radius: 10px; margin-bottom: 12px; }
         .pw-gate { padding: 8px 0 16px; }
         .pw-gate p { font-size: 0.78rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
@@ -416,6 +417,11 @@
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
             #bg-pattern { display: none; }
+            #globe-canvas { animation: none !important; }
+        }
+        /* ── Coarse pointer touch targets ──────────────── */
+        @media (pointer: coarse) {
+            .icon-btn, .btn, .chip, .modal-close, .chime-btn { min-height: 44px; min-width: 44px; }
         }
 
         /* ── Globe ───────────────────────────────────────── */
@@ -504,7 +510,7 @@
     </header>
 
     <!-- ══════════════ STATUS BAR ══════════════ -->
-    <div class="status-bar">
+    <div class="status-bar" aria-live="polite">
         <span id="status-badge" class="status-badge safe">
             <span id="status-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span id="status-text">Safe Window</span>
@@ -674,13 +680,13 @@
     </div>
 
     <!-- ══════════════ GLOBE ══════════════ -->
-    <div id="globe-wrap"><canvas id="globe-canvas"></canvas></div>
+    <div id="globe-wrap"><canvas id="globe-canvas" aria-hidden="true"></canvas></div>
 
     <!-- ══════════════ FOOTER ══════════════ -->
     <footer style="text-align:center;padding:12px 16px;font-size:0.65rem;color:var(--muted);border-top:1px solid var(--border);background:var(--card);margin-top:auto;">
-        Made with ❤️ by <a href="https://mscarabia.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:600;">Mohammed Siddiqui</a> ·
-        <a href="https://mscarabia.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">mscarabia.com</a> ·
-        Powered by <a href="https://aladhan.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">Aladhan API</a>
+        Made with ❤️ by <a href="https://mscarabia.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:600;">Mohammed Siddiqui</a> ·
+        <a href="https://mscarabia.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;">mscarabia.com</a> ·
+        Powered by <a href="https://aladhan.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;">Aladhan API</a>
     </footer>
 </div>
 
@@ -838,7 +844,7 @@ function updateUI() {
     const btnIcal = $('#btn-ical'); if (btnIcal) btnIcal.title = t('exportCal');
     const btnNotify = $('#btn-notify'); if (btnNotify) btnNotify.title = t('notifications');
     const btnHelp = $('#btn-help'); if (btnHelp) btnHelp.title = t('howToUse');
-    const btnCourse = $('#btn-course'); if (btnCourse) btnCourse.title = t('settings');
+    const btnCourse = $('#btn-course'); if (btnCourse) btnCourse.title = lang === 'ar' ? 'معلومات الدورة' : 'Course info';
     const closePanel = $('#close-panel'); if (closePanel) closePanel.title = t('close');
     const testChime = $('#test-chime'); if (testChime) testChime.textContent = '🔊 ' + t('test');
 }
@@ -853,30 +859,48 @@ function toast(msg) {
 }
 
 /* ── Time utilities ────────────────────────────────────────────────  */
+function isValidTimezone(tz) {
+    try { Intl.DateTimeFormat(undefined, {timeZone: tz}); return true; } catch { return false; }
+}
+function getOffsetHours(tz) {
+    try {
+        const now = new Date();
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit',
+            hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'
+        }).formatToParts(now);
+        const m = Object.fromEntries(parts.map(p => [p.type, p.value]));
+        const asUTC = Date.UTC(+m.year, +m.month-1, +m.day, +m.hour, +m.minute, +m.second);
+        return Math.round(((asUTC - now.getTime()) / 36e5) * 100) / 100;
+    } catch { return 0; }
+}
+function getOff(tz) { return getOffsetHours(isValidTimezone(tz) ? tz : 'UTC'); }
 function getLocalHours(tz) {
     try {
         const now = new Date();
-        const parts = new Intl.DateTimeFormat('en-US', {timeZone:tz, hour:'numeric', minute:'numeric', second:'numeric', hour12:false}).formatToParts(now);
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: tz, hour:'numeric', minute:'numeric', second:'numeric',
+            hour12:false, hourCycle:'h23'
+        }).formatToParts(now);
         const h = parseInt(parts.find(p=>p.type==='hour').value)||0;
         const m = parseInt(parts.find(p=>p.type==='minute').value)||0;
         const s = parseInt(parts.find(p=>p.type==='second').value)||0;
         return h + m/60 + s/3600;
     } catch {
-        // Fallback to UTC if timezone is invalid
         const now = new Date();
         return now.getUTCHours() + now.getUTCMinutes()/60 + now.getUTCSeconds()/3600;
     }
 }
-function getOff(tz) {
-    const n = new Date();
-    const u = new Date(n.toLocaleString('en-US', {timeZone:'UTC'}));
-    const l = new Date(n.toLocaleString('en-US', {timeZone:tz}));
-    return (l - u) / 36e5;
-}
 function fmtH(h) {
-    h = ((h % 24) + 24) % 24;
-    const hh = Math.floor(h), mm = Math.round((h - hh) * 60);
-    if (!h24) { const p = hh >= 12 ? 'PM' : 'AM', h12 = hh % 12 || 12; return `${h12}:${String(mm).padStart(2,'0')} ${p}`; }
+    let total = Math.round((((h % 24) + 24) % 24) * 60);
+    total %= 1440;
+    const hh = Math.floor(total / 60);
+    const mm = total % 60;
+    if (!h24) {
+        const p = hh >= 12 ? 'PM' : 'AM';
+        const h12 = hh % 12 || 12;
+        return `${h12}:${String(mm).padStart(2,'0')} ${p}`;
+    }
     return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
 }
 function pct(h) { return (h / 24) * 100; }
@@ -884,13 +908,27 @@ function clamp(v, m, M) { return Math.max(m, Math.min(M, v)); }
 function toMaster(uh) { let h = uh + mOffset; while (h < 0) h += 24; return h % 24; }
 
 /* ── API: fetch prayer times ──────────────────────────────────────── */
+function dateKey(tz) {
+    try {
+        const parts = new Intl.DateTimeFormat('en-CA', {
+            timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit'
+        }).formatToParts(new Date());
+        const m = Object.fromEntries(parts.map(p => [p.type, p.value]));
+        return `${m.day}-${m.month}-${m.year}`;
+    } catch {
+        return new Date().toISOString().slice(0,10).split('-').reverse().join('-');
+    }
+}
+function prayerCacheKey(city) {
+    return `${city.id}:${Number(city.lat||0).toFixed(3)}:${Number(city.lng||0).toFixed(3)}:${city.method||''}:${dateKey(city.tz||'UTC')}`;
+}
 async function fetchPrayer(city) {
-    const dk  = new Date().toISOString().slice(0,10).split('-').reverse().join('-');
-    const ck  = `${city.id}-${dk}`;
+    const dk  = dateKey(city.tz || 'UTC');
+    const ck  = prayerCacheKey(city);
     if (cache[ck]) return cache[ck];
 
-    // Prune stale day-keys
-    Object.keys(cache).forEach(k => { if (!k.endsWith(`-${dk}`)) delete cache[k]; });
+    // Prune stale entries
+    Object.keys(cache).forEach(k => { if (!k.endsWith(':' + dk)) delete cache[k]; });
 
     const url = `https://api.aladhan.com/v1/timings/${dk}?latitude=${city.lat}&longitude=${city.lng}&method=${city.method}`;
     try {
@@ -1085,6 +1123,9 @@ async function renderRow(city) {
 
 /* ── Render: all rows ─────────────────────────────────────────────── */
 async function renderAll() {
+    // Refresh master offset before rendering any row
+    mOffset = userCity?.tz ? getOff(userCity.tz) : 0;
+
     const c = $('#rows');
     c.innerHTML = '';
     const all = [...cities];
@@ -1216,7 +1257,7 @@ function checkConflicts() {
     for (const id of ids) {
         const city = [...cities, userCity].find(c => c && c.id === id);
         if (!city) continue;
-        const pd = cache[`${city.id}-${dk}`];
+        const pd = cache[prayerCacheKey(city)];
         if (!pd) continue;
 
         ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
@@ -1417,12 +1458,25 @@ function compCls(cls) {
     const [h, m]    = cls.start.split(':').map(Number);
     const [eh, em]  = cls.end.split(':').map(Number);
     const dur = (eh + em / 60) - (h + m / 60);
+
+    // Get London date parts using Intl (works in any timezone)
     const now = new Date();
-    const bn  = new Date(now.toLocaleString('en-US', {timeZone:'Europe/London'}));
-    let d = cls.day - bn.getDay(); // getDay() is correct here (bn is local London date)
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone:'Europe/London', weekday:'short', year:'numeric', month:'2-digit', day:'2-digit'
+    }).formatToParts(now);
+    const pmap = Object.fromEntries(parts.map(p => [p.type, p.value]));
+    const dayMap = {Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
+    const lp = { year:+pmap.year, month:+pmap.month, day:+pmap.day, dayOfWeek:dayMap[pmap.weekday] };
+
+    let d = cls.day - lp.dayOfWeek;
     if (d < 0) d += 7;
-    const cd = new Date(Date.UTC(bn.getUTCFullYear(), bn.getUTCMonth(), bn.getUTCDate() + d, h, m));
-    return { utcStart:cd.getUTCHours() + cd.getUTCMinutes()/60, utcEnd:cd.getUTCHours() + cd.getUTCMinutes()/60 + dur, ts:cd.getTime(), subject:cls.subject, teacher:cls.teacher };
+
+    const ts = Date.UTC(lp.year, lp.month - 1, lp.day + d, h, m);
+    return {
+        utcStart: new Date(ts).getUTCHours() + new Date(ts).getUTCMinutes()/60,
+        utcEnd: new Date(ts).getUTCHours() + new Date(ts).getUTCMinutes()/60 + dur,
+        ts, subject:cls.subject, teacher:cls.teacher
+    };
 }
 function updateEnrolled() {
     enrolled = enrolled.map(c => { const d = compCls(c); return {...c, ...d}; });
@@ -1511,6 +1565,9 @@ function openM(id)  { $(id).classList.add('open');    }
 function closeM(id) { $(id).classList.remove('open'); }
 $$('[data-close]').forEach(b => b.onclick = () => closeM('#' + b.dataset.close));
 $$('.modal-bg').forEach(m => m.onclick = e => { if (e.target === m) closeM('#' + m.id); });
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') $$('.modal-bg.open').forEach(m => closeM('#' + m.id));
+});
 
 /* ── Privacy banner ──────────────────────────────────────────────── */
 (function() {
@@ -2042,15 +2099,21 @@ detectUser().then(async () => {
         });
     }
 
+    let globePaused = false;
+    if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(([e]) => { globePaused = !e.isIntersecting; }, {threshold:0});
+        io.observe(cv);
+    }
+
     function loop(time) {
-        if (!prefersReduced) rotation += 0.02;
+        if (!globePaused && !prefersReduced) rotation += 0.02;
         drawGlobe(time);
         requestAnimationFrame(loop);
     }
 
     resize();
     window.addEventListener('resize', resize);
-    requestAnimationFrame(loop);
+    if (prefersReduced) { drawGlobe(0); } else { requestAnimationFrame(loop); }
 })();
 
 })(); // end IIFE
