@@ -69,9 +69,14 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .loader-text { font-size: 0.85rem; color: var(--muted); }
 
-        /* ── Islamic pattern canvas ──────────────────────── */
-        #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.08; }
-        [data-theme="light"] #bg-canvas { opacity: 0.05; }
+        /* ── Islamic pattern background (CSS SVG, no canvas) ──── */
+        #bg-pattern {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            opacity: 0.12;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M40 10 L55 25 L70 10 M40 70 L55 55 L70 70 M10 40 L25 55 L10 70 M70 40 L55 25 L70 10 M10 40 L25 25 L10 10 M70 40 L55 55 L70 70 M40 10 L25 25 L10 10 M40 70 L25 55 L10 70' fill='none' stroke='%232dd4bf' stroke-width='0.4'/%3E%3Ccircle cx='40' cy='40' r='15' fill='none' stroke='%232dd4bf' stroke-width='0.3'/%3E%3Ccircle cx='40' cy='40' r='8' fill='none' stroke='%232dd4bf' stroke-width='0.3'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+        }
+        [data-theme="light"] #bg-pattern { opacity: 0.07; }
 
         /* ── Glass ───────────────────────────────────────── */
         .glass {
@@ -409,7 +414,7 @@
         /* ── Reduced motion ──────────────────────────────── */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-            #bg-canvas { display: none; }
+            #bg-pattern { display: none; }
         }
 
         /* ── Mobile ─────────────────────────────────────── */
@@ -422,10 +427,11 @@
             .header { padding: 6px 10px; }
             .status-bar { padding: 5px 10px; font-size: 0.7rem; }
             .panel { width: 100%; }
-            .resize-h { width: 20px; }
-            .icon-btn { width: 38px; height: 38px; }
-            .sel-handle { width: 32px; height: 16px; }
-            .remove-btn { opacity: 0.5; }
+            .resize-h { width: 44px; }
+            .icon-btn { width: 44px; height: 44px; }
+            .sel-handle { width: 44px; height: 20px; }
+            .remove-btn { width: 44px; height: 44px; opacity: 0.5; }
+            .prayer-block { min-width: 44px; }
         }
     </style>
 </head>
@@ -436,8 +442,8 @@
     <div class="loader-text">Loading prayer times...</div>
 </div>
 
-<!-- Islamic pattern background canvas -->
-<canvas id="bg-canvas"></canvas>
+<!-- Islamic pattern background -->
+<div id="bg-pattern"></div>
 
 <div id="app" style="position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;">
 
@@ -712,12 +718,13 @@ const CLASSES=[
  * consistently by BOTH renderRow() (visual blocks) and checkConflicts().
  */
 const PRAYER_WINDOWS = {
-    Fajr:    { nextKey:'Sunrise', maxDurH:1.5  }, // Fajr → Sunrise
-    Dhuhr:   { nextKey:'Asr',     maxDurH:1.0  }, // Dhuhr → 1 hr max
-    Asr:     { nextKey:'Maghrib', maxDurH:1.5  }, // Asr → Maghrib or 1.5 hr
-    Maghrib: { nextKey:'Isha',    maxDurH:0.75 }, // Maghrib → Isha or 45 min
-    Isha:    { nextKey:null,      maxDurH:1.5  }, // Isha + 1.5 hr
+    Fajr:    { nextKey:'Sunrise', maxDurH:1.5  },
+    Dhuhr:   { nextKey:'Asr',     maxDurH:1.0  },
+    Asr:     { nextKey:'Maghrib', maxDurH:1.5  },
+    Maghrib: { nextKey:'Isha',    maxDurH:0.75 },
+    Isha:    { nextKey:null,      maxDurH:1.5  },
 };
+const FALLBACK_DUR = {Fajr:0.75, Dhuhr:0.5, Asr:0.75, Maghrib:0.45, Isha:1.0};
 
 /* ── State ────────────────────────────────────────────────────────── */
 const STORAGE_CITIES = 'wp_cities_v1';
@@ -1004,8 +1011,7 @@ async function renderRow(city) {
             if (d < 0) d += 24;
             durHours = d;
         } else {
-            const fallbackDur = {Fajr:0.75, Dhuhr:0.5, Asr:0.75, Maghrib:0.45, Isha:1.0};
-            durHours = fallbackDur[name] || 0.5;
+            durHours = FALLBACK_DUR[name] || 0.5;
         }
 
         const localStart = pd.loc[name];
@@ -1191,15 +1197,13 @@ function checkConflicts() {
              */
             let endU = pd.pw?.[name];
             if (endU === undefined) {
-                const fb = {Fajr:0.75, Dhuhr:0.5, Asr:0.75, Maghrib:0.45, Isha:1.0};
-                endU = (u + (fb[name] || 0.5)) % 24;
+                endU = (u + (FALLBACK_DUR[name] || 0.5)) % 24;
             }
             const endM = toMaster(endU);
 
-            // Handle midnight wrap-around (e.g. Isha ending after midnight)
             const overlaps = endM < m
-                ? (m < e || endM > s)      // block wraps midnight
-                : (m < e && endM > s);     // normal case
+                ? (s < endM || e > m)   // block wraps midnight: test [m,24] and [0,endM] against [s,e]
+                : (s < endM && e > m);  // normal case
 
             if (overlaps) cf.push({ city:city.name, prayer:name });
         });
@@ -1491,7 +1495,6 @@ $('#theme-btn').onclick = () => {
     dark = !dark;
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
     localStorage.setItem('wp_t', dark ? 'dark' : 'light');
-    drawBG();
     updateUI();
 };
 $('#theme-btn').textContent = dark ? t('dark') : t('light');
@@ -1526,7 +1529,6 @@ $('#btn-share').onclick = async () => {
     catch { window.prompt('Share link:', genShareLink()); }
 };
 $('#btn-ical').onclick = () => exportICal();
-function fmtICal(d) { return d.toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z'; }
 function exportICal() {
     const now   = new Date();
     const startH = Math.floor(selStart), startM = Math.round((selStart%1)*60);
@@ -1768,34 +1770,6 @@ function schedulePrayerNotifs() {
     });
 }
 
-/* ── Islamic background canvas ───────────────────────────────────── */
-function drawBG() {
-    const cv  = $('#bg-canvas'), ctx = cv.getContext('2d');
-    cv.width  = window.innerWidth;
-    cv.height = window.innerHeight;
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    const isDk = document.documentElement.getAttribute('data-theme') === 'dark';
-    ctx.strokeStyle = isDk ? 'rgba(45,212,191,0.12)' : 'rgba(13,148,136,0.08)';
-    ctx.lineWidth = 0.4;
-    const s = 80, r = s * 0.35;
-    for (let x = 0; x < cv.width + s; x += s) {
-        for (let y = 0; y < cv.height + s; y += s) {
-            ctx.beginPath();
-            for (let i = 0; i < 8; i++) { const a = (Math.PI*2*i/8)-Math.PI/8; const px=x+Math.cos(a)*r, py=y+Math.sin(a)*r; i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); }
-            ctx.closePath(); ctx.stroke();
-            ctx.beginPath();
-            for (let i = 0; i < 8; i++) { const a=(Math.PI*2*i/8)-Math.PI/8; const ri=r*0.5; ctx.lineTo(x+Math.cos(a)*ri,y+Math.sin(a)*ri); const a2=a+Math.PI/8; ctx.lineTo(x+Math.cos(a2)*r*0.8,y+Math.sin(a2)*r*0.8); }
-            ctx.closePath(); ctx.stroke();
-        }
-    }
-}
-drawBG();
-let _bgTimer;
-window.addEventListener('resize', () => { clearTimeout(_bgTimer); _bgTimer = setTimeout(drawBG, 300); });
-
-/* ── Service Worker ──────────────────────────────────────────────── */
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
-
 /* ── Init ────────────────────────────────────────────────────────── */
 dark   = (localStorage.getItem('wp_t') || 'dark') === 'dark';
 h24    = localStorage.getItem('wp_24') === '1';
@@ -1828,12 +1802,19 @@ updateHeaderDate();
 setTimeout(scrollToNow, 600);
 setInterval(tickClocks, 1000);
 setInterval(updateCD, 10000); updateCD();
-setInterval(() => { cache = {}; renderAll(); }, 30 * 60 * 1000);
 setTimeout(() => { if (notifEnabled) schedulePrayerNotifs(); }, 2000);
+
+// Refresh at local midnight instead of every 30 min
+function scheduleMidnightRefresh() {
+    const now = new Date();
+    const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1) - now;
+    setTimeout(() => { cache = {}; renderAll(); scheduleMidnightRefresh(); }, msUntilMidnight + 5000);
+}
+scheduleMidnightRefresh();
 
 // Try geolocation in background (non-blocking, 2s timeout)
 detectUser().then(async () => {
-    // Re-render with accurate coordinates if they changed
+    // Re-render with accurate coordinates, mOffset updated by renderRow via pd.tz
     renderAll();
 });
 

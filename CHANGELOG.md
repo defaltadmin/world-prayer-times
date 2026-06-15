@@ -8,10 +8,20 @@ All notable changes to World Prayer Times are documented here.
 - **Countdown timezone** — Uses API timezone (pd.tz) instead of userCity.tz for accurate countdown
 - **User city tz update** — User's city now updates timezone from API response
 - **Remove button touch target** — Increased from 16px to 28px for mobile accessibility
-- **iCal export** — Uses UTC timestamps instead of local time (was off by timezone offset)
+- **iCal export** — Uses UTC timestamps instead of local time (was timezone-offset)
 - **Course password error** — Now translated to Arabic when lang=ar
 - **Canvas resize** — Debounced to 300ms (was 150ms)
 - **Dead code removed** — Empty forEach in updateUI
+- **Conflict detection midnight-wrap** — Fixed inverted overlap logic for blocks wrapping midnight
+- **Fallback duration** — Single source of truth (FALLBACK_DUR const) for prayer block widths and conflict detection
+- **Service worker** — Removed broken sw.js registration (file didn't exist)
+- **Cache refresh** — Now refreshes at local midnight instead of every 30 min
+- **Mobile touch targets** — All interactive elements now 44px on mobile (resize handles, icons, prayer blocks, remove buttons)
+- **Background pattern** — Replaced canvas with CSS SVG pattern (zero JS, GPU-composited, no battery drain)
+- **Dead code** — Removed unused fmtICal function
+
+### Changed
+- **Islamic background** — Now CSS SVG data-URI instead of canvas (faster, sharper, no resize redraw)
 
 ## [1.6.1] – 2026-06-15
 
