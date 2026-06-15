@@ -1731,9 +1731,12 @@ async function detectUser() {
     // Try geolocation in background (non-blocking, 2s timeout)
     try {
         const pos = await new Promise((res, rej) => {
-            navigator.geolocation.getCurrentPosition(res, rej, {timeout:2000, maximumAge:600000});
-            // Don't block - resolve after timeout if no response
-            setTimeout(() => rej('timeout'), 2100);
+            const timeoutId = setTimeout(() => rej('timeout'), 2000);
+            navigator.geolocation.getCurrentPosition(
+                p => { clearTimeout(timeoutId); res(p); },
+                e => { clearTimeout(timeoutId); rej(e); },
+                {timeout:2000, maximumAge:600000}
+            );
         });
         userCity = { id:'user', name:'You', tz, lat:pos.coords.latitude, lng:pos.coords.longitude, method:3, isUser:true };
         localStorage.setItem('wp_u', JSON.stringify({ id:userCity.id, name:userCity.name, tz:userCity.tz, lat:Math.round(userCity.lat*10)/10, lng:Math.round(userCity.lng*10)/10, method:userCity.method, isUser:userCity.isUser }));
