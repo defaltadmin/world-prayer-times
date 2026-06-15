@@ -11,6 +11,9 @@ All notable changes to World Prayer Times are documented here.
   - Teal dots for cities outside prayer time
   - Slow rotation (pauses on prefers-reduced-motion, pauses when off-screen)
   - Responsive to dark/light theme
+- **"Use my location" button** — Replaces auto-prompt; shows in status bar until location is granted
+  - User row shows hint text when location not yet granted
+  - Translated to Arabic
 
 ### Fixed
 - **Timezone offset** — Replaced getOff() with proper Intl UTC-parts calculation

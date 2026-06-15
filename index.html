@@ -517,6 +517,9 @@
         </span>
         <span class="status-detail" id="sel-display">Drag the bar to select</span>
         <span class="status-time" id="your-time"></span>
+        <button class="icon-btn" id="btn-location" title="Use my location" aria-label="Use my location" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </button>
     </div>
 
     <!-- ══════════════ LEGEND ══════════════ -->
@@ -775,7 +778,7 @@ const i18n = {
         settingsGear:'Settings',dragToSelect:'Drag the bar to select',close:'Close',test:'Test',unlock:'Unlock',lock:'lock',memberAccess:'Member access',
         attendance:'Attendance',deposit:'Deposit',quickLinks:'Quick Links',imEnrolled:"I'm Enrolled",enrolledStudents:'For enrolled students only.',
         enterPassword:'Enter the group password to access course links and class schedule.',passwordPlaceholder:'Enter password...',incorrectPw:'Incorrect password. Ask your teacher.',
-        privacyBanner:'Preferences stored locally only. No cookies, no tracking.'
+        privacyBanner:'Preferences stored locally only. No cookies, no tracking.',useLocation:'Use my location',locationDenied:'Location access denied',locationNotSupported:'Geolocation not supported'
     },
     ar: {
         safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:',sunrise:'شروق',now:'الآن',selection:'التحديد',
@@ -785,7 +788,7 @@ const i18n = {
         settingsGear:'الإعدادات',dragToSelect:'اسحب الشريط للتحديد',close:'إغلاق',test:'تجربة',unlock:'فتح',lock:'قفل',memberAccess:'وصول الأعضاء',
         attendance:'الحضور',deposit:'الوديعة',quickLinks:'روابط سريعة',imEnrolled:'أنا مسجل',enrolledStudents:'للمسجلين فقط.',
         enterPassword:'أدخل كلمة مرور المجموعة للوصول إلى روابط الدورة والجدول.',passwordPlaceholder:'أدخل كلمة المرور...',incorrectPw:'كلمة مرور خاطئة. اسأل معلمك.',
-        privacyBanner:'التفضيلات محفوظة محلياً فقط. لا ملفات تعريف ارتباط، لا تتبع.'
+        privacyBanner:'التفضيلات محفوظة محلياً فقط. لا ملفات تعريف ارتباط، لا تتبع.',useLocation:'تحديد موقعي',locationDenied:'تم رفض الوصول للموقع',locationNotSupported:'تحديد الموقع غير مدعوم'
     },
 };
 const t = k => i18n[lang]?.[k] || i18n.en[k] || k;
@@ -996,6 +999,43 @@ async function fetchPrayer(city) {
 
 /* ── Render: city row ─────────────────────────────────────────────── */
 async function renderRow(city) {
+    // If city needs location and has no coordinates, show placeholder
+    if (city.isUser && city.needsLocation && (!city.lat || !city.lng)) {
+        const row = document.createElement('div');
+        row.className = 'city-row user-row';
+        row.dataset.id = city.id;
+        const lbl = document.createElement('div');
+        lbl.className = 'city-label';
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'city-name';
+        const pin = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        pin.setAttribute('width','10'); pin.setAttribute('height','10');
+        pin.setAttribute('viewBox','0 0 24 24'); pin.setAttribute('fill','#38bdf8');
+        pin.style.cssText = 'vertical-align:middle;margin-right:2px;flex-shrink:0;';
+        const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+        p.setAttribute('d','M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z');
+        pin.appendChild(p); nameSpan.appendChild(pin);
+        nameSpan.appendChild(document.createTextNode('You'));
+        const yb = document.createElement('span'); yb.className = 'you-badge'; yb.textContent = 'YOU';
+        nameSpan.appendChild(yb);
+        lbl.appendChild(nameSpan);
+        const clockSpan = document.createElement('span'); clockSpan.className = 'city-clock';
+        clockSpan.textContent = new Date().toLocaleTimeString('en-US', {timeZone:city.tz, hour:'2-digit', minute:'2-digit', hour12:!h24});
+        lbl.appendChild(clockSpan);
+        const hint = document.createElement('span'); hint.className = 'city-offset';
+        hint.textContent = lang === 'ar' ? 'اضغط 🔴 لتحديد الموقع' : 'Tap 🔴 to set location';
+        lbl.appendChild(hint);
+        row.appendChild(lbl);
+        const strip = document.createElement('div');
+        strip.style.cssText = 'flex:1;position:relative;background:var(--surface);display:flex;align-items:center;justify-content:center;';
+        const msg = document.createElement('span');
+        msg.style.cssText = 'font-size:0.75rem;color:var(--muted);';
+        msg.textContent = lang === 'ar' ? 'اضغط الزر الأحمر في الشريط العلوي لتفعيل الموقع' : 'Tap the red location pin in the status bar to show prayer times';
+        strip.appendChild(msg);
+        row.appendChild(strip);
+        return row;
+    }
+
     const pd  = await fetchPrayer(city);
 
     /*
@@ -1584,6 +1624,7 @@ $('#btn-settings').onclick = () => openM('#m-settings');
 $('#btn-help').onclick     = () => openM('#m-help');
 $('#btn-howto').onclick    = () => { closeM('#m-settings'); openM('#m-help'); };
 $('#btn-now').onclick      = () => scrollToNow();
+$('#btn-location').onclick = () => requestLocation();
 
 $('#theme-btn').onclick = () => {
     dark = !dark;
@@ -1820,23 +1861,28 @@ async function detectUser() {
     if (sv) { try { userCity = JSON.parse(sv); mOffset = getOff(userCity.tz); return; } catch {} }
     // Use browser timezone for immediate detection (no permission needed)
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    userCity = { id:'user', name:'You', tz, lat:51.51, lng:-0.13, method:3, isUser:true };
+    userCity = { id:'user', name:'You', tz, lat:null, lng:null, method:3, isUser:true, needsLocation:true };
     mOffset = getOff(tz);
-    // Try geolocation in background (non-blocking, 2s timeout)
-    try {
-        const pos = await new Promise((res, rej) => {
-            const timeoutId = setTimeout(() => rej('timeout'), 2000);
-            navigator.geolocation.getCurrentPosition(
-                p => { clearTimeout(timeoutId); res(p); },
-                e => { clearTimeout(timeoutId); rej(e); },
-                {timeout:2000, maximumAge:600000}
-            );
-        });
-        userCity = { id:'user', name:'You', tz, lat:pos.coords.latitude, lng:pos.coords.longitude, method:3, isUser:true };
-        localStorage.setItem('wp_u', JSON.stringify({ id:userCity.id, name:userCity.name, tz:userCity.tz, lat:Math.round(userCity.lat*10)/10, lng:Math.round(userCity.lng*10)/10, method:userCity.method, isUser:userCity.isUser }));
-        // Re-render with accurate coordinates
-        renderAll();
-    } catch {}
+    // Show location button if no saved location
+    const locBtn = $('#btn-location');
+    if (locBtn) locBtn.style.display = '';
+}
+
+function requestLocation() {
+    const locBtn = $('#btn-location');
+    if (!navigator.geolocation) { toast(t('locationNotSupported')); return; }
+    if (locBtn) locBtn.style.opacity = '0.5';
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            userCity = { id:'user', name:'You', tz, lat:pos.coords.latitude, lng:pos.coords.longitude, method:3, isUser:true };
+            localStorage.setItem('wp_u', JSON.stringify({ id:userCity.id, name:userCity.name, tz:userCity.tz, lat:Math.round(userCity.lat*10)/10, lng:Math.round(userCity.lng*10)/10, method:userCity.method, isUser:userCity.isUser }));
+            if (locBtn) locBtn.style.display = 'none';
+            renderAll();
+        },
+        () => { if (locBtn) locBtn.style.opacity = '1'; toast(t('locationDenied')); },
+        {timeout:5000, maximumAge:600000}
+    );
 }
 
 /* ── Prayer notifications ────────────────────────────────────────── */
