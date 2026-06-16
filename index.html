@@ -414,6 +414,8 @@
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
             #bg-pattern { display: none; }
         }
+        /* ── RTL: force timeline LTR ────────────────────── */
+        #tl-scroll, .ruler, .tl-scroll { direction: ltr; }
         /* ── Coarse pointer touch targets ──────────────── */
         @media (pointer: coarse) {
             .icon-btn, .btn, .chip, .modal-close, .chime-btn { min-height: 44px; min-width: 44px; }
@@ -491,8 +493,8 @@
     </header>
 
     <!-- ══════════════ STATUS BAR ══════════════ -->
-    <div class="status-bar" aria-live="polite">
-        <span id="status-badge" class="status-badge safe">
+    <div class="status-bar">
+        <span id="status-badge" class="status-badge safe" aria-live="polite">
             <span id="status-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>
             <span id="status-text">Safe Window</span>
         </span>
@@ -530,8 +532,8 @@
             </div>
             <!-- Selection bar -->
             <div class="sel-overlay" id="sel" style="left:41.67%;width:4.167%;top:0;bottom:0;" role="slider" aria-label="Meeting window selector" aria-valuemin="0" aria-valuemax="24" aria-valuenow="10" aria-valuetext="9:00 AM to 10:00 AM">
-                <div class="resize-h l" id="rz-l" tabindex="0"></div>
-                <div class="resize-h r" id="rz-r" tabindex="0"></div>
+                <div class="resize-h l" id="rz-l" tabindex="0" role="button" aria-label="Resize selection start"></div>
+                <div class="resize-h r" id="rz-r" tabindex="0" role="button" aria-label="Resize selection end"></div>
                 <div class="sel-handle t" id="h-top"></div>
                 <div class="sel-handle b" id="h-bot"></div>
             </div>
@@ -736,6 +738,8 @@ const STORAGE_CITIES = 'wp_cities_v1';
 let cities = [...CITIES], cache = {}, selStart = 9, selDur = 1;
 let dragging = false, resL = false, resR = false, dragX = 0, dragSL = 0, dragSD = 0;
 let h24 = false, dark = true, userCity = null;
+let _cachedLabelW = 140;
+function getLabelW() { return _cachedLabelW; }
 let enrolled = JSON.parse(localStorage.getItem('wp_e') || '[]');
 let lang = localStorage.getItem('wp_l') || 'en';
 let alarm = localStorage.getItem('wp_a') || 'ting';
@@ -743,7 +747,7 @@ const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s)
 
 /* ── Sanitise geocoded city names (XSS prevention) ───────────────── */
 function sanitizeName(s) {
-    return String(s).replace(/<[^>]*>/g,'').replace(/[<>"'`]/g,'').trim().slice(0, 60);
+    return String(s).replace(/<[^>]*>/g,'').replace(/[<>"'`\n\r]/g,'').trim().slice(0, 60);
 }
 
 /* ── i18n ──────────────────────────────────────────────────────────  */
@@ -877,6 +881,7 @@ function getLocalHours(tz) {
     }
 }
 function fmtH(h) {
+    if (isNaN(h)) return '--:--';
     let total = Math.round((((h % 24) + 24) % 24) * 60);
     total %= 1440;
     const hh = Math.floor(total / 60);
@@ -893,15 +898,22 @@ function clamp(v, m, M) { return Math.max(m, Math.min(M, v)); }
 
 /* ── API: fetch prayer times ──────────────────────────────────────── */
 function dateKey(tz) {
+    const today = new Date().toDateString();
+    const cacheKey = tz + today;
+    if (dateKey._cache?.[cacheKey]) return dateKey._cache[cacheKey];
+    let result;
     try {
         const parts = new Intl.DateTimeFormat('en-CA', {
             timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit'
         }).formatToParts(new Date());
         const m = Object.fromEntries(parts.map(p => [p.type, p.value]));
-        return `${m.day}-${m.month}-${m.year}`;
+        result = `${m.day}-${m.month}-${m.year}`;
     } catch {
-        return new Date().toISOString().slice(0,10).split('-').reverse().join('-');
+        result = new Date().toISOString().slice(0,10).split('-').reverse().join('-');
     }
+    if (!dateKey._cache) dateKey._cache = {};
+    dateKey._cache[cacheKey] = result;
+    return result;
 }
 function prayerCacheKey(city) {
     return `${city.id}:${Number(city.lat||0).toFixed(3)}:${Number(city.lng||0).toFixed(3)}:${city.method||''}:${dateKey(city.tz||'UTC')}`;
@@ -1047,7 +1059,8 @@ async function renderRow(city) {
         const b = document.createElement('div');
         b.className = `prayer-block ${name.toLowerCase()}`;
         b.style.left  = pct(localH) + '%';
-        b.style.width = pct(Math.max(durHours, 0.15)) + '%';
+        const maxWidthPct = 100 - pct(localH);
+        b.style.width = Math.min(pct(Math.max(durHours, 0.15)), maxWidthPct) + '%';
         b.textContent = PRAYER_NAMES[lang]?.[name] || name;
         b.title = `${name}: ${fmtH(localH)} – ${fmtH(localH + durHours)}`;
         b.setAttribute('aria-label', `${name}: ${fmtH(localH)} to ${fmtH(localH + durHours)}`);
@@ -1128,7 +1141,7 @@ function updateNow() {
      * strip width = tl-inner width (labelled by JS) – label width.
      * NOW line left = label-w + (m/24) * stripW.
      */
-    const lw  = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140;
+    const lw  = getLabelW();
     const iw  = ($('#tl-inner') || {offsetWidth:1000}).offsetWidth;
     const stripW = iw - lw;
     const nowPx  = lw + (m / 24) * stripW;
@@ -1170,6 +1183,7 @@ function renderRuler() {
 
         const l = document.createElement('span');
         l.className = 'ruler-lbl';
+        l.setAttribute('aria-hidden', 'true');
         l.style.left = leftExpr;
         l.textContent = h24
             ? `${String(h).padStart(2,'0')}:00`
@@ -1188,7 +1202,7 @@ function renderRuler() {
 
 /* ── Selection bar ────────────────────────────────────────────────── */
 function updateSel() {
-    const lw    = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140;
+    const lw    = getLabelW();
     const iw    = ($('#tl-inner') || {offsetWidth:1000}).offsetWidth;
     const stripW = iw - lw;
 
@@ -1211,7 +1225,6 @@ function updateSelA11y() {
 function checkConflicts() {
     const s = selStart, e = s + selDur;
     let cf = [];
-    const dk  = new Date().toISOString().slice(0,10).split('-').reverse().join('-');
     const ids = new Set([...cities.map(c => c.id), userCity?.id].filter(Boolean));
 
     for (const id of ids) {
@@ -1310,7 +1323,7 @@ async function updateCD() {
 
 /* ── Drag & resize ────────────────────────────────────────────────── */
 function tlW() {
-    const lw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140;
+    const lw = getLabelW();
     const i  = $('#tl-inner');
     return i ? (i.getBoundingClientRect().width - lw) : 960;
 }
@@ -1370,7 +1383,7 @@ document.addEventListener('touchend',  endD);
 // Click ruler to jump selection
 $('#ruler').onclick = e => {
     const r   = $('#ruler').getBoundingClientRect();
-    const lw  = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140;
+    const lw  = getLabelW();
     const stripW = r.width - lw;
     const clickX = e.clientX - r.left - lw;
     if (clickX < 0) return;
@@ -1409,7 +1422,7 @@ document.addEventListener('keydown', e => {
 });
 
 // Window resize: recalculate overlay and NOW line
-window.addEventListener('resize', () => { updateSel(); updateNow(); });
+window.addEventListener('resize', () => { _cachedLabelW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140; updateSel(); updateNow(); });
 
 /* ── Enrolled class schedule ─────────────────────────────────────── */
 function getOffsetForDate(tz, year, month, day) {
@@ -1614,7 +1627,9 @@ function exportICal() {
             const computed = compCls(cls);
             if (!computed.ts) return;
             const startTs = computed.ts;
-            const durMs = ((computed.utcEnd - computed.utcStart) * 3600000);
+            let durH = computed.utcEnd - computed.utcStart;
+            if (durH < 0) durH += 24;
+            const durMs = durH * 3600000;
             const endTs = startTs + durMs;
             lines.push(
                 'BEGIN:VEVENT',
@@ -1838,7 +1853,7 @@ async function detectUser() {
     if (sv) { try { userCity = JSON.parse(sv); return; } catch {} }
     // Use browser timezone for immediate detection (no permission needed)
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    userCity = { id:'user', name:'You', tz, lat:null, lng:null, method:3, isUser:true, needsLocation:true };
+    userCity = { id:'user', name:'You', tz, lat: userCity?.lat || 51.51, lng: userCity?.lng || -0.13, method:3, isUser:true, needsLocation:true };
     // Show location button if no saved location
     const locBtn = $('#btn-location');
     if (locBtn) locBtn.style.display = '';
@@ -1926,7 +1941,7 @@ setTimeout(() => { if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); },
 function scheduleMidnightRefresh() {
     const now = new Date();
     const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1) - now;
-    setTimeout(() => { cache = {}; renderAll(); scheduleMidnightRefresh(); }, msUntilMidnight + 5000);
+    setTimeout(() => { cache = {}; renderAll(); if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); scheduleMidnightRefresh(); }, msUntilMidnight + 5000);
 }
 scheduleMidnightRefresh();
 
