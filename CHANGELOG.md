@@ -2,6 +2,26 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.9.0] — 2026-06-16
+
+### Fixed
+- **Focus trap** — Added to all modals and course panel, Shift+Tab wraps
+- **Focus restore** — openM/closeM save and restore activeElement
+- **wp_u rounding** — 3dp coords, localStorage migration for existing 1dp users
+- **Share links** — Geocoded cities excluded (session-only), toast warning
+- **sw.js** — v4, network-first for HTML (fixes stale cache)
+- **AbortController** — Cancels stale Nominatim requests on new keystroke
+- **Layout caching** — tl-inner offsetWidth cached, invalidated on resize
+- **Keyboard transition** — Selection bar transition disabled during keydown
+- **Search a11y** — role=combobox, aria-autocomplete, aria-controls, aria-expanded, aria-live
+- **Remove button** — SVG pointer-events none (mobile tap fix)
+- **Noscript** — Fallback message for JS-disabled users
+- **Mobile perf** — Glass saturate reduced to 120% on mobile
+- **iCal UID** — Includes teacher name for uniqueness
+- **Enrolled save** — Strips alarmFired/computed fields before localStorage
+- **Alarm interval** — Early return when no classes enrolled
+- **Card nav** — aria-expanded on hamburger, role=dialog on menu
+
 ## [1.8.1] – 2026-06-16
 
 ### Added

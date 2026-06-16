@@ -3,8 +3,8 @@
 **Repo:** https://github.com/defaltadmin/world-prayer-times  
 **Live:** https://prayer.mscarabia.com  
 **Stack:** Single vanilla HTML file (index.html), no frameworks, no build tools  
-**Current version:** 1.8.1 (84 fixes + visual overhaul across 10 audit rounds)  
-**Last audit:** Round 10 — codebase clean. Visual polish applied.
+**Current version:** 1.9.0 (111 fixes across 12 audit rounds)  
+**Last audit:** Round 12 — all findings addressed.
 
 ---
 
@@ -22,6 +22,8 @@
 | 8 | Round 8 | #72–76 | Password hash correction, AudioContext reuse, countdown accuracy, day i18n |
 | 9 | Round 9 | #77–81 | renderAll double-call, loadFromURL zero, NOW Arabic, countdown 1s |
 | 10 | Round 10 | #82–84 | UA version, notifications tz, dead variable |
+| 11 | Round 11 | #85–95 | Dot grid, card nav, border glow, spotlight, visual polish |
+| 12 | Round 12 | #96–111 | Focus trap, wp_u 3dp, sw.js v4, AbortController, a11y, mobile perf |
 
 **Next reviewer:** Focus on visual design polish (see "Visual Design Audit" section) and any remaining edge cases. Don't re-flag fixed items.
 
@@ -214,6 +216,22 @@ These issues have been identified and resolved:
 82. ~~Nominatim UA version~~ — Bumped to 1.7.10
 83. ~~Notifications timezone~~ — Uses pd.tz from API instead of stored userCity.tz
 84. ~~Dead cpQuickLinks~~ — Removed unused variable
+85. ~~Focus trap~~ — Added to all modals and course panel
+86. ~~Focus restore~~ — openM/closeM save and restore activeElement
+87. ~~wp_u 3dp~~ — Coords rounded to 3dp, localStorage migration
+88. ~~Share links~~ — Geocoded cities excluded, toast warning
+89. ~~sw.js v4~~ — Network-first for HTML
+90. ~~AbortController~~ — Cancels stale Nominatim requests
+91. ~~Layout caching~~ — tl-inner offsetWidth cached
+92. ~~Keyboard transition~~ — Selection bar transition disabled during keydown
+93. ~~Search a11y~~ — role=combobox, aria-autocomplete, aria-live
+94. ~~Remove button SVG~~ — pointer-events none
+95. ~~Noscript~~ — Fallback for JS-disabled users
+96. ~~Mobile saturate~~ — Reduced to 120%
+97. ~~iCal UID~~ — Includes teacher name
+98. ~~Enrolled save~~ — Strips alarmFired before localStorage
+99. ~~Alarm interval~~ — Early return when no classes
+100. ~~Card nav a11y~~ — aria-expanded, role=dialog
 
 ---
 
