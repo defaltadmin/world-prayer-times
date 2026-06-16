@@ -759,6 +759,13 @@ const i18n = {
         privacyTitle:'Privacy & Data',gotIt:'Got it',ok:'OK',learnMore:'Learn more',share:'Share link',exportCal:'Export calendar',notifications:'Prayer notifications',
         settingsGear:'Settings',dragToSelect:'Drag the bar to select',close:'Close',test:'Test',unlock:'Unlock',lock:'lock',memberAccess:'Member access',
         attendance:'Attendance',deposit:'Deposit',quickLinks:'Quick Links',imEnrolled:"I'm Enrolled",enrolledStudents:'For enrolled students only.',
+        attendanceDesc:'Missing 2 lessons without notice releases your place. Excused absences cover up to 5 days.',
+        depositDesc:'£100 refundable. Contact your teacher for payment details.',
+        sannataynMen:'Sannatayn (Men) – WhatsApp',joinMenGroup:"Join the men's group chat",
+        tafseerAll:'Tafseer (All) – WhatsApp',tafseerDesc:'Men & Women, 3:30–5:30 PM BST',
+        timetable:'Timetable',viewSchedule:'View the full weekly schedule',
+        meetingLinks:'Meeting Links',meetingLinksDesc:'Zoom / Google Meet links for each class',
+        recordingLinks:'Recording Links',recordingLinksDesc:'Access past lesson recordings',
         enterPassword:'Enter the group password to access course links and class schedule.',passwordPlaceholder:'Enter password...',incorrectPw:'Incorrect password. Ask your teacher.',
         privacyBanner:'Preferences stored locally only. No cookies, no tracking.',useLocation:'Use my location',locationDenied:'Location access denied',locationNotSupported:'Geolocation not supported'
     },
@@ -769,6 +776,13 @@ const i18n = {
         privacyTitle:'الخصوصية والبيانات',gotIt:'فهمت',ok:'موافق',learnMore:'اعرف المزيد',share:'مشاركة رابط',exportCal:'تصدير التقويم',notifications:'إشعارات الصلاة',
         settingsGear:'الإعدادات',dragToSelect:'اسحب الشريط للتحديد',close:'إغلاق',test:'تجربة',unlock:'فتح',lock:'قفل',memberAccess:'وصول الأعضاء',
         attendance:'الحضور',deposit:'الوديعة',quickLinks:'روابط سريعة',imEnrolled:'أنا مسجل',enrolledStudents:'للمسجلين فقط.',
+        attendanceDesc:'غياب دروسين بدون إشعار يؤدي لفقدان مقعدك. الغياب المبرم يغطي حتى 5 أيام.',
+        depositDesc:'100£ قابلة للاسترداد. تواصل مع معلمك لتفاصيل الدفع.',
+        sannataynMen:'سنن (رجال) – واتساب',joinMenGroup:'انضم لمجموعة الرجال',
+        tafseerAll:'تفسير (الجميع) – واتساب',tafseerDesc:'رجال ونساء، 3:30–5:30 مساءً بتوقيت لندن',
+        timetable:'الجدول الزمني',viewSchedule:'عرض الجدول الأسبوعي الكامل',
+        meetingLinks:'روابط الاجتماعات',meetingLinksDesc:'روابط Zoom / Google Meet لكل فصل',
+        recordingLinks:'روابط التسجيلات',recordingLinksDesc:'الوصول لتسجيلات الدروس السابقة',
         enterPassword:'أدخل كلمة مرور المجموعة للوصول إلى روابط الدورة والجدول.',passwordPlaceholder:'أدخل كلمة المرور...',incorrectPw:'كلمة مرور خاطئة. اسأل معلمك.',
         privacyBanner:'التفضيلات محفوظة محلياً فقط. لا ملفات تعريف ارتباط، لا تتبع.',useLocation:'تحديد موقعي',locationDenied:'تم رفض الوصول للموقع',locationNotSupported:'تحديد الموقع غير مدعوم'
     },
@@ -827,6 +841,32 @@ function updateUI() {
     const cpUnlock = $('#course-pw-btn'); if (cpUnlock) cpUnlock.textContent = t('unlock');
     const cpInput = $('#course-pw-input'); if (cpInput) cpInput.placeholder = t('passwordPlaceholder');
     const cpBadge = $('.unlock-badge'); if (cpBadge) { const lb = cpBadge.querySelector('#course-lock-btn'); cpBadge.textContent = ''; cpBadge.appendChild(document.createTextNode('✓ ' + t('memberAccess') + ' ')); if (lb) cpBadge.appendChild(lb); }
+    // Course panel content translations
+    const cpCards = $$('.info-card-title');
+    if (cpCards[0]) cpCards[0].innerHTML = cpCards[0].querySelector('svg').outerHTML + t('attendance');
+    if (cpCards[1]) cpCards[1].innerHTML = cpCards[1].querySelector('svg').outerHTML + t('deposit');
+    const cpBodies = $$('.info-card-body');
+    if (cpBodies[0]) cpBodies[0].textContent = t('attendanceDesc');
+    if (cpBodies[1]) cpBodies[1].textContent = t('depositDesc');
+    const cpQuickLinks = $$('.info-card-title');
+    // Find the "Quick Links" text node - it's in a div, not an info-card-title
+    $$('[style*="Quick Links"], [style*="روابط سريعة"]').forEach(el => { if (el.textContent === 'Quick Links' || el.textContent === 'روابط سريعة') el.textContent = t('quickLinks'); });
+    // Translate link titles and descriptions
+    const linkTitles = $$('.info-link-title');
+    const linkDescs = $$('.info-link-desc');
+    if (linkTitles[0]) linkTitles[0].textContent = t('sannataynMen');
+    if (linkDescs[0]) linkDescs[0].textContent = t('joinMenGroup');
+    if (linkTitles[1]) linkTitles[1].textContent = t('tafseerAll');
+    if (linkDescs[1]) linkDescs[1].textContent = t('tafseerDesc');
+    if (linkTitles[2]) linkTitles[2].textContent = t('timetable');
+    if (linkDescs[2]) linkDescs[2].textContent = t('viewSchedule');
+    if (linkTitles[3]) linkTitles[3].textContent = t('meetingLinks');
+    if (linkDescs[3]) linkDescs[3].textContent = t('meetingLinksDesc');
+    if (linkTitles[4]) linkTitles[4].textContent = t('recordingLinks');
+    if (linkDescs[4]) linkDescs[4].textContent = t('recordingLinksDesc');
+    // I'm Enrolled
+    const cpEnrolled = $$('.info-card-title');
+    if (cpEnrolled[2]) cpEnrolled[2].innerHTML = cpEnrolled[2].querySelector('svg').outerHTML + t('imEnrolled');
     // Buttons
     const btnSettings = $('#btn-settings'); if (btnSettings) btnSettings.title = t('settingsGear');
     const btnShare = $('#btn-share'); if (btnShare) btnShare.title = t('share');
@@ -1064,11 +1104,11 @@ async function renderRow(city) {
         b.textContent = PRAYER_NAMES[lang]?.[name] || name;
         b.title = `${name}: ${fmtH(localH)} – ${fmtH(localH + durHours)}`;
         b.setAttribute('aria-label', `${name}: ${fmtH(localH)} to ${fmtH(localH + durHours)}`);
-        b.onclick = e => {
-            e.stopPropagation();
-            selStart = clamp(localH - selDur / 2, 0, 24 - selDur);
-            updateSel(); checkConflicts();
-        };
+        b.setAttribute('tabindex', '0');
+        b.setAttribute('role', 'button');
+        const centerSel = () => { selStart = clamp(localH - selDur / 2, 0, 24 - selDur); updateSel(); checkConflicts(); };
+        b.onclick = e => { e.stopPropagation(); centerSel(); };
+        b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); centerSel(); } };
         strip.appendChild(b);
     });
 
