@@ -46,7 +46,8 @@ _headers         # Cloudflare security headers
 _redirects       # Cloudflare redirects
 wrangler.toml    # Cloudflare config
 package.json     # Deploy scripts only (no runtime deps)
-CHANGELOG.md     # Version history (130+ fixes across 13 audit rounds)
+CHANGELOG.md     # Version history
+LICENSE          # MIT License
 ```
 
 ## How It Works
