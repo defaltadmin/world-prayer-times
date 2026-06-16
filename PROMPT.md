@@ -2,7 +2,23 @@
 
 **Repo:** https://github.com/defaltadmin/world-prayer-times  
 **Live:** https://prayer.mscarabia.com  
-**Stack:** Single vanilla HTML file (index.html), no frameworks, no build tools
+**Stack:** Single vanilla HTML file (index.html), no frameworks, no build tools  
+**Current version:** 1.7.5 (62 documented fixes across 5 audit rounds)  
+**Last audit:** Kimi 2.6 — all findings addressed
+
+---
+
+## Audit History
+
+| Round | Auditor | Fixes | Key Findings |
+|-------|---------|-------|--------------|
+| 1 | MiMo (self) | #1–30 | Timing bugs, globe removal, course panel |
+| 2 | Kimi 2.7 | #31–39 | Geocoding IDs, dead code, iCal RRULE, DST |
+| 3 | Qwen | #40–52 | iCal midnight wrap, dateKey perf, RTL, a11y |
+| 4 | MiMo (self) | #53–54 | Course panel i18n, prayer block keyboard |
+| 5 | Kimi 2.6 | #55–62 | iCal UTC, Nominatim ToS, focus CSS, privacy |
+
+**Next reviewer:** Focus on visual design polish (see "Visual Design Audit" section) and any remaining edge cases. Don't re-flag fixed items.
 
 ---
 
