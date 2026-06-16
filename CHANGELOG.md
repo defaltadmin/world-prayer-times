@@ -2,6 +2,12 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.7.4] – 2026-06-16
+
+### Fixed
+- **Course panel i18n** — All hardcoded English strings now translatable to Arabic (attendance, deposit, quick links, WhatsApp groups, timetable, meeting links, recording links, I'm Enrolled)
+- **Prayer block keyboard accessibility** — Added `tabindex="0"`, `role="button"`, and Enter/Space key handlers
+
 ## [1.7.3] – 2026-06-16
 
 ### Fixed

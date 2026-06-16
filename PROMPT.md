@@ -10,7 +10,7 @@
 
 | File | Purpose |
 |------|---------|
-| `index.html` | **The entire app** — HTML + CSS + JS in one file (~1942 lines) |
+| `index.html` | **The entire app** — HTML + CSS + JS in one file (~1997 lines) |
 | `wrangler.toml` | Cloudflare Pages config |
 | `_headers` | Cloudflare HTTP headers |
 | `_redirects` | Cloudflare redirects |
@@ -154,6 +154,8 @@ These issues have been identified and resolved:
 50. ~~getComputedStyle cache~~ — --label-w cached, refreshed on resize
 51. ~~Dead dk variable~~ — Removed from checkConflicts
 52. ~~fmtH NaN~~ — Returns --:-- on invalid input
+53. ~~Course panel i18n~~ — All hardcoded English strings translatable to Arabic
+54. ~~Prayer block keyboard~~ — tabindex=0, role=button, Enter/Space handlers
 
 ---
 
@@ -196,6 +198,43 @@ These issues have been identified and resolved:
 3. **Dark mode auto-switch** — Follow system preference via `prefers-color-scheme`
 4. **Analytics** — Track most used cities and time windows (privacy-friendly, no PII)
 5. **Unit tests** — Hidden `?test=1` mode for time calculation assertions
+
+---
+
+## Visual Design Audit
+
+The site should look polished, modern, and professional. When auditing, check:
+
+### Visual Quality
+- **Prayer block colors** — Are they distinct, accessible (WCAG AA), and harmonious?
+- **Typography** — Is Inter/JetBrains Mono/Amiri used well? Font sizes, weights, spacing?
+- **Spacing consistency** — Are paddings, margins, and gaps uniform across all sections?
+- **Card/panel styling** — Do info cards, modals, and the course panel look refined?
+- **Dark mode** — Is contrast good? Any muddy backgrounds or hard-to-read text?
+- **Light mode** — Are borders, shadows, and backgrounds clean? No invisible elements?
+
+### Layout & Polish
+- **Timeline alignment** — Do prayer blocks, ruler marks, and NOW line align precisely?
+- **Sticky labels** — Do city labels stay fixed while scrolling horizontally?
+- **Selection bar** — Is the cyan bar visually clear and easy to grab?
+- **Status badge** — Does Safe (green) / Conflict (red) look good?
+- **Mobile layout** — Does everything stack and scroll gracefully on small screens?
+
+### Animation & Transitions
+- **Hover states** — Do buttons, chips, and blocks have smooth hover feedback?
+- **Panel slide** — Does the course panel slide in/out smoothly?
+- **Modal transitions** — Do modals fade/scale in cleanly?
+- **NOW line** — Is it visible but not distracting?
+
+### Things to Suggest
+- Better color combinations or gradients
+- Improved spacing or alignment
+- Typography improvements
+- Icon refinements
+- Any visual bugs or inconsistencies
+- Ideas to make it look more premium/polished
+
+The goal: **make it look like a shipped product, not a prototype.**
 
 ---
 
