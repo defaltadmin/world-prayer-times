@@ -206,11 +206,11 @@
         .prayer-block.asr     { background: rgba(251,146,60,0.38);  color: #7c2d12; border-color: var(--prayer-asr); }
         .prayer-block.maghrib { background: rgba(248,113,113,0.35); color: #7f1d1d; border-color: var(--prayer-maghrib); }
         .prayer-block.isha    { background: rgba(167,139,250,0.38); color: #4c1d95; border-color: var(--prayer-isha); }
-        [data-theme="light"] .prayer-block.fajr    { background: rgba(6,182,212,0.2); }
-        [data-theme="light"] .prayer-block.dhuhr   { background: rgba(251,191,36,0.25); }
-        [data-theme="light"] .prayer-block.asr     { background: rgba(251,146,60,0.25); }
-        [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.2); }
-        [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.2); }
+        [data-theme="light"] .prayer-block.fajr    { background: rgba(6,182,212,0.35); }
+        [data-theme="light"] .prayer-block.dhuhr   { background: rgba(251,191,36,0.35); }
+        [data-theme="light"] .prayer-block.asr     { background: rgba(251,146,60,0.35); }
+        [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.3); }
+        [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.3); }
 
         /* ── Class event overlays ────────────────────────── */
         .class-ev {
@@ -1127,10 +1127,8 @@ async function renderRow(city) {
     enrolled.forEach(cls => {
         if (cls.utcStart === undefined) return;
         // cls.utcStart/utcEnd are now proper UTC hours from compCls
-        let ls = cls.utcStart + pd.off;
-        let le = cls.utcEnd + pd.off;
-        while (ls < 0) ls += 24; while (ls >= 24) ls -= 24;
-        while (le < 0) le += 24; while (le >= 24) le -= 24;
+        let ls = (cls.utcStart + pd.off + 24) % 24;
+        let le = (cls.utcEnd + pd.off + 24) % 24;
         const ev = document.createElement('div');
         ev.className = 'class-ev';
         ev.style.left  = pct(ls) + '%';
@@ -1290,8 +1288,7 @@ function checkConflicts() {
                 endU = (pd.utc[name] + (FALLBACK_DUR[name] || 0.5)) % 24;
             }
             // Convert end from UTC to local
-            let endL = endU + pd.off;
-            while (endL < 0) endL += 24; endL = endL % 24;
+            let endL = (endU + pd.off + 24) % 24;
 
             const overlaps = endL < localH
                 ? (s < endL || e > localH)   // block wraps midnight
