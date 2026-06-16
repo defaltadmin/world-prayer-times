@@ -10,7 +10,7 @@
 
 | File | Purpose |
 |------|---------|
-| `index.html` | **The entire app** — HTML + CSS + JS in one file (~1997 lines) |
+| `index.html` | **The entire app** — HTML + CSS + JS in one file (~2004 lines) |
 | `wrangler.toml` | Cloudflare Pages config |
 | `_headers` | Cloudflare HTTP headers |
 | `_redirects` | Cloudflare redirects |
@@ -156,6 +156,14 @@ These issues have been identified and resolved:
 52. ~~fmtH NaN~~ — Returns --:-- on invalid input
 53. ~~Course panel i18n~~ — All hardcoded English strings translatable to Arabic
 54. ~~Prayer block keyboard~~ — tabindex=0, role=button, Enter/Space handlers
+55. ~~iCal meeting window UTC~~ — Local selection converted to UTC with user offset
+56. ~~Nominatim User-Agent~~ — Added per ToS
+57. ~~Prayer block focus CSS~~ — :focus outline for keyboard users
+58. ~~Class overlay a11y~~ — title + aria-label with teacher and times
+59. ~~Privacy modal dismiss~~ — Got it button sets localStorage and hides banner
+60. ~~City row hover~~ — Increased visibility
+61. ~~fmtH Infinity~~ — Handles Infinity and -0
+62. ~~loadFromURL validation~~ — Coordinates validated
 
 ---
 

@@ -2,6 +2,18 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.7.5] – 2026-06-16
+
+### Fixed
+- **iCal meeting window UTC** — Local selection times now converted to UTC using user's timezone offset
+- **Nominatim User-Agent** — Added per Nominatim ToS requirement
+- **Prayer block focus** — Added `:focus` CSS with outline for keyboard navigation
+- **Class overlay accessibility** — Added `title` and `aria-label` with teacher + time info
+- **Privacy modal dismiss** — "Got it" button now sets localStorage and hides banner
+- **City row hover** — Increased opacity from 0.01 to 0.03 for visibility
+- **fmtH Infinity** — Now handles `Infinity` and `-0` inputs
+- **loadFromURL validation** — Coordinates validated before adding cities
+
 ## [1.7.4] – 2026-06-16
 
 ### Fixed
