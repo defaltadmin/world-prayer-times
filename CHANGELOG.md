@@ -2,6 +2,23 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.7.3] – 2026-06-16
+
+### Fixed
+- **iCal midnight wrap** — Duration calculation handles classes crossing UTC midnight (`if (durH < 0) durH += 24`)
+- **detectUser fallback** — Preserves London coords (51.51, -0.13) when no saved location exists
+- **dateKey memoized** — Per-timezone cache avoids `Intl.DateTimeFormat` in drag hot path
+- **Notifications at midnight** — `schedulePrayerNotifs()` re-called after midnight refresh
+- **Screen reader spam** — `aria-live="polite"` moved from status-bar to status-badge only
+- **Ruler labels** — Added `aria-hidden="true"` to prevent screen reader spam
+- **RTL timeline** — Forced `direction: ltr` on timeline/ruler containers
+- **Prayer block overflow** — Width capped at timeline boundary for midnight-wrapping blocks
+- **Resize handles** — Added `role="button"` and `aria-label` for accessibility
+- **iCal XSS** — `sanitizeName()` now strips newlines (`\n\r`)
+- **getComputedStyle caching** — `--label-w` cached, refreshed on resize only
+- **Dead code** — Removed unused `dk` variable from `checkConflicts()`
+- **fmtH NaN** — Returns `--:--` instead of `NaN:NaN` on invalid input
+
 ## [1.7.2] – 2026-06-16
 
 ### Fixed

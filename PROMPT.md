@@ -141,6 +141,19 @@ These issues have been identified and resolved:
 37. ~~Prayer blocks lack aria-label~~ — Added for screen readers
 38. ~~Nominatim no rate limit~~ — 1s minimum between requests enforced
 39. ~~Arabic class subjects~~ — SUBJECTS translation map added
+40. ~~iCal midnight wrap~~ — Duration handles classes crossing UTC midnight
+41. ~~detectUser fallback~~ — Preserves London coords when no saved location
+42. ~~dateKey memoized~~ — Per-timezone cache avoids Intl in hot path
+43. ~~Notifications at midnight~~ — Re-scheduled after midnight refresh
+44. ~~Screen reader spam~~ — aria-live on status-badge only
+45. ~~Ruler labels~~ — aria-hidden for screen readers
+46. ~~RTL timeline~~ — Forces direction: ltr on timeline containers
+47. ~~Prayer block overflow~~ — Width capped at timeline boundary
+48. ~~Resize handles a11y~~ — role=button + aria-label
+49. ~~iCal XSS newlines~~ — sanitizeName strips \n\r
+50. ~~getComputedStyle cache~~ — --label-w cached, refreshed on resize
+51. ~~Dead dk variable~~ — Removed from checkConflicts
+52. ~~fmtH NaN~~ — Returns --:-- on invalid input
 
 ---
 
@@ -173,7 +186,6 @@ These issues have been identified and resolved:
 ## Known Issues to Fix
 
 1. **DST edge cases** — Prayer times may shift during DST transitions if the API returns stale offsets
-2. **Class overlay midnight wrap** — If a class spans midnight in UTC, the overlay width calculation may be wrong
 
 ---
 
@@ -183,12 +195,7 @@ These issues have been identified and resolved:
 2. **Custom color themes** — Allow user to customize prayer block colors
 3. **Dark mode auto-switch** — Follow system preference via `prefers-color-scheme`
 4. **Analytics** — Track most used cities and time windows (privacy-friendly, no PII)
-
----
-
-## Technical Debt
-
-1. **Add tests** — Unit tests for time calculations (compCls, getLocalHours, fmtH)
+5. **Unit tests** — Hidden `?test=1` mode for time calculation assertions
 
 ---
 
