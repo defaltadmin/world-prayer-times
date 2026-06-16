@@ -3,8 +3,8 @@
 **Repo:** https://github.com/defaltadmin/world-prayer-times  
 **Live:** https://prayer.mscarabia.com  
 **Stack:** Single vanilla HTML file (index.html), no frameworks, no build tools  
-**Current version:** 1.9.0 (111 fixes across 12 audit rounds)  
-**Last audit:** Round 12 — all findings addressed.
+**Current version:** 1.10.0 (130+ fixes across 13 audit rounds)  
+**Last audit:** Round 13 — all findings addressed.
 
 ---
 
@@ -24,6 +24,7 @@
 | 10 | Round 10 | #82–84 | UA version, notifications tz, dead variable |
 | 11 | Round 11 | #85–95 | Dot grid, card nav, border glow, spotlight, visual polish |
 | 12 | Round 12 | #96–111 | Focus trap, wp_u 3dp, sw.js v4, AbortController, a11y, mobile perf |
+| 13 | Round 13 | #112–130 | render race, URL clamp, dot grid perf, midnight tz, iOS, security |
 
 **Next reviewer:** Focus on visual design polish (see "Visual Design Audit" section) and any remaining edge cases. Don't re-flag fixed items.
 

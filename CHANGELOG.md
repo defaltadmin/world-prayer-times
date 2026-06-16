@@ -2,6 +2,32 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.10.0] — 2026-06-16
+
+### Fixed
+- **renderAll race condition** — Generation counter prevents duplicate rows on rapid city add/remove
+- **URL clamp** — selStart clamped after dur parsed (prevents e>24 breaking conflict detection)
+- **iOS alarm warning** — Toast when notifications enabled on iOS (tab must stay open)
+- **iOS AudioContext** — Resume on visibilitychange for Safari background tab
+- **Dot grid perf** — Resize debounced 150ms, dirty flag skips redraw when dots at rest
+- **Midnight refresh timezone** — Uses user city timezone instead of browser local
+- **Merged intervals** — updateClsCountdown merged into tickClocks (single 1s interval)
+- **enrolled save** — Strips alarmFired/computed fields before localStorage
+- **sanitizeName** — Strips invisible/bidi Unicode characters
+- **closeM** — Clears add city modal search on any close
+- **Course panel** — Password cleared on panel close
+- **Password shake** — Reflow forces animation restart on rapid submit
+- **scrollToNow** — Respects prefers-reduced-motion
+- **loadFromURL order** — Runs after loadSavedCities (URL overrides saved)
+- **Card nav** — Escape closes menu, inert on #app when open
+- **Course panel a11y** — role=dialog, aria-labelledby, panel-bg aria-hidden
+- **color-scheme** — Updates on theme toggle for browser scrollbars
+- **overscroll-behavior** — contain on class timetable (mobile scroll bleed)
+- **iCal** — Comma escape in DESCRIPTION per RFC 5545
+- **Custom cities** — Cap at 20 entries in localStorage
+- **package.json** — Version updated to 1.10.0
+- **SECURITY.md** — Supported versions updated
+
 ## [1.9.0] — 2026-06-16
 
 ### Fixed
