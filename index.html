@@ -366,7 +366,7 @@
         }
         .city-row:hover .remove-btn { opacity: 1; }
         .remove-btn:hover { color: var(--danger); background: rgba(239,68,68,0.1); }
-        .remove-btn svg { width: 10px; height: 10px; }
+        .remove-btn svg { width: 10px; height: 10px; pointer-events: none; }
 
         /* ── Prayer blocks ───────────────────────────────── */
         .prayer-block {
@@ -609,7 +609,7 @@
         /* ── Mobile ─────────────────────────────────────── */
         @media (max-width: 768px) {
             :root { --label-w: 120px; --tl-min: 700px; }
-            .glass { backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%); }
+            .glass { backdrop-filter: blur(12px) saturate(120%); -webkit-backdrop-filter: blur(12px) saturate(120%); }
             .city-label { padding: 6px 8px 6px 10px; }
             .city-name { font-size: 0.78rem; }
             .city-clock { font-size: 0.68rem; }
@@ -626,6 +626,7 @@
     </style>
 </head>
 <body>
+<noscript><p style="text-align:center;padding:40px;font-family:sans-serif;color:#d0dce6;background:#091117;">This app requires JavaScript to display prayer times.</p></noscript>
 <!-- Loading screen -->
 <div id="loader">
     <div class="loader-spinner"></div>
@@ -656,7 +657,7 @@
             <button class="icon-btn" id="btn-now" title="Scroll to current time" aria-label="Scroll to current time">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </button>
-            <button class="icon-btn" id="btn-menu" title="Menu" aria-label="Open menu">
+            <button class="icon-btn" id="btn-menu" title="Menu" aria-label="Open menu" aria-expanded="false">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
         </div>
@@ -664,7 +665,7 @@
 
     <!-- ══════════════ CARD NAV MENU ══════════════ -->
     <div class="card-nav-overlay" id="card-nav-overlay"></div>
-    <nav class="card-nav-menu" id="card-nav-menu" aria-modal="true" aria-label="Navigation menu">
+    <nav class="card-nav-menu" id="card-nav-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
         <div class="card-nav-header">
             <span class="card-nav-title">Menu</span>
             <button class="modal-close" id="close-card-nav" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -864,8 +865,8 @@
         <div class="modal">
             <div class="modal-head"><span class="modal-title">Add City</span><button class="modal-close" data-close="m-addcity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
             <div id="popular-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
-            <input type="text" class="search-input" id="city-search" placeholder="Search any city worldwide..." autocomplete="off">
-            <div class="search-results" id="search-results"></div>
+            <input type="text" class="search-input" id="city-search" placeholder="Search any city worldwide..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="search-results" aria-expanded="false">
+            <div class="search-results" id="search-results" role="list" aria-live="polite"></div>
             <div class="search-hint">Searches all cities via OpenStreetMap</div>
         </div>
     </div>
@@ -1410,7 +1411,7 @@ function updateNow() {
      * NOW line left = label-w + (m/24) * stripW.
      */
     const lw  = getLabelW();
-    const iw  = ($('#tl-inner') || {offsetWidth:1000}).offsetWidth;
+    const iw  = getInnerW();
     const stripW = iw - lw;
     const nowPx  = lw + (m / 24) * stripW;
 
@@ -1471,7 +1472,7 @@ function renderRuler() {
 /* ── Selection bar ────────────────────────────────────────────────── */
 function updateSel() {
     const lw    = getLabelW();
-    const iw    = ($('#tl-inner') || {offsetWidth:1000}).offsetWidth;
+    const iw    = getInnerW();
     const stripW = iw - lw;
 
     $('#sel').style.left  = (lw + (selStart / 24) * stripW) + 'px';
@@ -1680,6 +1681,8 @@ $('#ruler-scroll').addEventListener('scroll', () => {
 // Keyboard controls: arrow keys move, [ ] resize
 document.addEventListener('keydown', e => {
     if (['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+    const sel = $('#sel');
+    if (sel) sel.style.transition = 'none';
     const step = e.shiftKey ? 1 : 0.5;
     let changed = false;
     if      (e.key === 'ArrowRight') { selStart = clamp(selStart + step, 0, 24 - selDur); changed = true; }
@@ -1688,9 +1691,12 @@ document.addEventListener('keydown', e => {
     else if (e.key === '[')          { selDur = clamp(selDur - step, 0.5, 24 - selStart); changed = true; }
     if (changed) { e.preventDefault(); updateSel(); checkConflicts(); }
 });
+document.addEventListener('keyup', () => { const sel = $('#sel'); if (sel) sel.style.transition = ''; });
 
 // Window resize: recalculate overlay and NOW line
-window.addEventListener('resize', () => { _cachedLabelW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140; updateSel(); updateNow(); });
+let _cachedInnerW = 0;
+window.addEventListener('resize', () => { _cachedInnerW = 0; _cachedLabelW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140; });
+function getInnerW() { return _cachedInnerW || (_cachedInnerW = $('#tl-inner')?.offsetWidth || 1000); }
 
 /* ── Enrolled class schedule ─────────────────────────────────────── */
 function getOffsetForDate(tz, year, month, day) {
@@ -1735,7 +1741,7 @@ function compCls(cls) {
 }
 function updateEnrolled() {
     enrolled = enrolled.map(c => { const d = compCls(c); return {...c, ...d}; });
-    localStorage.setItem('wp_e', JSON.stringify(enrolled));
+    localStorage.setItem('wp_e', JSON.stringify(enrolled.map(({day,start,end,subject,teacher}) => ({day,start,end,subject,teacher}))));
 }
 function renderToggles() {
     const ct = $('#class-timetable');
@@ -1816,6 +1822,7 @@ function playAlarm() {
     }
 }
 setInterval(() => {
+    if (!enrolled.length) return;
     const now = Date.now();
     enrolled.forEach(c => {
         const {ts} = compCls(c);
@@ -1827,8 +1834,22 @@ setInterval(() => {
 }, 15000);
 
 /* ── Modal helpers ───────────────────────────────────────────────── */
-function openM(id)  { $(id).classList.add('open');    }
-function closeM(id) { $(id).classList.remove('open'); }
+let _lastFocus = null;
+function trapFocus(modalEl) {
+    const sel = 'button,input,select,textarea,[tabindex]:not([tabindex="-1"])';
+    modalEl.addEventListener('keydown', e => {
+        if (e.key !== 'Tab' || !modalEl.classList.contains('open')) return;
+        const nodes = [...modalEl.querySelectorAll(sel)].filter(n => !n.disabled && n.offsetParent !== null);
+        if (!nodes.length) return;
+        const first = nodes[0], last = nodes[nodes.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+}
+function openM(id)  { _lastFocus = document.activeElement; $(id).classList.add('open'); const first = $(id).querySelector('button,input,[tabindex]'); if (first) setTimeout(() => first.focus(), 50); }
+function closeM(id) { $(id).classList.remove('open'); if (_lastFocus && _lastFocus.focus) { _lastFocus.focus(); _lastFocus = null; } }
+['#m-settings','#m-help','#m-addcity','#m-privacy'].forEach(id => { const el = $(id); if (el) trapFocus(el); });
+const cp = $('#course-panel'); if (cp) trapFocus(cp);
 $$('[data-close]').forEach(b => b.onclick = () => closeM('#' + b.dataset.close));
 // Privacy "Got it" also dismisses the banner
 $('#privacy-gotit').onclick = () => { closeM('#m-privacy'); localStorage.setItem('wp_privacy_ok','1'); const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); };
@@ -1883,14 +1904,17 @@ $('#test-chime').onclick  = () => playAlarm();
 
 /* ── Share & iCal ────────────────────────────────────────────────── */
 function genShareLink() {
-    const ids = cities.map(c => c.id.toLowerCase().replace(/[^a-z0-9]/g,'')).join(',');
+    const hasGeo = cities.some(c => c.geo);
+    const ids = cities.filter(c => !c.geo).map(c => c.id.toLowerCase().replace(/[^a-z0-9]/g,'')).join(',');
     const p   = new URLSearchParams({cities:ids, start:selStart.toFixed(2), dur:selDur.toFixed(2)});
     if (lang === 'ar') p.set('lang','ar');
-    return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
+    return { url: `${window.location.origin}${window.location.pathname}?${p.toString()}`, hasGeo };
 }
 $('#btn-share').onclick = async () => {
-    try { await navigator.clipboard.writeText(genShareLink()); toast('Link copied! 🔗'); }
-    catch { window.prompt('Share link:', genShareLink()); }
+    const { url, hasGeo } = genShareLink();
+    const msg = hasGeo ? 'Link copied! (custom cities not included) 🔗' : 'Link copied! 🔗';
+    try { await navigator.clipboard.writeText(url); toast(msg); }
+    catch { window.prompt('Share link:', url); }
 };
 $('#btn-ical').onclick = () => exportICal();
 function exportICal() {
@@ -1918,7 +1942,7 @@ function exportICal() {
                 `DTEND:${fmtUTC(endTs)}`,
                 `RRULE:FREQ=WEEKLY;BYDAY=${dayMapCal[cls.day]}`,
                 `DESCRIPTION:Sannatayn class with ${cls.teacher}`,
-                `UID:${cls.day}-${cls.start.replace(':','')}-${cls.subject}@prayer.mscarabia.com`,
+                `UID:${cls.day}-${cls.start.replace(':','')}-${cls.subject}-${cls.teacher}@prayer.mscarabia.com`,
                 'END:VEVENT'
             );
         });
@@ -2061,13 +2085,15 @@ function addCity(city) {
 // Geocoding search (Nominatim) with 400ms debounce + 1s rate limit
 let _geoTimer = null;
 let _lastGeoCall = 0;
+let _geoAbort = null;
 $('#city-search').oninput = () => {
     const q  = $('#city-search').value.trim();
     const sr = $('#search-results');
     clearTimeout(_geoTimer);
+    if (_geoAbort) _geoAbort.abort();
     const ex = new Set([...cities.map(c=>c.id), 'user']);
     const local = POOL.filter(c => !ex.has(c.id) && c.name.toLowerCase().includes(q.toLowerCase()));
-    if (q.length < 2) { sr.innerHTML = ''; return; }
+    if (q.length < 2) { sr.innerHTML = ''; $('#city-search')?.setAttribute('aria-expanded','false'); return; }
     if (local.length) renderSearchItems(local, sr); else sr.innerHTML = '<div class="search-spinner">Searching…</div>';
     _geoTimer = setTimeout(async () => {
         const elapsed = Date.now() - _lastGeoCall;
@@ -2076,7 +2102,8 @@ $('#city-search').oninput = () => {
         _lastGeoCall = Date.now();
         try {
             const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
-            const data = await (await fetch(url, {headers:{'Accept-Language':'en','User-Agent':'PrayerTimesApp/1.7.9 (https://prayer.mscarabia.com)'}})).json();
+            _geoAbort = new AbortController();
+            const data = await (await fetch(url, {signal:_geoAbort.signal, headers:{'Accept-Language':'en','User-Agent':'PrayerTimesApp/1.8.2 (https://prayer.mscarabia.com)'}})).json();
             const results = [], seen = new Set(local.map(c=>c.id));
             data.forEach(d => {
                 const name    = sanitizeName(d.address?.city || d.address?.town || d.address?.village || d.name || '').trim();
@@ -2101,11 +2128,13 @@ $('#city-search').oninput = () => {
 };
 
 function renderSearchItems(items, sr, showCountry=false) {
-    if (!items.length) { sr.innerHTML = '<div class="search-spinner">No results</div>'; return; }
+    if (!items.length) { sr.innerHTML = '<div class="search-spinner">No results</div>'; $('#city-search')?.setAttribute('aria-expanded','false'); return; }
     sr.innerHTML = '';
+    $('#city-search')?.setAttribute('aria-expanded','true');
     items.forEach(c => {
         const div = document.createElement('div');
         div.className = 'search-item';
+        div.setAttribute('role', 'listitem');
         const nameEl = document.createElement('span');
         nameEl.textContent = c.name;
         if (c.country && showCountry) {
@@ -2148,7 +2177,7 @@ function requestLocation() {
         pos => {
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
             userCity = { id:'user', name:'You', tz, lat:pos.coords.latitude, lng:pos.coords.longitude, method:3, isUser:true };
-            localStorage.setItem('wp_u', JSON.stringify({ id:userCity.id, name:userCity.name, tz:userCity.tz, lat:Math.round(userCity.lat*10)/10, lng:Math.round(userCity.lng*10)/10, method:userCity.method, isUser:userCity.isUser }));
+            localStorage.setItem('wp_u', JSON.stringify({ id:userCity.id, name:userCity.name, tz:userCity.tz, lat:Math.round(userCity.lat*1000)/1000, lng:Math.round(userCity.lng*1000)/1000, method:userCity.method, isUser:userCity.isUser }));
             if (locBtn) locBtn.style.display = 'none';
             renderAll();
         },
@@ -2203,7 +2232,16 @@ loadSavedCities();
 const initTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 try {
     const sv = localStorage.getItem('wp_u');
-    if (sv) userCity = JSON.parse(sv);
+    if (sv) {
+        const u = JSON.parse(sv);
+        // Migrate 1dp coords to 3dp for cache key consistency
+        if (u.lat && String(u.lat).split('.')[1]?.length < 3) {
+            u.lat = Math.round(u.lat * 1000) / 1000;
+            u.lng = Math.round(u.lng * 1000) / 1000;
+            localStorage.setItem('wp_u', JSON.stringify(u));
+        }
+        userCity = u;
+    }
 } catch {}
 if (!userCity) userCity = { id:'user', name:'You', tz:initTz, lat:51.51, lng:-0.13, method:3, isUser:true };
 
@@ -2372,15 +2410,15 @@ let _updateNotifyBadge;
     const menu = $('#card-nav-menu');
     const btnMenu = $('#btn-menu');
     const btnClose = $('#close-card-nav');
-    function openMenu() { overlay.classList.add('open'); menu.classList.add('open'); }
-    function closeMenu() { overlay.classList.remove('open'); menu.classList.remove('open'); }
+    function openMenu() { overlay.classList.add('open'); menu.classList.add('open'); btnMenu?.setAttribute('aria-expanded','true'); }
+    function closeMenu() { overlay.classList.remove('open'); menu.classList.remove('open'); btnMenu?.setAttribute('aria-expanded','false'); }
     if (btnMenu) btnMenu.onclick = openMenu;
     if (btnClose) btnClose.onclick = closeMenu;
     if (overlay) overlay.onclick = closeMenu;
     // Wire nav items directly (no hidden orphan buttons)
     $('#nav-now')?.addEventListener('click', () => { closeMenu(); scrollToNow(); });
     $('#nav-course')?.addEventListener('click', () => { closeMenu(); $('#btn-course')?.click?.(); });
-    $('#nav-share')?.addEventListener('click', () => { closeMenu(); navigator.clipboard?.writeText(genShareLink()).then(()=>toast('Link copied! 🔗')).catch(()=>window.prompt('Share link:',genShareLink())); });
+    $('#nav-share')?.addEventListener('click', () => { closeMenu(); const { url, hasGeo } = genShareLink(); const msg = hasGeo ? 'Link copied! (custom cities not included) 🔗' : 'Link copied! 🔗'; navigator.clipboard?.writeText(url).then(()=>toast(msg)).catch(()=>window.prompt('Share link:',url)); });
     $('#nav-ical')?.addEventListener('click', () => { closeMenu(); exportICal(); });
     $('#nav-notify')?.addEventListener('click', async () => {
         closeMenu();
