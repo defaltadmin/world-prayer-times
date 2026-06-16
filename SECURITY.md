@@ -10,8 +10,9 @@ If you discover a security vulnerability within World Prayer Times, please send 
 
 | Version | Supported |
 |---------|-----------|
-| 1.4.x | ✅ Yes |
-| < 1.4 | ❌ No |
+| 1.10.x | ✅ Yes |
+| 1.8.x | ✅ Yes |
+| < 1.8 | ❌ No |
 
 ## Security Measures
 
