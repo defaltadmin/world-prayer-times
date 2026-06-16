@@ -2,6 +2,26 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.7.1] – 2026-06-16
+
+### Fixed
+- **Geocoding ID collision** — Lat/lng rounded to 2 decimal places instead of integers, preventing distinct cities from getting identical IDs
+- **Dead user row code** — Removed placeholder row, pin icon, YOU badge, and `isUser` checks from `renderRow()` (user row no longer rendered)
+- **Notifications before geolocation** — `schedulePrayerNotifs()` now gated on `userCity.lat` to prevent scheduling for wrong location
+- **iCal recurrence** — Enrolled class events now include `RRULE:FREQ=WEEKLY;BYDAY=XX` for recurring weekly events
+- **compCls DST off-by-one** — London offset now computed per class date via `getOffsetForDate()`, not current date
+- **ARIA aria-valuenow** — Fixed initial HTML value to match post-init state
+- **Prayer block accessibility** — Added `aria-label` with prayer name and time range
+- **Cache pruning** — Simplified to `filter().forEach(delete)` pattern
+- **Stale comment** — Removed outdated `mOffset` reference in `detectUser`
+
+### Added
+- **Arabic class subjects** — `SUBJECTS` translation map for course overlay labels
+- **Nominatim rate limit** — 1s minimum between geocoding requests
+
+### Changed
+- **Selection bar tabindex** — Moved from parent overlay to resize handles for better mobile keyboard UX
+
 ## [1.7.0] – 2026-06-16
 
 ### Fixed

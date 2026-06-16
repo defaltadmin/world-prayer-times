@@ -124,13 +124,22 @@ These issues have been identified and resolved:
 21. ~~Status bar not announced~~ — aria-live="polite"
 22. ~~Duplicate class enrollment~~ — Key includes start time
 23. ~~Auto-prompt geolocation~~ — Replaced with "Use my location" button
-24. ~~Prayer timing inaccurate~~ — Uses `pd.loc[name]` directly instead of `toMaster(u)` UTC conversion
-25. ~~Globe removed~~ — Canvas wireframe removed (janky on desktop, not needed)
-26. ~~User "You" row removed~~ — No longer displayed on timeline
-27. ~~toMaster() / mOffset eliminated~~ — No longer needed; local times used directly
-28. ~~Course panel toggle broken~~ — Now properly shows locked/unlocked state on open
-29. ~~Class overlays wrong timezone~~ — `compCls()` now converts London local → UTC properly
-30. ~~iCal missing enrolled classes~~ — Export now includes all enrolled class events at correct times
+24. ~~Prayer timing inaccurate~~ — Uses `pd.loc[name]` directly
+25. ~~Globe removed~~ — Canvas wireframe removed
+26. ~~User "You" row removed~~ — No longer displayed
+27. ~~toMaster() / mOffset eliminated~~ — Local times used directly
+28. ~~Course panel toggle broken~~ — Proper locked/unlocked state on open
+29. ~~Class overlays wrong timezone~~ — compCls converts London local → UTC
+30. ~~iCal missing enrolled classes~~ — Export includes all enrolled events
+31. ~~Geocoding ID collision~~ — Uses 2 decimal places for lat/lng in ID
+32. ~~Dead user row code~~ — Placeholder, pin icon, YOU badge removed from renderRow
+33. ~~Notifications fire before geolocation~~ — Gated on userCity.lat
+34. ~~iCal single-use events~~ — Enrolled classes use RRULE:FREQ=WEEKLY
+35. ~~compCls DST off-by-one~~ — Offset computed per class date via getOffsetForDate()
+36. ~~ARIA aria-valuenow mismatch~~ — Fixed to match post-init value
+37. ~~Prayer blocks lack aria-label~~ — Added for screen readers
+38. ~~Nominatim no rate limit~~ — 1s minimum between requests enforced
+39. ~~Arabic class subjects~~ — SUBJECTS translation map added
 
 ---
 
