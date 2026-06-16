@@ -255,6 +255,7 @@
             color: #fff; background: var(--danger);
             padding: 2px 6px; border-radius: 3px; letter-spacing: 0.08em; white-space: nowrap;
         }
+        [lang="ar"] .now-line::after { content: 'الآن'; }
 
         /* ── Add city row ─────────────────────────────────── */
         .add-row {
@@ -1325,6 +1326,7 @@ function tickClocks() {
         if (tz) el.textContent = new Date().toLocaleTimeString('en-US', {timeZone:tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
     });
     updateNow();
+    updateCD();
     // Also keep ruler NOW marker in sync
     const tz = userCity?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
     const m  = getLocalHours(tz);
@@ -1514,7 +1516,8 @@ function updateEnrolled() {
 function renderToggles() {
     const ct = $('#class-timetable');
     if (!ct) return;
-    const days = [...Array(7)].map((_,i) => new Intl.DateTimeFormat(lang === 'ar' ? 'ar' : 'en', {weekday:'long'}).format(new Date(2023, 0, i + 1)));
+    const dayFmt = new Intl.DateTimeFormat(lang === 'ar' ? 'ar' : 'en', {weekday:'long'});
+    const days = [...Array(7)].map((_,i) => dayFmt.format(new Date(2023, 0, i + 1)));
     const byDay = {};
     CLASSES.forEach((c, i) => { if (!byDay[c.day]) byDay[c.day] = []; byDay[c.day].push({...c, idx:i}); });
     ct.innerHTML = '';
@@ -1731,8 +1734,8 @@ function loadFromURL() {
         const matched = raw.flatMap(id => POOL.filter(c => normCity(c.id)===id || normCity(c.name)===id)).filter(c => c.lat && c.lng && !isNaN(c.lat) && !isNaN(c.lng));
         if (matched.length > 0) cities = [...new Map(matched.map(c=>[c.id,c])).values()].map(c=>({...c}));
     }
-    if (p.has('start')) selStart = parseFloat(p.get('start')) || 9;
-    if (p.has('dur'))   selDur   = parseFloat(p.get('dur'))   || 1;
+    if (p.has('start')) { const v = parseFloat(p.get('start')); if (!isNaN(v)) selStart = clamp(v, 0, 23.5); }
+    if (p.has('dur'))   { const v = parseFloat(p.get('dur'));   if (!isNaN(v)) selDur   = clamp(v, 0.5, 24); }
     if (p.has('lang'))  { lang = p.get('lang')==='ar'?'ar':'en'; localStorage.setItem('wp_l',lang); document.documentElement.lang=lang; document.documentElement.dir=lang==='ar'?'rtl':'ltr'; if($('#lang-sel'))$('#lang-sel').value=lang; updateUI(); }
 }
 
@@ -1988,7 +1991,6 @@ updateUI();
 updateHeaderDate();
 setTimeout(scrollToNow, 600);
 setInterval(tickClocks, 1000);
-setInterval(updateCD, 10000); updateCD();
 setTimeout(() => { if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); }, 2000);
 
 // Refresh at local midnight instead of every 30 min
@@ -2001,8 +2003,8 @@ scheduleMidnightRefresh();
 
 // Try geolocation in background (non-blocking, 2s timeout)
 detectUser().then(async () => {
-    // Re-render with accurate coordinates (renderRow updates city.tz from API response)
-    renderAll();
+    // Only re-render if detectUser found a real saved location
+    if (userCity && !userCity.needsLocation) renderAll();
 });
 
 })(); // end IIFE
