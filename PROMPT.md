@@ -3,8 +3,8 @@
 **Repo:** https://github.com/defaltadmin/world-prayer-times  
 **Live:** https://prayer.mscarabia.com  
 **Stack:** Single vanilla HTML file (index.html), no frameworks, no build tools  
-**Current version:** 1.7.5 (62 documented fixes across 5 audit rounds)  
-**Last audit:** Kimi 2.6 — all findings addressed
+**Current version:** 1.7.6 (64 documented fixes across 6 audit rounds)  
+**Last audit:** Manus — all findings addressed
 
 ---
 
@@ -17,6 +17,7 @@
 | 3 | Qwen | #40–52 | iCal midnight wrap, dateKey perf, RTL, a11y |
 | 4 | MiMo (self) | #53–54 | Course panel i18n, prayer block keyboard |
 | 5 | Kimi 2.6 | #55–62 | iCal UTC, Nominatim ToS, focus CSS, privacy |
+| 6 | Manus | #63–64 | Light mode contrast, time normalization |
 
 **Next reviewer:** Focus on visual design polish (see "Visual Design Audit" section) and any remaining edge cases. Don't re-flag fixed items.
 
@@ -180,6 +181,8 @@ These issues have been identified and resolved:
 60. ~~City row hover~~ — Increased visibility
 61. ~~fmtH Infinity~~ — Handles Infinity and -0
 62. ~~loadFromURL validation~~ — Coordinates validated
+63. ~~Light mode contrast~~ — Prayer block opacity increased for WCAG AA
+64. ~~Time normalization~~ — While loops replaced with modulo pattern
 
 ---
 

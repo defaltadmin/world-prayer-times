@@ -2,6 +2,12 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.7.6] – 2026-06-16
+
+### Fixed
+- **Light mode prayer block contrast** — Background opacity increased for WCAG AA compliance
+- **Time normalization** — Replaced repetitive while loops with `(x + 24) % 24` modulo pattern
+
 ## [1.7.5] – 2026-06-16
 
 ### Fixed
