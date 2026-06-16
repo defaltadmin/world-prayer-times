@@ -3,8 +3,8 @@
 **Repo:** https://github.com/defaltadmin/world-prayer-times  
 **Live:** https://prayer.mscarabia.com  
 **Stack:** Single vanilla HTML file (index.html), no frameworks, no build tools  
-**Current version:** 1.7.7 (71 documented fixes across 7 audit rounds)  
-**Last audit:** Round 7 — all findings addressed
+**Current version:** 1.7.8 (76 documented fixes across 8 audit rounds)  
+**Last audit:** Round 8 — all findings addressed
 
 ---
 
@@ -19,6 +19,7 @@
 | 5 | Kimi 2.6 | #55–62 | iCal UTC, Nominatim ToS, focus CSS, privacy |
 | 6 | Manus | #63–64 | Light mode contrast, time normalization |
 | 7 | Round 7 | #65–71 | Password hash, detectUser race, loadSavedCities, iCal date, offset display |
+| 8 | Round 8 | #72–76 | Password hash correction, AudioContext reuse, countdown accuracy, day i18n |
 
 **Next reviewer:** Focus on visual design polish (see "Visual Design Audit" section) and any remaining edge cases. Don't re-flag fixed items.
 
@@ -191,6 +192,11 @@ These issues have been identified and resolved:
 69. ~~UTC offset display~~ — Shows +5:30 instead of +5.5
 70. ~~Quick Links translation~~ — Added id, fixed broken selector
 71. ~~City row CSS~~ — Removed orphaned accent styling
+72. ~~Password hash corrected~~ — 988ecb15 (was MD5 of "password")
+73. ~~AudioContext reuse~~ — Single shared instance, no leak
+74. ~~Countdown clamp removed~~ — Shows actual time, not capped at 24h
+75. ~~Day header i18n~~ — Uses Intl for Arabic day names
+76. ~~Nominatim UA version~~ — Bumped to 1.7.8
 
 ---
 

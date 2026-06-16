@@ -2,6 +2,15 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.7.8] – 2026-06-16
+
+### Fixed
+- **Password hash** — Corrected pre-computed hash (was MD5 of "password", now actual hash of "thequrangroup")
+- **AudioContext leak** — Single shared instance reused across calls
+- **Countdown accuracy** — Removed 24h clamp, shows actual time to next prayer
+- **Day header i18n** — Class timetable day names use Intl for Arabic
+- **Nominatim User-Agent** — Version bumped to 1.7.8
+
 ## [1.7.7] – 2026-06-16
 
 ### Fixed
