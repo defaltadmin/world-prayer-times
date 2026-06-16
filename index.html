@@ -79,11 +79,131 @@
 
         /* ── Glass ───────────────────────────────────────── */
         .glass {
-            background: rgba(17,25,40,0.75); backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(17,25,40,0.75); backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.15);
         }
-        [data-theme="light"] .glass { background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.05); }
+        [data-theme="light"] .glass { background: rgba(255,255,255,0.85); border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 30px rgba(0,0,0,0.06); }
+
+        /* ── Visual Polish ───────────────────────────────── */
+        /* Animated gradient background */
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background: linear-gradient(135deg, rgba(45,212,191,0.03) 0%, transparent 40%, rgba(56,189,248,0.03) 60%, transparent 100%);
+            background-size: 400% 400%; animation: gradientShift 20s ease infinite;
+        }
+        [data-theme="light"] body::before { background: linear-gradient(135deg, rgba(45,212,191,0.04) 0%, transparent 40%, rgba(56,189,248,0.04) 60%, transparent 100%); background-size: 400% 400%; animation: gradientShift 20s ease infinite; }
+
+        /* Page load fade-in */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        #app { animation: fadeInUp 0.5s ease-out; }
+
+        /* Enhanced prayer block hover */
+        .prayer-block { transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), filter 0.2s ease, box-shadow 0.2s ease; }
+        .prayer-block:hover { transform: scaleY(1.08) translateY(-1px); filter: brightness(1.2); box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+
+        /* Card hover lift */
+        .info-card { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+        .info-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); border-color: rgba(45,212,191,0.3); }
+        [data-theme="light"] .info-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+
+        /* Link hover glow */
+        .info-link { transition: all 0.2s ease; }
+        .info-link:hover { transform: translateX(4px); box-shadow: 0 2px 12px rgba(45,212,191,0.1); }
+
+        /* Selection bar glow */
+        .sel-overlay { transition: left 0.05s ease-out, width 0.08s, box-shadow 0.2s ease; }
+        .sel-overlay:not(.dragging) { box-shadow: 0 0 20px rgba(34,211,238,0.15); }
+        .sel-overlay:hover { box-shadow: 0 0 30px rgba(34,211,238,0.25); }
+
+        /* NOW line pulse */
+        @keyframes nowPulse { 0%,100% { box-shadow: 0 0 10px var(--danger); } 50% { box-shadow: 0 0 20px var(--danger), 0 0 40px rgba(248,113,113,0.3); } }
+        .now-line { animation: nowPulse 3s ease-in-out infinite; }
+
+        /* Chip hover */
+        .chip { transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); }
+        .chip:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+        /* Icon button hover */
+        .icon-btn { transition: all 0.2s ease; }
+        .icon-btn:hover { transform: translateY(-1px); }
+
+        /* Status badge pulse */
+        @keyframes badgePulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        .status-badge { animation: badgePulse 4s ease-in-out infinite; }
+
+        /* Modal backdrop enhanced */
+        .modal-bg { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+        .modal { transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease; }
+
+        /* Panel slide enhanced */
+        .panel { transition: right 0.35s cubic-bezier(0.22,0.61,0.36,1); }
+
+        /* City row hover enhanced */
+        .city-row { transition: background 0.15s ease; }
+        .city-row:hover { background: rgba(255,255,255,0.04); }
+        [data-theme="light"] .city-row:hover { background: rgba(0,0,0,0.03); }
+
+        /* ── Dot Grid Background ─────────────────────────── */
+        #dot-grid {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            opacity: 0.4;
+        }
+        [data-theme="light"] #dot-grid { opacity: 0.25; }
+
+        /* ── Card Nav Menu ──────────────────────────────── */
+        .card-nav-overlay {
+            position: fixed; inset: 0; z-index: 45; background: rgba(0,0,0,0.4);
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+        }
+        .card-nav-overlay.open { opacity: 1; pointer-events: auto; }
+        .card-nav-menu {
+            position: fixed; top: 0; right: -100%; width: 340px; max-width: 90vw;
+            height: 100vh; z-index: 46; background: var(--card);
+            border-left: 1px solid var(--border);
+            box-shadow: -8px 0 40px rgba(0,0,0,0.3);
+            transition: right 0.35s cubic-bezier(0.22,0.61,0.36,1);
+            overflow-y: auto; padding: 0;
+        }
+        .card-nav-menu.open { right: 0; }
+        .card-nav-header {
+            padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border); position: sticky; top: 0;
+            background: var(--card); z-index: 2;
+        }
+        .card-nav-title { font-size: 0.9rem; font-weight: 700; color: var(--heading); }
+        .card-nav-group { padding: 12px 16px; }
+        .card-nav-group-label {
+            font-size: 0.65rem; font-weight: 700; color: var(--accent); text-transform: uppercase;
+            letter-spacing: 0.08em; margin-bottom: 8px; padding: 0 4px;
+        }
+        .card-nav-item {
+            display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+            border-radius: 10px; cursor: pointer; transition: all 0.15s ease;
+            color: var(--text); text-decoration: none; border: 1px solid transparent;
+        }
+        .card-nav-item:hover { background: rgba(45,212,191,0.06); border-color: rgba(45,212,191,0.15); }
+        .card-nav-item.active { background: rgba(45,212,191,0.1); border-color: rgba(45,212,191,0.2); }
+        .card-nav-icon {
+            width: 36px; height: 36px; border-radius: 10px; display: flex;
+            align-items: center; justify-content: center; flex-shrink: 0;
+            background: rgba(45,212,191,0.08); color: var(--accent);
+        }
+        .card-nav-icon svg { width: 18px; height: 18px; }
+        .card-nav-text { flex: 1; min-width: 0; }
+        .card-nav-text-title { font-size: 0.8rem; font-weight: 600; color: var(--heading); }
+        .card-nav-text-desc { font-size: 0.65rem; color: var(--muted); margin-top: 1px; }
+        .card-nav-badge {
+            font-size: 0.6rem; padding: 2px 7px; border-radius: 8px; font-weight: 600;
+            background: rgba(45,212,191,0.1); color: var(--accent); border: 1px solid rgba(45,212,191,0.2);
+        }
+        .card-nav-divider { height: 1px; background: var(--border); margin: 4px 16px; }
 
         /* ── Header ──────────────────────────────────────── */
         .header {
@@ -415,6 +535,8 @@
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
             #bg-pattern { display: none; }
+            #dot-grid { display: none; }
+            body::before { animation: none !important; }
         }
         /* ── RTL: force timeline LTR ────────────────────── */
         #tl-scroll, .ruler, .tl-scroll { direction: ltr; }
@@ -450,6 +572,7 @@
 
 <!-- Islamic pattern background -->
 <div id="bg-pattern"></div>
+<canvas id="dot-grid" aria-hidden="true"></canvas>
 
 <div id="app" style="position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;">
 
@@ -468,31 +591,67 @@
         </div>
         <div class="header-right">
             <span class="countdown-pill" id="countdown"><span id="cd-text">--</span></span>
-
-            <!-- Scroll to Now -->
             <button class="icon-btn" id="btn-now" title="Scroll to current time" aria-label="Scroll to current time">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </button>
-            <button class="icon-btn" id="btn-help" title="How to use" aria-label="How to use">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            </button>
-            <button class="icon-btn" id="btn-course" title="Course info" aria-label="Course info">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            </button>
-            <button class="icon-btn" id="btn-share" title="Share link" aria-label="Share link">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            </button>
-            <button class="icon-btn" id="btn-ical" title="Export to calendar" aria-label="Export calendar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
-            </button>
-            <button class="icon-btn" id="btn-notify" title="Prayer notifications" aria-label="Prayer notifications">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            </button>
-            <button class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <button class="icon-btn" id="btn-menu" title="Menu" aria-label="Open menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
         </div>
     </header>
+
+    <!-- ══════════════ CARD NAV MENU ══════════════ -->
+    <div class="card-nav-overlay" id="card-nav-overlay"></div>
+    <nav class="card-nav-menu" id="card-nav-menu">
+        <div class="card-nav-header">
+            <span class="card-nav-title">Menu</span>
+            <button class="modal-close" id="close-card-nav" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="card-nav-group">
+            <div class="card-nav-group-label">Navigate</div>
+            <div class="card-nav-item" id="nav-now">
+                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <div class="card-nav-text"><div class="card-nav-text-title">Scroll to Now</div><div class="card-nav-text-desc">Jump to current time</div></div>
+            </div>
+        </div>
+        <div class="card-nav-divider"></div>
+        <div class="card-nav-group">
+            <div class="card-nav-group-label">Course</div>
+            <div class="card-nav-item" id="nav-course">
+                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+                <div class="card-nav-text"><div class="card-nav-text-title">Sannatayn & Tafseer</div><div class="card-nav-text-desc">Course info, links & schedule</div></div>
+            </div>
+        </div>
+        <div class="card-nav-divider"></div>
+        <div class="card-nav-group">
+            <div class="card-nav-group-label">Share & Export</div>
+            <div class="card-nav-item" id="nav-share">
+                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+                <div class="card-nav-text"><div class="card-nav-text-title">Share Link</div><div class="card-nav-text-desc">Copy shareable URL</div></div>
+            </div>
+            <div class="card-nav-item" id="nav-ical">
+                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                <div class="card-nav-text"><div class="card-nav-text-title">Export Calendar</div><div class="card-nav-text-desc">Download .ics file</div></div>
+            </div>
+            <div class="card-nav-item" id="nav-notify">
+                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+                <div class="card-nav-text"><div class="card-nav-text-title">Notifications</div><div class="card-nav-text-desc">Prayer time alerts</div></div>
+                <span class="card-nav-badge" id="nav-notify-badge" style="display:none;">ON</span>
+            </div>
+        </div>
+        <div class="card-nav-divider"></div>
+        <div class="card-nav-group">
+            <div class="card-nav-group-label">Settings</div>
+            <div class="card-nav-item" id="nav-settings">
+                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+                <div class="card-nav-text"><div class="card-nav-text-title">Settings</div><div class="card-nav-text-desc">Theme, language, format</div></div>
+            </div>
+            <div class="card-nav-item" id="nav-help">
+                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+                <div class="card-nav-text"><div class="card-nav-text-title">How to Use</div><div class="card-nav-text-desc">Guide & tips</div></div>
+            </div>
+        </div>
+    </nav>
 
     <!-- ══════════════ STATUS BAR ══════════════ -->
     <div class="status-bar">
@@ -2005,6 +2164,113 @@ detectUser().then(async () => {
     // Only re-render if detectUser found a real saved location
     if (userCity && !userCity.needsLocation) renderAll();
 });
+
+/* ── Dot Grid Background (vanilla JS canvas) ───────────────────── */
+(function initDotGrid() {
+    const canvas = document.getElementById('dot-grid');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    const DOT_SIZE = 3, GAP = 28, PROXIMITY = 120;
+    const BASE_ALPHA = 0.15, ACTIVE_ALPHA = 0.6;
+    let dots = [], W, H, dpr;
+    let mouseX = -1000, mouseY = -1000;
+
+    function resize() {
+        dpr = window.devicePixelRatio || 1;
+        W = window.innerWidth; H = window.innerHeight;
+        canvas.width = W * dpr; canvas.height = H * dpr;
+        canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        buildGrid();
+    }
+    function buildGrid() {
+        dots = [];
+        const cols = Math.floor((W + GAP) / (DOT_SIZE + GAP));
+        const rows = Math.floor((H + GAP) / (DOT_SIZE + GAP));
+        const cell = DOT_SIZE + GAP;
+        const startX = (W - (cell * cols - GAP)) / 2 + DOT_SIZE / 2;
+        const startY = (H - (cell * rows - GAP)) / 2 + DOT_SIZE / 2;
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                dots.push({ x: startX + c * cell, y: startY + r * cell, ox: 0, oy: 0, vx: 0, vy: 0 });
+            }
+        }
+    }
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#2dd4bf';
+        for (const d of dots) {
+            const dx = d.x - mouseX, dy = d.y - mouseY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const t = Math.max(0, 1 - dist / PROXIMITY);
+            const alpha = BASE_ALPHA + (ACTIVE_ALPHA - BASE_ALPHA) * t;
+            const size = DOT_SIZE + t * 2;
+            // Spring back
+            d.ox *= 0.92; d.oy *= 0.92;
+            ctx.beginPath();
+            ctx.arc(d.x + d.ox, d.y + d.oy, size / 2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(45,212,191,${alpha})`;
+            ctx.fill();
+        }
+        requestAnimationFrame(draw);
+    }
+    document.addEventListener('mousemove', e => {
+        mouseX = e.clientX; mouseY = e.clientY;
+        for (const d of dots) {
+            const dx = d.x - mouseX, dy = d.y - mouseY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < PROXIMITY && dist > 0) {
+                const force = (1 - dist / PROXIMITY) * 8;
+                d.ox += (dx / dist) * force;
+                d.oy += (dy / dist) * force;
+            }
+        }
+    }, { passive: true });
+    window.addEventListener('resize', resize);
+    resize();
+    requestAnimationFrame(draw);
+})();
+
+/* ── Card Nav Menu ────────────────────────────────────────────── */
+// Hidden buttons for existing JS handlers (card nav items dispatch clicks to these)
+const _hiddenBtns = {help:'m-help',course:null,share:null,ical:null,notify:null,settings:'m-settings'};
+Object.entries(_hiddenBtns).forEach(([k,modal]) => {
+    const b = document.createElement('button'); b.id = 'btn-'+k; b.style.display='none'; document.body.appendChild(b);
+});
+(function initCardNav() {
+    const overlay = $('#card-nav-overlay');
+    const menu = $('#card-nav-menu');
+    const btnMenu = $('#btn-menu');
+    const btnClose = $('#close-card-nav');
+    function openMenu() { overlay.classList.add('open'); menu.classList.add('open'); }
+    function closeMenu() { overlay.classList.remove('open'); menu.classList.remove('open'); }
+    if (btnMenu) btnMenu.onclick = openMenu;
+    if (btnClose) btnClose.onclick = closeMenu;
+    if (overlay) overlay.onclick = closeMenu;
+    // Wire up nav items to existing buttons
+    $('#nav-now')?.addEventListener('click', () => { closeMenu(); scrollToNow(); });
+    $('#nav-course')?.addEventListener('click', () => { closeMenu(); $('#btn-course')?.click(); });
+    $('#nav-share')?.addEventListener('click', () => { closeMenu(); $('#btn-share')?.click(); });
+    $('#nav-ical')?.addEventListener('click', () => { closeMenu(); $('#btn-ical')?.click(); });
+    $('#nav-notify')?.addEventListener('click', () => { closeMenu(); $('#btn-notify')?.click(); });
+    $('#nav-settings')?.addEventListener('click', () => { closeMenu(); $('#btn-settings')?.click(); });
+    $('#nav-help')?.addEventListener('click', () => { closeMenu(); $('#btn-help')?.click(); });
+    // Update notify badge
+    function updateNotifyBadge() {
+        const badge = $('#nav-notify-badge');
+        if (badge) badge.style.display = notifEnabled ? '' : 'none';
+    }
+    updateNotifyBadge();
+    // Re-check on notify toggle
+    const origNotify = $('#btn-notify')?.onclick;
+    if ($('#btn-notify')) {
+        const oldClick = $('#btn-notify').onclick;
+        $('#btn-close-card-nav');
+    }
+})();
 
 })(); // end IIFE
 </script>
