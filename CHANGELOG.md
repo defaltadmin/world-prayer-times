@@ -2,6 +2,13 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.8.1] – 2026-06-16
+
+### Added
+- **Border glow effect** — Conic gradient follows mouse cursor around card edges (course panel info cards, logo)
+- **Spotlight card** — Radial gradient follows mouse on info-links and nav items
+- **Mobile performance** — All cursor-tracking effects disabled on touch devices (`pointer: coarse`)
+
 ## [1.8.0] – 2026-06-16
 
 ### Added

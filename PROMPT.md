@@ -3,8 +3,8 @@
 **Repo:** https://github.com/defaltadmin/world-prayer-times  
 **Live:** https://prayer.mscarabia.com  
 **Stack:** Single vanilla HTML file (index.html), no frameworks, no build tools  
-**Current version:** 1.8.0 (84 fixes + visual overhaul across 10 audit rounds)  
-**Last audit:** Round 10 — codebase clean. Visual overhaul applied.
+**Current version:** 1.8.1 (84 fixes + visual overhaul across 10 audit rounds)  
+**Last audit:** Round 10 — codebase clean. Visual polish applied.
 
 ---
 
@@ -56,11 +56,15 @@ A prayer times coordination tool for Muslims worldwide. Users can:
 
 ## Architecture Inside index.html
 
-### CSS (~400 lines)
+### CSS (~500 lines)
 - CSS variables for theming (dark/light)
-- Glass morphism, modals, panels, prayer blocks
+- Glass morphism with saturate(180%), modals, panels, prayer blocks
+- Border glow (conic gradient mouse tracking)
+- Spotlight card (radial gradient mouse tracking)
+- Dot grid canvas background
+- Card nav slide-out menu
 - Mobile responsive (`@media max-width: 768px`)
-- Coarse pointer touch targets (`@media pointer: coarse`)
+- Coarse pointer touch targets (`@media pointer: coarse`) — disables cursor effects
 - Reduced motion (`@media prefers-reduced-motion`)
 
 ### HTML (~280 lines)
