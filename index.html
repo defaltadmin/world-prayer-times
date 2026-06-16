@@ -850,7 +850,6 @@ function updateUI() {
     const cpBodies = $$('.info-card-body');
     if (cpBodies[0]) cpBodies[0].textContent = t('attendanceDesc');
     if (cpBodies[1]) cpBodies[1].textContent = t('depositDesc');
-    const cpQuickLinks = $$('.info-card-title');
     const qlh = $('#quick-links-heading'); if (qlh) qlh.textContent = t('quickLinks');
     // Translate link titles and descriptions
     const linkTitles = $$('.info-link-title');
@@ -1848,7 +1847,7 @@ $('#city-search').oninput = () => {
         _lastGeoCall = now;
         try {
             const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
-            const data = await (await fetch(url, {headers:{'Accept-Language':'en','User-Agent':'PrayerTimesApp/1.7.7 (https://prayer.mscarabia.com)'}})).json();
+            const data = await (await fetch(url, {headers:{'Accept-Language':'en','User-Agent':'PrayerTimesApp/1.7.9 (https://prayer.mscarabia.com)'}})).json();
             const results = [], seen = new Set(local.map(c=>c.id));
             data.forEach(d => {
                 const name    = sanitizeName(d.address?.city || d.address?.town || d.address?.village || d.name || '').trim();
@@ -1946,7 +1945,7 @@ const NOTIF_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 function schedulePrayerNotifs() {
     if (!userCity || !notifEnabled) return;
     fetchPrayer(userCity).then(pd => {
-        const lh = getLocalHours(userCity.tz);
+        const lh = getLocalHours(pd.tz || userCity.tz);
         ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
             const pt = pd.loc[name]; if (!pt || pt < lh) return;
             const ms = (pt - lh) * 3600000 - 300000; // 5 min before
