@@ -2,6 +2,17 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.7.7] – 2026-06-16
+
+### Fixed
+- **Password plaintext removed** — Pre-computed hash constant, plaintext never in source
+- **detectUser race condition** — Init restores from localStorage before London fallback
+- **loadSavedCities ordering** — Custom geocoded cities restored to POOL before ID lookup
+- **iCal meeting window date** — Uses Intl for user timezone date (near-midnight fix)
+- **UTC offset display** — Shows +5:30 instead of +5.5 for half-hour timezones
+- **Quick Links translation** — Added id, fixed broken CSS selector
+- **City row CSS** — Removed orphaned accent styling from removed user row
+
 ## [1.7.6] – 2026-06-16
 
 ### Fixed
