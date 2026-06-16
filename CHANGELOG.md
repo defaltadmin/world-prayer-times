@@ -2,6 +2,15 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.7.9] – 2026-06-16
+
+### Fixed
+- **renderAll double-call** — Only re-renders if detectUser found a real saved location
+- **loadFromURL zero values** — `parseFloat('0')` no longer treated as falsy
+- **renderToggles Intl** — Hoisted formatter (1 instance instead of 7 per render)
+- **NOW label Arabic** — Added `[lang="ar"]` CSS override for "الآن"
+- **Countdown 1s** — Moved updateCD into tickClocks (was 10s interval, seconds looked broken)
+
 ## [1.7.8] – 2026-06-16
 
 ### Fixed

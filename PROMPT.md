@@ -3,8 +3,8 @@
 **Repo:** https://github.com/defaltadmin/world-prayer-times  
 **Live:** https://prayer.mscarabia.com  
 **Stack:** Single vanilla HTML file (index.html), no frameworks, no build tools  
-**Current version:** 1.7.8 (76 documented fixes across 8 audit rounds)  
-**Last audit:** Round 8 — all findings addressed
+**Current version:** 1.7.9 (81 documented fixes across 9 audit rounds)  
+**Last audit:** Round 9 — all findings addressed
 
 ---
 
@@ -20,6 +20,7 @@
 | 6 | Manus | #63–64 | Light mode contrast, time normalization |
 | 7 | Round 7 | #65–71 | Password hash, detectUser race, loadSavedCities, iCal date, offset display |
 | 8 | Round 8 | #72–76 | Password hash correction, AudioContext reuse, countdown accuracy, day i18n |
+| 9 | Round 9 | #77–81 | renderAll double-call, loadFromURL zero, NOW Arabic, countdown 1s |
 
 **Next reviewer:** Focus on visual design polish (see "Visual Design Audit" section) and any remaining edge cases. Don't re-flag fixed items.
 
@@ -197,6 +198,11 @@ These issues have been identified and resolved:
 74. ~~Countdown clamp removed~~ — Shows actual time, not capped at 24h
 75. ~~Day header i18n~~ — Uses Intl for Arabic day names
 76. ~~Nominatim UA version~~ — Bumped to 1.7.8
+77. ~~renderAll double-call~~ — Only re-renders if detectUser found saved location
+78. ~~loadFromURL zero~~ — parseFloat('0') no longer treated as falsy
+79. ~~renderToggles Intl~~ — Hoisted formatter (1 instance instead of 7)
+80. ~~NOW label Arabic~~ — [lang="ar"] CSS override for "الآن"
+81. ~~Countdown 1s~~ — Moved into tickClocks for smooth seconds
 
 ---
 
