@@ -821,7 +821,7 @@
             </div>
             <div class="pw-gate">
                 <div class="pw-input-row">
-                    <input type="password" class="pw-input" id="course-pw-input" placeholder="Enter password..." autocomplete="off" maxlength="40">
+                    <input type="password" class="pw-input" id="course-pw-input" placeholder="Enter password..." autocomplete="off" spellcheck="false" data-form-type="password" maxlength="40">
                     <button class="btn btn-accent" id="course-pw-btn" style="flex-shrink:0;">Unlock</button>
                 </div>
                 <div class="pw-hint" id="course-pw-hint"></div>
@@ -878,7 +878,7 @@
             <div class="privacy-section"><h3>What stays on your device</h3><ul><li>Selected cities (localStorage)</li><li>Theme, language, and time format preferences (localStorage)</li><li>Your approximate timezone (localStorage) — precise GPS coords are never stored</li><li>Class enrollment selections (localStorage)</li></ul></div>
             <div class="privacy-section"><h3>External requests</h3><ul><li><strong>api.aladhan.com</strong> — prayer time data (coordinates sent, no user ID)</li><li><strong>nominatim.openstreetmap.org</strong> — city search only (text sent, no user ID)</li><li><strong>fonts.googleapis.com</strong> — font loading</li></ul></div>
             <div class="privacy-section"><h3>Geolocation</h3><p>If you grant location permission, coordinates are used once to set your timezone. Only a rounded value (±11 km) is stored locally. You can revoke this in browser settings at any time.</p></div>
-            <button class="btn btn-accent" data-close="m-privacy" style="width:100%;justify-content:center;margin-top:4px;">Got it</button>
+            <button class="btn btn-accent" id="privacy-gotit" style="width:100%;justify-content:center;margin-top:4px;">Got it</button>
         </div>
     </div>
 
@@ -1199,7 +1199,10 @@ async function fetchPrayer(city) {
         const utc = {}, loc = {};
 
         names.forEach(n => {
-            const [hh, mm] = j.data.timings[n].split(':').map(Number);
+            const raw = j.data.timings[n];
+            if (!raw || raw === '00:00') return;
+            const [hh, mm] = raw.split(':').map(Number);
+            if (isNaN(hh)) return;
             const l = hh + mm / 60;
             let u = l - off;
             while (u < 0) u += 24;
@@ -1368,10 +1371,12 @@ async function renderRow(city) {
 /* ── Render: all rows ─────────────────────────────────────────────── */
 async function renderAll() {
     const c = $('#rows');
+    const sc = $('#tl-scroll'), pos = sc?.scrollLeft || 0;
     c.innerHTML = '';
     const all = [...cities];
-    const rows = await Promise.all(all.map(renderRow));
-    rows.forEach(r => c.appendChild(r));
+    const results = await Promise.allSettled(all.map(renderRow));
+    results.forEach(r => { if (r.status === 'fulfilled' && r.value) c.appendChild(r.value); });
+    if (sc) sc.scrollLeft = pos;
     updateOverlayH();
     updateNow();
     updateSel();
@@ -1805,7 +1810,9 @@ function playAlarm() {
         if (p[i] === 0) { t += p[i+1]; continue; }
         const o = ctx.createOscillator(); o.type = 'sine';
         o.frequency.setValueAtTime(p[i], t); o.connect(ctx.destination);
-        o.start(t); o.stop(t + p[i+1]); t += p[i+1] + 0.02;
+        o.start(t); o.stop(t + p[i+1]);
+        o.addEventListener('ended', () => o.disconnect());
+        t += p[i+1] + 0.02;
     }
 }
 setInterval(() => {
@@ -1824,7 +1831,7 @@ function openM(id)  { $(id).classList.add('open');    }
 function closeM(id) { $(id).classList.remove('open'); }
 $$('[data-close]').forEach(b => b.onclick = () => closeM('#' + b.dataset.close));
 // Privacy "Got it" also dismisses the banner
-$('#m-privacy .btn-accent').onclick = () => { closeM('#m-privacy'); localStorage.setItem('wp_privacy_ok','1'); const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); };
+$('#privacy-gotit').onclick = () => { closeM('#m-privacy'); localStorage.setItem('wp_privacy_ok','1'); const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); };
 $$('.modal-bg').forEach(m => m.onclick = e => { if (e.target === m) closeM('#' + m.id); });
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') $$('.modal-bg.open').forEach(m => closeM('#' + m.id));
@@ -1866,7 +1873,8 @@ $('#fmt-btn').textContent = h24 ? '12h' : '24h';
 $('#lang-sel').onchange = function() {
     lang = this.value; localStorage.setItem('wp_l', lang);
     document.documentElement.lang = lang;
-    document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+document.title = lang === 'ar' ? 'أوقات الصلاة' : 'Prayer Times – Coordinate Salah Across Cities';
     checkConflicts(); updateClsCountdown(); updateUI();
 };
 
@@ -2062,9 +2070,10 @@ $('#city-search').oninput = () => {
     if (q.length < 2) { sr.innerHTML = ''; return; }
     if (local.length) renderSearchItems(local, sr); else sr.innerHTML = '<div class="search-spinner">Searching…</div>';
     _geoTimer = setTimeout(async () => {
-        const now = Date.now();
-        if (now - _lastGeoCall < 1000) return;
-        _lastGeoCall = now;
+        const elapsed = Date.now() - _lastGeoCall;
+        const delay = Math.max(0, 1000 - elapsed);
+        if (delay > 0) { await new Promise(r => setTimeout(r, delay)); }
+        _lastGeoCall = Date.now();
         try {
             const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
             const data = await (await fetch(url, {headers:{'Accept-Language':'en','User-Agent':'PrayerTimesApp/1.7.9 (https://prayer.mscarabia.com)'}})).json();
@@ -2216,7 +2225,7 @@ setTimeout(() => { if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); },
 function scheduleMidnightRefresh() {
     const now = new Date();
     const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1) - now;
-    setTimeout(() => { cache = {}; renderAll(); if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); scheduleMidnightRefresh(); }, msUntilMidnight + 5000);
+    setTimeout(() => { cache = {}; dateKey._cache = {}; renderAll(); if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); scheduleMidnightRefresh(); }, msUntilMidnight + 5000);
 }
 scheduleMidnightRefresh();
 
@@ -2264,6 +2273,7 @@ detectUser().then(async () => {
         }
     }
     function draw() {
+        if (document.hidden) { requestAnimationFrame(draw); return; }
         ctx.clearRect(0, 0, W, H);
         for (const d of dots) {
             const dx = d.x - mouseX, dy = d.y - mouseY;
@@ -2330,6 +2340,7 @@ detectUser().then(async () => {
         logo.style.setProperty('--cone-spread', '40');
         let angle = 0;
         function sweepLogo() {
+            if (document.hidden) { requestAnimationFrame(sweepLogo); return; }
             angle = (angle + 1.5) % 360;
             logo.style.setProperty('--cursor-angle', angle + 'deg');
             logo.style.setProperty('--edge-proximity', '30');
@@ -2355,6 +2366,7 @@ detectUser().then(async () => {
 })();
 
 /* ── Card Nav Menu ────────────────────────────────────────────── */
+let _updateNotifyBadge;
 (function initCardNav() {
     const overlay = $('#card-nav-overlay');
     const menu = $('#card-nav-menu');
@@ -2373,9 +2385,9 @@ detectUser().then(async () => {
     $('#nav-notify')?.addEventListener('click', async () => {
         closeMenu();
         if (!('Notification' in window)) { alert('Notifications not supported'); return; }
-        if (notifEnabled) { notifEnabled = false; localStorage.setItem('wp_notif','0'); if(window._updateNotifyBadge) window._updateNotifyBadge(); return; }
+        if (notifEnabled) { notifEnabled = false; localStorage.setItem('wp_notif','0'); if(_updateNotifyBadge) _updateNotifyBadge(); return; }
         const p = await Notification.requestPermission();
-        if (p === 'granted') { notifEnabled = true; localStorage.setItem('wp_notif','1'); if(window._updateNotifyBadge) window._updateNotifyBadge(); schedulePrayerNotifs(); }
+        if (p === 'granted') { notifEnabled = true; localStorage.setItem('wp_notif','1'); if(_updateNotifyBadge) _updateNotifyBadge(); schedulePrayerNotifs(); }
     });
     $('#nav-settings')?.addEventListener('click', () => { closeMenu(); openM('#m-settings'); });
     $('#nav-help')?.addEventListener('click', () => { closeMenu(); openM('#m-help'); });
@@ -2384,7 +2396,7 @@ detectUser().then(async () => {
         if (badge) badge.style.display = notifEnabled ? '' : 'none';
     }
     updateNotifyBadge();
-    window._updateNotifyBadge = updateNotifyBadge;
+    _updateNotifyBadge = updateNotifyBadge;
 })();
 
 })(); // end IIFE
