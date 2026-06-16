@@ -163,7 +163,8 @@
             display: flex; align-items: stretch; min-height: 50px;
             border-bottom: 1px solid var(--border); background: var(--card);
         }
-        .city-row:hover { background: rgba(255,255,255,0.01); }
+        .city-row:hover { background: rgba(255,255,255,0.03); }
+        [data-theme="light"] .city-row:hover { background: rgba(0,0,0,0.02); }
         .city-row { background: rgba(56,189,248,0.03); border-left: 3px solid var(--accent); }
         .city-label {
             width: var(--label-w); min-width: var(--label-w); flex-shrink: 0;
@@ -199,6 +200,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         .prayer-block:hover { transform: scaleY(1.06); filter: brightness(1.15); z-index: 5; }
+        .prayer-block:focus { outline: 2px solid var(--accent); outline-offset: 2px; z-index: 5; }
         .prayer-block.fajr    { background: rgba(103,232,249,0.35); color: #0c4a6e; border-color: var(--prayer-fajr); }
         .prayer-block.dhuhr   { background: rgba(251,191,36,0.38);  color: #713f12; border-color: var(--prayer-dhuhr); }
         .prayer-block.asr     { background: rgba(251,146,60,0.38);  color: #7c2d12; border-color: var(--prayer-asr); }
@@ -921,7 +923,7 @@ function getLocalHours(tz) {
     }
 }
 function fmtH(h) {
-    if (isNaN(h)) return '--:--';
+    if (isNaN(h) || !isFinite(h)) return '--:--';
     let total = Math.round((((h % 24) + 24) % 24) * 60);
     total %= 1440;
     const hh = Math.floor(total / 60);
@@ -1134,6 +1136,8 @@ async function renderRow(city) {
         ev.style.left  = pct(ls) + '%';
         ev.style.width = pct(le > ls ? le - ls : (24 - ls + le)) + '%';
         ev.textContent = SUBJECTS[lang]?.[cls.subject] || cls.subject;
+        ev.title = `${cls.subject} (${cls.teacher}) ${fmtH(ls)} – ${fmtH(le)}`;
+        ev.setAttribute('aria-label', `${cls.subject} with ${cls.teacher}, ${fmtH(ls)} to ${fmtH(le)}`);
         strip.appendChild(ev);
     });
 
@@ -1593,6 +1597,8 @@ setInterval(() => {
 function openM(id)  { $(id).classList.add('open');    }
 function closeM(id) { $(id).classList.remove('open'); }
 $$('[data-close]').forEach(b => b.onclick = () => closeM('#' + b.dataset.close));
+// Privacy "Got it" also dismisses the banner
+$('#m-privacy .btn-accent').onclick = () => { closeM('#m-privacy'); localStorage.setItem('wp_privacy_ok','1'); const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); };
 $$('.modal-bg').forEach(m => m.onclick = e => { if (e.target === m) closeM('#' + m.id); });
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') $$('.modal-bg.open').forEach(m => closeM('#' + m.id));
@@ -1684,11 +1690,13 @@ function exportICal() {
         });
     }
 
-    // Also export the selected safe meeting window
+    // Also export the selected safe meeting window — convert local selection to UTC
     const startH = Math.floor(selStart), startM = Math.round((selStart%1)*60);
     const endH = Math.floor(selStart+selDur), endM = Math.round(((selStart+selDur)%1)*60);
-    const meetingStart = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), startH, startM);
-    const meetingEnd = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), endH, endM);
+    const userTz = userCity?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const userOff = getOff(userTz);
+    const meetingStart = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), startH - userOff, startM);
+    const meetingEnd = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), endH - userOff, endM);
     lines.push(
         'BEGIN:VEVENT',
         'SUMMARY:Safe Meeting Window (No Salah Conflict)',
@@ -1713,7 +1721,7 @@ function loadFromURL() {
     const p = new URLSearchParams(window.location.search);
     if (p.has('cities')) {
         const raw     = p.get('cities').split(',').map(s => normCity(s.trim()));
-        const matched = raw.flatMap(id => POOL.filter(c => normCity(c.id)===id || normCity(c.name)===id));
+        const matched = raw.flatMap(id => POOL.filter(c => normCity(c.id)===id || normCity(c.name)===id)).filter(c => c.lat && c.lng && !isNaN(c.lat) && !isNaN(c.lng));
         if (matched.length > 0) cities = [...new Map(matched.map(c=>[c.id,c])).values()].map(c=>({...c}));
     }
     if (p.has('start')) selStart = parseFloat(p.get('start')) || 9;
@@ -1835,7 +1843,7 @@ $('#city-search').oninput = () => {
         _lastGeoCall = now;
         try {
             const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
-            const data = await (await fetch(url, {headers:{'Accept-Language':'en'}})).json();
+            const data = await (await fetch(url, {headers:{'Accept-Language':'en','User-Agent':'PrayerTimesApp/1.7.5 (https://prayer.mscarabia.com)'}})).json();
             const results = [], seen = new Set(local.map(c=>c.id));
             data.forEach(d => {
                 const name    = sanitizeName(d.address?.city || d.address?.town || d.address?.village || d.name || '').trim();
