@@ -205,6 +205,38 @@
         }
         .card-nav-divider { height: 1px; background: var(--border); margin: 4px 16px; }
 
+        /* ── Border Glow Effect ──────────────────────────── */
+        .border-glow {
+            position: relative; overflow: hidden;
+            --edge-proximity: 0; --cursor-angle: 0deg;
+        }
+        .border-glow::before {
+            content: ''; position: absolute; inset: 0; border-radius: inherit;
+            background: conic-gradient(
+                from var(--cursor-angle),
+                transparent 0deg,
+                rgba(45,212,191,0.4) calc(var(--cone-spread, 25) * 1deg),
+                transparent calc(var(--cone-spread, 25) * 2 * 1deg)
+            );
+            opacity: calc(var(--edge-proximity) * 0.01);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude; -webkit-mask-composite: xor;
+            padding: 1px; pointer-events: none; z-index: 1;
+            transition: opacity 0.15s ease;
+        }
+        .border-glow::after {
+            content: ''; position: absolute; inset: -1px; border-radius: inherit;
+            background: conic-gradient(
+                from var(--cursor-angle),
+                transparent 0deg,
+                rgba(45,212,191,0.15) calc(var(--cone-spread, 25) * 1deg),
+                transparent calc(var(--cone-spread, 25) * 2 * 1deg)
+            );
+            opacity: calc(var(--edge-proximity) * 0.008);
+            filter: blur(12px); pointer-events: none; z-index: 0;
+        }
+        .border-glow .glow-inner { position: relative; z-index: 2; }
+
         /* ── Header ──────────────────────────────────────── */
         .header {
             position: sticky; top: 0; z-index: 30; padding: 8px 16px;
@@ -2232,6 +2264,48 @@ detectUser().then(async () => {
     window.addEventListener('resize', resize);
     resize();
     requestAnimationFrame(draw);
+})();
+
+/* ── Border Glow Effect ────────────────────────────────────────── */
+(function initBorderGlow() {
+    const cards = $$('.info-card');
+    cards.forEach(card => {
+        card.classList.add('border-glow');
+        const inner = document.createElement('div');
+        inner.className = 'glow-inner';
+        while (card.firstChild) inner.appendChild(card.firstChild);
+        card.appendChild(inner);
+        card.addEventListener('pointermove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left, y = e.clientY - rect.top;
+            const cx = rect.width / 2, cy = rect.height / 2;
+            const dx = x - cx, dy = y - cy;
+            let kx = Infinity, ky = Infinity;
+            if (dx !== 0) kx = cx / Math.abs(dx);
+            if (dy !== 0) ky = cy / Math.abs(dy);
+            const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
+            const angle = (Math.atan2(dy, dx) * 180 / Math.PI + 90 + 360) % 360;
+            card.style.setProperty('--edge-proximity', (edge * 100).toFixed(1));
+            card.style.setProperty('--cursor-angle', angle.toFixed(1) + 'deg');
+        });
+        card.addEventListener('pointerleave', () => {
+            card.style.setProperty('--edge-proximity', '0');
+        });
+    });
+    // Animated sweep on logo
+    const logo = $('.logo');
+    if (logo) {
+        logo.classList.add('border-glow');
+        logo.style.setProperty('--cone-spread', '40');
+        let angle = 0;
+        function sweepLogo() {
+            angle = (angle + 1.5) % 360;
+            logo.style.setProperty('--cursor-angle', angle + 'deg');
+            logo.style.setProperty('--edge-proximity', '30');
+            requestAnimationFrame(sweepLogo);
+        }
+        sweepLogo();
+    }
 })();
 
 /* ── Card Nav Menu ────────────────────────────────────────────── */
