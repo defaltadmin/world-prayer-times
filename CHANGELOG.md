@@ -2,6 +2,26 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.7.2] – 2026-06-16
+
+### Fixed
+- All 12 audit findings from Kimi 2.7 review verified and confirmed in main index.html
+- Note: Previous reviewer (Kimi) read from stale `.worktrees/` copy — all fixes were already in main file
+
+### Verified (from v1.7.1)
+- Geocoding ID collision fix at line 1789 (`*100)/100`)
+- Dead user row code removed (file: 1942 lines, was 1970)
+- Notifications gated on `userCity?.lat` at line 1923
+- iCal RRULE at line 1624
+- `getOffsetForDate()` at lines 1415, 1444
+- `aria-valuenow="10"` at line 532
+- Stale `mOffset` comment removed
+- Cache pruning `filter+delete` at line 914
+- Prayer block `aria-label` at line 1053
+- `tabindex="0"` on resize handles at lines 533-534
+- `SUBJECTS` map at lines 777, 1083
+- `_lastGeoCall` rate limit at lines 1768, 1779-1780
+
 ## [1.7.1] – 2026-06-16
 
 ### Fixed

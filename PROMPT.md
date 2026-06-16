@@ -10,7 +10,7 @@
 
 | File | Purpose |
 |------|---------|
-| `index.html` | **The entire app** — HTML + CSS + JS in one file (~1970 lines) |
+| `index.html` | **The entire app** — HTML + CSS + JS in one file (~1942 lines) |
 | `wrangler.toml` | Cloudflare Pages config |
 | `_headers` | Cloudflare HTTP headers |
 | `_redirects` | Cloudflare redirects |
@@ -51,11 +51,11 @@ A prayer times coordination tool for Muslims worldwide. Users can:
 - Course panel (slide-out with password gate)
 - Footer
 
-### JavaScript (~1350 lines)
+### JavaScript (~1300 lines)
 - **Config:** CITIES array (5 defaults), POOL (13 cities), CLASSES (14 course sessions)
 - **State:** cities, cache, selection, userCity, lang, enrolled
-- **i18n:** English + Arabic translations for all UI strings
-- **Time utilities:** getOff(), getLocalHours(), fmtH(), pct()
+- **i18n:** English + Arabic translations for all UI strings, SUBJECTS map for class names
+- **Time utilities:** getOff(), getLocalHours(), getOffsetForDate(), fmtH(), pct()
 - **API:** fetchPrayer() with cache key = city:lat:lng:method:dateKey
 - **Rendering:** renderRow(), renderAll(), renderRuler(), updateSel()
 - **Conflicts:** checkConflicts() using local prayer times from API
@@ -71,6 +71,7 @@ A prayer times coordination tool for Muslims worldwide. Users can:
 |----------|---------|
 | `getOff(tz)` | UTC offset using Intl API |
 | `getLocalHours(tz)` | Current local time as decimal hours |
+| `getOffsetForDate(tz,y,m,d)` | UTC offset for a specific date (DST-safe) |
 | `fmtH(h)` | Format decimal hours to 12h/24h string |
 | `fetchPrayer(city)` | Fetch from Aladhan API, cache with coordinate-aware key |
 | `renderRow(city)` | Build city row DOM — uses `pd.loc[name]` directly for prayer block positioning |
@@ -83,7 +84,7 @@ A prayer times coordination tool for Muslims worldwide. Users can:
 | `renderRuler()` | Draw 24h ruler with hour marks |
 | `updateNow()` | Position NOW line using `getLocalHours()` |
 | `renderToggles()` | Course enrollment checkboxes |
-| `compCls(cls)` | Compute class timestamps — converts London local times to UTC |
+| `compCls(cls)` | Compute class timestamps — DST-safe London local → UTC via getOffsetForDate() |
 | `exportICal()` | Generate .ics file with enrolled classes + meeting window |
 | `updateUI()` | Update all translated text on language change |
 
@@ -173,25 +174,21 @@ These issues have been identified and resolved:
 
 1. **DST edge cases** — Prayer times may shift during DST transitions if the API returns stale offsets
 2. **Class overlay midnight wrap** — If a class spans midnight in UTC, the overlay width calculation may be wrong
-3. **iCal recurrence** — Enrolled classes export as one-time events, not recurring weekly events
-4. **Dead code in renderRow** — `isUser` checks are now dead code since user row is no longer rendered
 
 ---
 
 ## Enhancement Ideas
 
-1. **Recurring iCal events** — Use RRULE for weekly class recurrence instead of single events
-2. **Prayer time notifications** — Browser notifications 5 minutes before each Salah (partially implemented)
-3. **Custom color themes** — Allow user to customize prayer block colors
-4. **Dark mode auto-switch** — Follow system preference via `prefers-color-scheme`
-5. **Analytics** — Track most used cities and time windows (privacy-friendly, no PII)
+1. **Prayer time notifications** — Browser notifications 5 minutes before each Salah (partially implemented)
+2. **Custom color themes** — Allow user to customize prayer block colors
+3. **Dark mode auto-switch** — Follow system preference via `prefers-color-scheme`
+4. **Analytics** — Track most used cities and time windows (privacy-friendly, no PII)
 
 ---
 
 ## Technical Debt
 
 1. **Add tests** — Unit tests for time calculations (compCls, getLocalHours, fmtH)
-2. **Dead code cleanup** — `isUser` checks in renderRow, stale globe/mOffset references in comments
 
 ---
 
