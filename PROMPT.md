@@ -3,8 +3,8 @@
 **Repo:** https://github.com/defaltadmin/world-prayer-times  
 **Live:** https://prayer.mscarabia.com  
 **Stack:** Single vanilla HTML file (index.html), no frameworks, no build tools  
-**Current version:** 1.7.9 (81 documented fixes across 9 audit rounds)  
-**Last audit:** Round 9 — all findings addressed
+**Current version:** 1.7.10 (84 documented fixes across 10 audit rounds)  
+**Last audit:** Round 10 — all findings addressed. Codebase clean.
 
 ---
 
@@ -21,6 +21,7 @@
 | 7 | Round 7 | #65–71 | Password hash, detectUser race, loadSavedCities, iCal date, offset display |
 | 8 | Round 8 | #72–76 | Password hash correction, AudioContext reuse, countdown accuracy, day i18n |
 | 9 | Round 9 | #77–81 | renderAll double-call, loadFromURL zero, NOW Arabic, countdown 1s |
+| 10 | Round 10 | #82–84 | UA version, notifications tz, dead variable |
 
 **Next reviewer:** Focus on visual design polish (see "Visual Design Audit" section) and any remaining edge cases. Don't re-flag fixed items.
 
@@ -203,6 +204,9 @@ These issues have been identified and resolved:
 79. ~~renderToggles Intl~~ — Hoisted formatter (1 instance instead of 7)
 80. ~~NOW label Arabic~~ — [lang="ar"] CSS override for "الآن"
 81. ~~Countdown 1s~~ — Moved into tickClocks for smooth seconds
+82. ~~Nominatim UA version~~ — Bumped to 1.7.10
+83. ~~Notifications timezone~~ — Uses pd.tz from API instead of stored userCity.tz
+84. ~~Dead cpQuickLinks~~ — Removed unused variable
 
 ---
 

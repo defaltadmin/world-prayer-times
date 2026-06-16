@@ -2,6 +2,13 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.7.10] – 2026-06-16
+
+### Fixed
+- **Nominatim User-Agent** — Version bumped to 1.7.10
+- **Notifications timezone** — Uses `pd.tz` from API instead of stored `userCity.tz`
+- **Dead code** — Removed unused `cpQuickLinks` variable
+
 ## [1.7.9] – 2026-06-16
 
 ### Fixed
