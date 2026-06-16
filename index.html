@@ -164,7 +164,7 @@
             border-bottom: 1px solid var(--border); background: var(--card);
         }
         .city-row:hover { background: rgba(255,255,255,0.01); }
-        .city-row.user-row { background: rgba(56,189,248,0.03); border-left: 3px solid var(--accent); }
+        .city-row { background: rgba(56,189,248,0.03); border-left: 3px solid var(--accent); }
         .city-label {
             width: var(--label-w); min-width: var(--label-w); flex-shrink: 0;
             padding: 8px 10px 8px 12px;
@@ -176,10 +176,6 @@
         .city-name { font-weight: 600; font-size: 0.85rem; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; display: flex; align-items: center; gap: 3px; }
         .city-clock { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text); line-height: 1.3; }
         .city-offset { font-size: 0.52rem; color: var(--muted); line-height: 1.3; }
-        .you-badge {
-            font-size: 0.5rem; background: rgba(56,189,248,0.15); color: var(--accent);
-            padding: 1px 5px; border-radius: 8px; font-weight: 700; flex-shrink: 0;
-        }
         .remove-btn {
             position: absolute; top: 3px; right: 3px;
             width: 28px; height: 28px; border-radius: 50%; border: none;
@@ -417,25 +413,10 @@
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
             #bg-pattern { display: none; }
-            #globe-canvas { animation: none !important; }
         }
         /* ── Coarse pointer touch targets ──────────────── */
         @media (pointer: coarse) {
             .icon-btn, .btn, .chip, .modal-close, .chime-btn { min-height: 44px; min-width: 44px; }
-        }
-
-        /* ── Globe ───────────────────────────────────────── */
-        #globe-wrap {
-            width: 100%; height: 300px; position: relative; overflow: hidden;
-            border-top: 1px solid var(--border); background: transparent;
-        }
-        #globe-canvas {
-            width: 100%; height: 100%; display: block;
-        }
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-            #bg-pattern { display: none; }
-            #globe-canvas { animation: none !important; }
         }
 
         /* ── Mobile ─────────────────────────────────────── */
@@ -682,9 +663,6 @@
         <div class="pb-actions"><button class="btn btn-accent" id="privacy-ok" style="padding:5px 14px;">OK</button></div>
     </div>
 
-    <!-- ══════════════ GLOBE ══════════════ -->
-    <div id="globe-wrap"><canvas id="globe-canvas" aria-hidden="true"></canvas></div>
-
     <!-- ══════════════ FOOTER ══════════════ -->
     <footer style="text-align:center;padding:12px 16px;font-size:0.65rem;color:var(--muted);border-top:1px solid var(--border);background:var(--card);margin-top:auto;">
         Made with ❤️ by <a href="https://mscarabia.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:600;">Mohammed Siddiqui</a> ·
@@ -757,7 +735,7 @@ const FALLBACK_DUR = {Fajr:0.75, Dhuhr:0.5, Asr:0.75, Maghrib:0.45, Isha:1.0};
 const STORAGE_CITIES = 'wp_cities_v1';
 let cities = [...CITIES], cache = {}, selStart = 9, selDur = 1;
 let dragging = false, resL = false, resR = false, dragX = 0, dragSL = 0, dragSD = 0;
-let h24 = false, dark = true, userCity = null, mOffset = 0;
+let h24 = false, dark = true, userCity = null;
 let enrolled = JSON.parse(localStorage.getItem('wp_e') || '[]');
 let lang = localStorage.getItem('wp_l') || 'en';
 let alarm = localStorage.getItem('wp_a') || 'ting';
@@ -908,7 +886,6 @@ function fmtH(h) {
 }
 function pct(h) { return (h / 24) * 100; }
 function clamp(v, m, M) { return Math.max(m, Math.min(M, v)); }
-function toMaster(uh) { let h = uh + mOffset; while (h < 0) h += 24; return h % 24; }
 
 /* ── API: fetch prayer times ──────────────────────────────────────── */
 function dateKey(tz) {
@@ -1048,7 +1025,6 @@ async function renderRow(city) {
     }
     if (city.isUser && pd.tz) {
         city.tz = pd.tz;
-        mOffset = getOff(pd.tz);
     }
 
     const row = document.createElement('div');
@@ -1098,20 +1074,15 @@ async function renderRow(city) {
     const strip = document.createElement('div');
     strip.style.cssText = 'flex:1;position:relative;background:var(--surface);';
 
-    // Prayer blocks
+    // Prayer blocks — use local prayer times directly (pd.loc) for positioning
     ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
-        const u = pd.utc[name];
-        if (u === undefined) return;
-        const m = toMaster(u);
+        const localH = pd.loc[name];
+        if (localH === undefined) return;
 
-        /*
-         * FIX: Use pw (prayer windows) from the API cache for block width.
-         * The old code tried pd.loc[name+'End'] which never exists in the API,
-         * making it always fall back to a tiny hardcoded durMap (≈12–20 min).
-         * Now blocks correctly show e.g. Fajr spanning to Sunrise (~45–90 min).
-         */
+        // Compute duration from local prayer window
         let durHours;
         if (pd.pw && pd.pw[name] !== undefined) {
+            // pw is in UTC, convert duration to local (same difference)
             let d = pd.pw[name] - pd.utc[name];
             if (d < 0) d += 24;
             durHours = d;
@@ -1119,40 +1090,41 @@ async function renderRow(city) {
             durHours = FALLBACK_DUR[name] || 0.5;
         }
 
-        const localStart = pd.loc[name];
-        const localEnd   = localStart + durHours;
-
         const b = document.createElement('div');
         b.className = `prayer-block ${name.toLowerCase()}`;
-        b.style.left  = pct(m) + '%';
+        b.style.left  = pct(localH) + '%';
         b.style.width = pct(Math.max(durHours, 0.15)) + '%';
         b.textContent = PRAYER_NAMES[lang]?.[name] || name;
-        b.title = `${name}: ${fmtH(m)} – ${fmtH(m + durHours)} (local ${fmtH(localStart)}–${fmtH(localEnd)})`;
+        b.title = `${name}: ${fmtH(localH)} – ${fmtH(localH + durHours)}`;
         b.onclick = e => {
             e.stopPropagation();
-            selStart = clamp(m - selDur / 2, 0, 24 - selDur);
+            selStart = clamp(localH - selDur / 2, 0, 24 - selDur);
             updateSel(); checkConflicts();
         };
         strip.appendChild(b);
     });
 
-    // Sunrise marker (yellow vertical line)
-    if (pd.utc.Sunrise !== undefined) {
-        const srM = toMaster(pd.utc.Sunrise);
+    // Sunrise marker (yellow vertical line) — use local time directly
+    if (pd.loc.Sunrise !== undefined) {
+        const srH = pd.loc.Sunrise;
         const sr  = document.createElement('div');
-        sr.style.cssText = `position:absolute;left:${pct(srM)}%;width:1.5px;top:0;bottom:0;background:rgba(251,191,36,0.55);z-index:1;pointer-events:none;`;
-        sr.title = `Sunrise: ${fmtH(srM)}`;
+        sr.style.cssText = `position:absolute;left:${pct(srH)}%;width:1.5px;top:0;bottom:0;background:rgba(251,191,36,0.55);z-index:1;pointer-events:none;`;
+        sr.title = `Sunrise: ${fmtH(srH)}`;
         strip.appendChild(sr);
     }
 
-    // Enrolled class overlays
+    // Enrolled class overlays — convert UTC times to this city's local time
     enrolled.forEach(cls => {
         if (cls.utcStart === undefined) return;
-        const ms = toMaster(cls.utcStart), me = toMaster(cls.utcEnd);
+        // cls.utcStart/utcEnd are now proper UTC hours from compCls
+        let ls = cls.utcStart + pd.off;
+        let le = cls.utcEnd + pd.off;
+        while (ls < 0) ls += 24; while (ls >= 24) ls -= 24;
+        while (le < 0) le += 24; while (le >= 24) le -= 24;
         const ev = document.createElement('div');
         ev.className = 'class-ev';
-        ev.style.left  = pct(ms) + '%';
-        ev.style.width = pct(me - ms) + '%';
+        ev.style.left  = pct(ls) + '%';
+        ev.style.width = pct(le > ls ? le - ls : (24 - ls + le)) + '%';
         ev.textContent = cls.subject;
         strip.appendChild(ev);
     });
@@ -1163,13 +1135,9 @@ async function renderRow(city) {
 
 /* ── Render: all rows ─────────────────────────────────────────────── */
 async function renderAll() {
-    // Refresh master offset before rendering any row
-    mOffset = userCity?.tz ? getOff(userCity.tz) : 0;
-
     const c = $('#rows');
     c.innerHTML = '';
     const all = [...cities];
-    if (userCity && !all.find(x => x.id === 'user')) all.unshift(userCity);
     const rows = await Promise.all(all.map(renderRow));
     rows.forEach(r => c.appendChild(r));
     updateOverlayH();
@@ -1186,9 +1154,8 @@ function updateOverlayH() {
 
 /* ── NOW line (pixel-positioned to match prayer blocks exactly) ────── */
 function scrollToNow() {
-    const n = new Date();
-    const uH = n.getUTCHours() + n.getUTCMinutes() / 60 + n.getUTCSeconds() / 3600;
-    const m  = toMaster(uH);
+    const tz = userCity?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const m  = getLocalHours(tz);
     const scroll = $('#tl-scroll'), inner = $('#tl-inner');
     if (!scroll || !inner) return;
     const viewW = scroll.clientWidth, innerW = inner.offsetWidth;
@@ -1197,9 +1164,8 @@ function scrollToNow() {
 }
 
 function updateNow() {
-    const n  = new Date();
-    const uH = n.getUTCHours() + n.getUTCMinutes() / 60 + n.getUTCSeconds() / 3600;
-    const m  = toMaster(uH);
+    const tz = userCity?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const m  = getLocalHours(tz);
 
     /*
      * The NOW line uses pixel positioning relative to tl-inner.
@@ -1257,9 +1223,8 @@ function renderRuler() {
     }
 
     // NOW marker in ruler (percentage-based to match strip)
-    const n  = new Date();
-    const uH = n.getUTCHours() + n.getUTCMinutes() / 60;
-    const m  = toMaster(uH);
+    const tz = userCity?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const m  = getLocalHours(tz);
     const rn = document.createElement('div');
     rn.id = 'ruler-now';
     rn.style.cssText = `position:absolute;left:calc(var(--label-w) + (100% - var(--label-w)) * ${m/24});top:0;bottom:0;width:2.5px;background:var(--danger);box-shadow:0 0 6px var(--danger);pointer-events:none;z-index:5;`;
@@ -1301,25 +1266,24 @@ function checkConflicts() {
         if (!pd) continue;
 
         ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
-            const u = pd.utc[name];
-            if (u === undefined) return;
-            const m = toMaster(u);
+            const localH = pd.loc[name];
+            if (localH === undefined) return;
 
             /*
              * FIX: Use pw (prayer windows) for conflict detection.
-             * This makes conflict detection consistent with what is visually shown.
-             * The old PRAYER_DUR constants (0.25–0.4 h) were inconsistent with
-             * the visual blocks, causing false "safe" readings near prayer windows.
+             * Convert pw from UTC to local for consistent comparison with selection.
              */
             let endU = pd.pw?.[name];
             if (endU === undefined) {
-                endU = (u + (FALLBACK_DUR[name] || 0.5)) % 24;
+                endU = (pd.utc[name] + (FALLBACK_DUR[name] || 0.5)) % 24;
             }
-            const endM = toMaster(endU);
+            // Convert end from UTC to local
+            let endL = endU + pd.off;
+            while (endL < 0) endL += 24; endL = endL % 24;
 
-            const overlaps = endM < m
-                ? (s < endM || e > m)   // block wraps midnight: test [m,24] and [0,endM] against [s,e]
-                : (s < endM && e > m);  // normal case
+            const overlaps = endL < localH
+                ? (s < endL || e > localH)   // block wraps midnight
+                : (s < endL && e > localH);  // normal case
 
             if (overlaps) cf.push({ city:city.name, prayer:name });
         });
@@ -1352,9 +1316,8 @@ function tickClocks() {
     });
     updateNow();
     // Also keep ruler NOW marker in sync
-    const n  = new Date();
-    const uH = n.getUTCHours() + n.getUTCMinutes() / 60 + n.getUTCSeconds() / 3600;
-    const m  = toMaster(uH);
+    const tz = userCity?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const m  = getLocalHours(tz);
     const rnow = $('#ruler-now');
     if (rnow) rnow.style.left = `calc(var(--label-w) + (100% - var(--label-w)) * ${m/24})`;
 }
@@ -1511,10 +1474,15 @@ function compCls(cls) {
     let d = cls.day - lp.dayOfWeek;
     if (d < 0) d += 7;
 
-    const ts = Date.UTC(lp.year, lp.month - 1, lp.day + d, h, m);
+    // Compute London offset (BST=UTC+1 in summer, GMT=UTC+0 in winter)
+    const londonOff = getOff('Europe/London');
+    // Class times are in London local time, convert to UTC
+    const utcStartH = h + m / 60 - londonOff;
+    const utcEndH = eh + em / 60 - londonOff;
+    const ts = Date.UTC(lp.year, lp.month - 1, lp.day + d, 0, 0) + utcStartH * 3600000;
     return {
-        utcStart: new Date(ts).getUTCHours() + new Date(ts).getUTCMinutes()/60,
-        utcEnd: new Date(ts).getUTCHours() + new Date(ts).getUTCMinutes()/60 + dur,
+        utcStart: ((utcStartH % 24) + 24) % 24,
+        utcEnd: ((utcEndH % 24) + 24) % 24,
         ts, subject:cls.subject, teacher:cls.teacher
     };
 }
@@ -1668,22 +1636,51 @@ $('#btn-share').onclick = async () => {
 $('#btn-ical').onclick = () => exportICal();
 function exportICal() {
     const now   = new Date();
+    const fmtUTC = ts => new Date(ts).toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z';
+    const lines = [
+        'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Prayer Times//EN','CALSCALE:GREGORIAN',
+    ];
+
+    // Export enrolled class events for the current week
+    if (enrolled.length) {
+        enrolled.forEach(cls => {
+            const computed = compCls(cls);
+            if (!computed.ts) return;
+            const startTs = computed.ts;
+            const durMs = ((computed.utcEnd - computed.utcStart) * 3600000);
+            const endTs = startTs + durMs;
+            lines.push(
+                'BEGIN:VEVENT',
+                `SUMMARY:${cls.subject} (${cls.teacher})`,
+                `DTSTART:${fmtUTC(startTs)}`,
+                `DTEND:${fmtUTC(endTs)}`,
+                `DESCRIPTION:Sannatayn class with ${cls.teacher}`,
+                `UID:${cls.day}-${cls.start.replace(':','')}-${cls.subject}@prayer.mscarabia.com`,
+                'END:VEVENT'
+            );
+        });
+    }
+
+    // Also export the selected safe meeting window
     const startH = Math.floor(selStart), startM = Math.round((selStart%1)*60);
     const endH = Math.floor(selStart+selDur), endM = Math.round(((selStart+selDur)%1)*60);
-    const start = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), startH, startM);
-    const end = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), endH, endM);
-    const fmtUTC = ts => new Date(ts).toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z';
-    const ics = [
-        'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Prayer Times//EN','CALSCALE:GREGORIAN',
-        'BEGIN:VEVENT','SUMMARY:Safe Meeting Window (No Salah Conflict)',
-        `DTSTART:${fmtUTC(start)}`,`DTEND:${fmtUTC(end)}`,
+    const meetingStart = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), startH, startM);
+    const meetingEnd = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), endH, endM);
+    lines.push(
+        'BEGIN:VEVENT',
+        'SUMMARY:Safe Meeting Window (No Salah Conflict)',
+        `DTSTART:${fmtUTC(meetingStart)}`,
+        `DTEND:${fmtUTC(meetingEnd)}`,
         `DESCRIPTION:Coordinated safe time across: ${cities.map(c=>c.name).join(', ')}`,
         `UID:${Date.now()}@prayer.mscarabia.com`,
-        'END:VEVENT','END:VCALENDAR',
-    ].join('\r\n');
+        'END:VEVENT',
+    );
+
+    lines.push('END:VCALENDAR');
+    const ics = lines.join('\r\n');
     const blob = new Blob([ics], {type:'text/calendar'});
     const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a'); a.href = url; a.download = `prayer-safe-${now.toISOString().slice(0,10)}.ics`;
+    const a    = document.createElement('a'); a.href = url; a.download = `prayer-sannatayn-${now.toISOString().slice(0,10)}.ics`;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
@@ -1728,8 +1725,14 @@ function attemptUnlock() {
     }
 }
 $('#btn-course').onclick = () => {
-    if (isCourseUnlocked()) unlockCourse(); else lockCourse();
-    $('#course-panel').classList.add('open'); $('#panel-bg').classList.add('open');
+    const panel = $('#course-panel');
+    const bg = $('#panel-bg');
+    panel.classList.add('open'); bg.classList.add('open');
+    if (isCourseUnlocked()) {
+        unlockCourse();
+    } else {
+        lockCourse();
+    }
 };
 $('#close-panel').onclick = $('#panel-bg').onclick = () => {
     $('#course-panel').classList.remove('open'); $('#panel-bg').classList.remove('open');
@@ -1860,11 +1863,10 @@ $('#rows').onclick = e => {
 /* ── User location detection ─────────────────────────────────────── */
 async function detectUser() {
     const sv = localStorage.getItem('wp_u');
-    if (sv) { try { userCity = JSON.parse(sv); mOffset = getOff(userCity.tz); return; } catch {} }
+    if (sv) { try { userCity = JSON.parse(sv); return; } catch {} }
     // Use browser timezone for immediate detection (no permission needed)
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     userCity = { id:'user', name:'You', tz, lat:null, lng:null, method:3, isUser:true, needsLocation:true };
-    mOffset = getOff(tz);
     // Show location button if no saved location
     const locBtn = $('#btn-location');
     if (locBtn) locBtn.style.display = '';
@@ -1932,7 +1934,6 @@ loadSavedCities();
 // Set userCity immediately with browser timezone (no geolocation needed)
 const initTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 userCity = { id:'user', name:'You', tz:initTz, lat:51.51, lng:-0.13, method:3, isUser:true };
-mOffset = getOff(initTz);
 
 // Hide loader immediately
 setTimeout(() => { const l = $('#loader'); if (l) { l.classList.add('hide'); setTimeout(() => l.remove(), 600); } }, 100);
@@ -1962,207 +1963,6 @@ detectUser().then(async () => {
     // Re-render with accurate coordinates, mOffset updated by renderRow via pd.tz
     renderAll();
 });
-
-/* ── Wireframe Globe ─────────────────────────────────────────────── */
-(function initGlobe() {
-    const cv = document.getElementById('globe-canvas');
-    if (!cv) return;
-    const ctx = cv.getContext('2d');
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    const GLOBE_CITIES = [
-        {name:'London',   lat:51.51, lng:-0.13},
-        {name:'Riyadh',   lat:24.71, lng:46.68},
-        {name:'Mumbai',   lat:19.08, lng:72.88},
-        {name:'Brussels', lat:50.85, lng:4.35},
-        {name:'New York', lat:40.71, lng:-74.01},
-        {name:'Dubai',    lat:25.20, lng:55.27},
-        {name:'Istanbul', lat:41.01, lng:28.98},
-        {name:'Cairo',    lat:30.04, lng:31.24},
-        {name:'Lagos',    lat:6.52,  lng:3.38},
-        {name:'Jakarta',  lat:-6.21, lng:106.85},
-        {name:'Singapore',lat:1.35,  lng:103.82},
-        {name:'Karachi',  lat:24.86, lng:67.01},
-        {name:'KL',       lat:3.14,  lng:101.69},
-    ];
-
-    const COASTLINES = [
-        [[-10,36],[-10,43],[-5,43],[-5,48],[0,49],[2,51],[5,52],[8,54],[12,55],[15,58],[18,60],[25,65],[30,70],[35,69],[40,65],[45,60],[50,55],[55,50],[50,45],[45,40],[40,37],[35,35],[30,32],[25,30],[20,30],[15,32],[12,38],[10,44],[5,44],[0,43],[-5,36],[-10,36]],
-        [[-17,15],[-17,5],[-5,5],[5,4],[10,2],[10,5],[15,5],[20,4],[30,2],[35,-5],[40,-10],[42,-15],[38,-20],[35,-25],[30,-30],[28,-34],[25,-34],[20,-30],[18,-25],[15,-20],[12,-15],[10,-5],[5,0],[0,5],[-5,5],[-10,8],[-17,15]],
-        [[50,55],[55,50],[60,45],[65,40],[70,35],[75,30],[80,28],[85,25],[90,22],[95,20],[100,15],[105,10],[110,5],[115,0],[120,-5],[125,-8],[130,-5],[135,0],[140,5],[145,10],[140,15],[135,20],[130,25],[125,30],[120,35],[115,38],[110,35],[105,30],[100,25],[95,20],[90,22],[85,25],[80,28],[75,30],[70,25],[65,25],[60,25],[55,30],[50,35],[50,55]],
-        [[30,32],[35,35],[40,37],[45,40],[50,45],[55,50],[50,55],[45,50],[40,45],[35,40],[30,35],[30,32]],
-        [[68,22],[72,18],[75,12],[78,8],[80,12],[82,16],[85,20],[88,22],[90,22],[88,25],[85,28],[80,30],[75,32],[72,28],[68,22]],
-        [[-170,65],[-160,60],[-150,55],[-140,50],[-130,45],[-125,40],[-120,35],[-115,30],[-110,25],[-105,20],[-100,18],[-95,16],[-90,15],[-85,12],[-80,8],[-78,5],[-75,5],[-70,8],[-65,10],[-60,12],[-55,15],[-50,18],[-45,20],[-40,22],[-35,25],[-30,28],[-25,30],[-20,32],[-15,35],[-10,36],[-5,36],[0,36],[5,40],[0,45],[-5,50],[-10,55],[-15,60],[-20,65],[-30,68],[-40,70],[-50,72],[-60,70],[-70,65],[-80,60],[-90,55],[-100,50],[-110,48],[-120,50],[-130,55],[-140,60],[-150,62],[-160,64],[-170,65]],
-        [[115,-15],[120,-18],[125,-20],[130,-18],[135,-15],[140,-12],[145,-15],[150,-18],[153,-22],[153,-28],[150,-32],[148,-35],[145,-38],[140,-38],[138,-35],[135,-32],[130,-30],[125,-28],[120,-25],[118,-22],[115,-15]],
-    ];
-
-    let rotation = 0;
-    let W, H, cx, cy, R;
-
-    function resize() {
-        const wrap = document.getElementById('globe-wrap');
-        if (!wrap) return;
-        W = wrap.clientWidth;
-        H = wrap.clientHeight;
-        cv.width = W * devicePixelRatio;
-        cv.height = H * devicePixelRatio;
-        cv.style.width = W + 'px';
-        cv.style.height = H + 'px';
-        ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-        cx = W / 2;
-        cy = H * 0.75;
-        R = Math.min(W, H) * 0.55;
-    }
-
-    function latLngTo3D(lat, lng, rot) {
-        const phi = (90 - lat) * Math.PI / 180;
-        const theta = (lng + rot) * Math.PI / 180;
-        return {
-            x: R * Math.sin(phi) * Math.cos(theta),
-            y: R * Math.cos(phi),
-            z: R * Math.sin(phi) * Math.sin(theta),
-        };
-    }
-
-    function project(p) {
-        return { x: cx + p.x, y: cy - p.y, z: p.z };
-    }
-
-    function drawGlobe(time) {
-        ctx.clearRect(0, 0, W, H);
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const strokeColor = isDark ? 'rgba(45,212,191,' : 'rgba(13,148,136,';
-
-        // Grid (latitude)
-        ctx.strokeStyle = strokeColor + '0.08)';
-        ctx.lineWidth = 0.5;
-        for (let lat = -60; lat <= 60; lat += 30) {
-            ctx.beginPath();
-            let first = true;
-            for (let lng = 0; lng <= 360; lng += 5) {
-                const p3d = latLngTo3D(lat, lng, rotation);
-                if (p3d.z < 0) { first = true; continue; }
-                const s = project(p3d);
-                if (first) { ctx.moveTo(s.x, s.y); first = false; }
-                else ctx.lineTo(s.x, s.y);
-            }
-            ctx.stroke();
-        }
-
-        // Grid (longitude)
-        for (let lng = 0; lng < 360; lng += 30) {
-            ctx.beginPath();
-            let first = true;
-            for (let lat = -90; lat <= 90; lat += 5) {
-                const p3d = latLngTo3D(lat, lng, rotation);
-                if (p3d.z < 0) { first = true; continue; }
-                const s = project(p3d);
-                if (first) { ctx.moveTo(s.x, s.y); first = false; }
-                else ctx.lineTo(s.x, s.y);
-            }
-            ctx.stroke();
-        }
-
-        // Coastlines
-        ctx.strokeStyle = strokeColor + '0.3)';
-        ctx.lineWidth = 0.8;
-        COASTLINES.forEach(path => {
-            ctx.beginPath();
-            let first = true;
-            let prevVisible = false;
-            path.forEach(([lng, lat]) => {
-                const p3d = latLngTo3D(lat, lng, rotation);
-                const visible = p3d.z > 0;
-                if (!visible) { first = true; prevVisible = false; return; }
-                const s = project(p3d);
-                if (first || !prevVisible) { ctx.moveTo(s.x, s.y); first = false; }
-                else ctx.lineTo(s.x, s.y);
-                prevVisible = true;
-            });
-            ctx.stroke();
-        });
-
-        // City dots + prayer indicators
-        const now = new Date();
-        const uH = now.getUTCHours() + now.getUTCMinutes() / 60;
-        const dk = new Date().toISOString().slice(0,10).split('-').reverse().join('-');
-
-        GLOBE_CITIES.forEach(city => {
-            const p3d = latLngTo3D(city.lat, city.lng, rotation);
-            if (p3d.z < -R * 0.2) return;
-            const s = project(p3d);
-            const opacity = Math.max(0.2, Math.min(1, (p3d.z + R) / (2 * R)));
-
-            let isPrayerTime = false;
-            const cid = city.name.toLowerCase().replace(/\s/g,'');
-            for (const k of Object.keys(cache)) {
-                if (k.startsWith(cid) && k.endsWith('-' + dk)) {
-                    const pd = cache[k];
-                    if (pd && pd.pw) {
-                        ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(p => {
-                            const start = pd.utc[p];
-                            const end = pd.pw[p];
-                            if (start === undefined || end === undefined) return;
-                            let inWindow = end > start
-                                ? (uH >= start && uH <= end)
-                                : (uH >= start || uH <= end);
-                            if (inWindow) isPrayerTime = true;
-                        });
-                    }
-                    break;
-                }
-            }
-
-            if (isPrayerTime) {
-                const lineH = 20 + Math.sin(time / 500) * 3;
-                ctx.strokeStyle = `rgba(248,113,113,${opacity * 0.8})`;
-                ctx.lineWidth = 1.5;
-                ctx.shadowColor = 'rgba(248,113,113,0.5)';
-                ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.moveTo(s.x, s.y);
-                ctx.lineTo(s.x, s.y - lineH);
-                ctx.stroke();
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = `rgba(248,113,113,${opacity})`;
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, 3, 0, Math.PI * 2);
-                ctx.fill();
-                if (p3d.z > R * 0.3) {
-                    ctx.fillStyle = `rgba(248,113,113,${opacity * 0.8})`;
-                    ctx.font = '9px Inter, sans-serif';
-                    ctx.fillText(city.name, s.x + 6, s.y + 3);
-                }
-            } else {
-                ctx.fillStyle = `rgba(45,212,191,${opacity * 0.7})`;
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                if (p3d.z > R * 0.5) {
-                    ctx.fillStyle = `rgba(139,164,180,${opacity * 0.6})`;
-                    ctx.font = '8px Inter, sans-serif';
-                    ctx.fillText(city.name, s.x + 5, s.y + 3);
-                }
-            }
-        });
-    }
-
-    let globePaused = false;
-    if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver(([e]) => { globePaused = !e.isIntersecting; }, {threshold:0});
-        io.observe(cv);
-    }
-
-    function loop(time) {
-        if (!globePaused && !prefersReduced) rotation += 0.02;
-        drawGlobe(time);
-        requestAnimationFrame(loop);
-    }
-
-    resize();
-    window.addEventListener('resize', resize);
-    if (prefersReduced) { drawGlobe(0); } else { requestAnimationFrame(loop); }
-})();
 
 })(); // end IIFE
 </script>
