@@ -2,6 +2,28 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.7.0] – 2026-06-16
+
+### Fixed
+- **Prayer timing accuracy** — Blocks now use `pd.loc[name]` (local prayer times) directly for positioning instead of converting UTC→master via `toMaster()`. This eliminates the timezone offset confusion where blocks were shifted by the user's local offset relative to UTC.
+- **Conflict detection** — Now compares local prayer times against the selection directly, consistent with visual block positioning.
+- **NOW line** — Uses `getLocalHours(userCity.tz)` directly instead of UTC→master conversion.
+- **Class overlays** — `compCls()` now properly converts London local class times to UTC by subtracting the London offset (BST=UTC+1, GMT=UTC+0). Overlays on the timeline convert UTC to each city's local time.
+- **Course panel toggle** — Panel now properly shows locked/unlocked state based on session storage when opened. Previously the toggle logic was inverted.
+- **iCal export** — Now exports enrolled class events at correct times in addition to the selected meeting window.
+
+### Removed
+- **Globe/Qibla wireframe** — Canvas-based Earth visualization removed (~200 lines). Was janky on desktop, not useful for the app's purpose.
+- **"You" user row** — User's detected location row removed from the timeline. User city still used for prayer calculations but no longer displayed as a row.
+- **`toMaster()` function** — Eliminated entirely. All positioning now uses local times directly.
+- **`mOffset` variable** — No longer needed. Was the source of the timing bug (set to user's London offset, applied to all cities).
+
+### Changed
+- **Prayer block positioning** — Uses `pd.loc[name]` (local hours) directly instead of `toMaster(pd.utc[name])`.
+- **Sunrise marker** — Uses `pd.loc.Sunrise` directly.
+- **Ruler NOW marker** — Uses `getLocalHours()` directly.
+- **All timing functions** — Eliminated unnecessary UTC→master conversion layer.
+
 ## [1.6.3] – 2026-06-15
 
 ### Added

@@ -2,39 +2,28 @@
 
 ## Current State
 The app is a single-page prayer time coordination tool with:
-- 24-hour timeline with city rows
-- Real-time prayer data from Aladhan API
-- Selection bar with conflict detection
+- 24-hour timeline with city rows (user row removed)
+- Real-time prayer data from Aladhan API, positioned using local times directly
+- Selection bar with conflict detection (uses local prayer times)
 - Dark/light theme, EN/AR language support
-- Course enrollment panel
+- Course enrollment panel with password gate
+- iCal export for enrolled classes + meeting windows
 - Mobile responsive design
 
 ## Known Issues to Fix
-1. **Prayer block width**: Currently hardcoded to 30min (0.5h). Should vary by prayer duration (Fajr/Isha shorter, Dhuhr/Asr longer).
-2. **Timezone edge cases**: DST transitions can cause prayer times to be off by 1 hour.
-3. **Offline support**: No service worker for offline caching.
-4. **Accessibility**: Missing ARIA labels on interactive elements.
-5. **Performance**: Multiple API calls on init. Should batch requests.
+1. **DST edge cases**: Prayer times may shift during DST transitions if the API returns stale offsets.
+2. **Class overlay midnight wrap**: If a class spans midnight in UTC (unlikely but possible), the overlay width calculation may be wrong.
+3. **iCal recurrence**: Enrolled classes export as one-time events, not recurring weekly events.
 
 ## Enhancement Ideas
-1. **Add prayer duration info**: Show actual prayer duration (e.g., Fajr 20min, Dhuhr 15min) in tooltip.
-2. **Add sunrise block**: Currently only shows 5 prayers, add Sunrise as a visual marker.
-3. **Calendar integration**: Export prayer times to Google Calendar/Apple Calendar.
-4. **Custom cities**: Allow user to add any city (not just from pool).
-5. **Notifications**: Browser notifications for upcoming prayers.
-6. **Share button**: Generate shareable link with selected cities and time window.
-7. **Analytics**: Track most used cities and time windows.
-8. **PWA support**: Add manifest.json for installability.
-
-## UI Polish Ideas
-1. **Micro-animations**: Subtle fade-in for prayer blocks on load.
-2. **Hover tooltips**: Show detailed prayer info on hover.
-3. **Keyboard navigation**: Arrow keys to move selection bar.
-4. **Dark mode auto-switch**: Follow system preference.
-5. **Custom color themes**: Allow user to customize prayer colors.
+1. **Recurring iCal events**: Use RRULE for weekly class recurrence instead of single events.
+2. **Prayer time notifications**: Browser notifications 5 minutes before each Salah (partially implemented).
+3. **Custom color themes**: Allow user to customize prayer block colors.
+4. **Dark mode auto-switch**: Follow system preference via `prefers-color-scheme`.
+5. **Analytics**: Track most used cities and time windows (privacy-friendly, no PII).
 
 ## Technical Debt
-1. **Split JS into modules**: Currently all in one IIFE.
-2. **Add TypeScript**: For better type safety.
-3. **Add tests**: Unit tests for time calculations.
-4. **Add CI/CD**: GitHub Actions for auto-deploy.
+1. **Split JS into modules**: Currently all in one IIFE (constraint: single HTML file).
+2. **Add TypeScript**: For better type safety (would require build step).
+3. **Add tests**: Unit tests for time calculations (compCls, getLocalHours, fmtH).
+4. **Dead code in renderRow**: `isUser` checks in renderRow are now dead code since user row is no longer rendered.
