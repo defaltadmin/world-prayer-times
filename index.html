@@ -529,9 +529,9 @@
                 Add City
             </div>
             <!-- Selection bar -->
-            <div class="sel-overlay" id="sel" style="left:41.67%;width:4.167%;top:0;bottom:0;" tabindex="0" role="slider" aria-label="Meeting window selector" aria-valuemin="0" aria-valuemax="24" aria-valuenow="9" aria-valuetext="9:00 AM to 10:00 AM">
-                <div class="resize-h l" id="rz-l"></div>
-                <div class="resize-h r" id="rz-r"></div>
+            <div class="sel-overlay" id="sel" style="left:41.67%;width:4.167%;top:0;bottom:0;" role="slider" aria-label="Meeting window selector" aria-valuemin="0" aria-valuemax="24" aria-valuenow="10" aria-valuetext="9:00 AM to 10:00 AM">
+                <div class="resize-h l" id="rz-l" tabindex="0"></div>
+                <div class="resize-h r" id="rz-r" tabindex="0"></div>
                 <div class="sel-handle t" id="h-top"></div>
                 <div class="sel-handle b" id="h-bot"></div>
             </div>
@@ -774,6 +774,10 @@ const PRAYER_NAMES = {
     en: {Fajr:'Fajr',Dhuhr:'Dhuhr',Asr:'Asr',Maghrib:'Maghrib',Isha:'Isha'},
     ar: {Fajr:'فجر',Dhuhr:'ظهر',Asr:'عصر',Maghrib:'مغرب',Isha:'عشاء'},
 };
+const SUBJECTS = {
+    en: {Fiqh:'Fiqh',Tafseer:'Tafseer',Seerah:'Seerah',Adab:'Adab',Arabic:'Arabic',Hadith:'Hadith',Aqaaid:'Aqaaid'},
+    ar: {Fiqh:'فقه',Tafseer:'تفسير',Seerah:'سيرة',Adab:'أدب',Arabic:'عربي',Hadith:'حديث',Aqaaid:'عقائد'},
+};
 function updateLegend() {
     const n = PRAYER_NAMES[lang];
     ['fajr','dhuhr','asr','maghrib','isha'].forEach(p => {
@@ -908,7 +912,8 @@ async function fetchPrayer(city) {
     if (cache[ck]) return cache[ck];
 
     // Prune stale entries
-    Object.keys(cache).forEach(k => { if (!k.endsWith(':' + dk)) delete cache[k]; });
+    const staleKeys = Object.keys(cache).filter(k => !k.endsWith(':' + dk));
+    staleKeys.forEach(k => delete cache[k]);
 
     const url = `https://api.aladhan.com/v1/timings/${dk}?latitude=${city.lat}&longitude=${city.lng}&method=${city.method}`;
     try {
@@ -976,43 +981,6 @@ async function fetchPrayer(city) {
 
 /* ── Render: city row ─────────────────────────────────────────────── */
 async function renderRow(city) {
-    // If city needs location and has no coordinates, show placeholder
-    if (city.isUser && city.needsLocation && (!city.lat || !city.lng)) {
-        const row = document.createElement('div');
-        row.className = 'city-row user-row';
-        row.dataset.id = city.id;
-        const lbl = document.createElement('div');
-        lbl.className = 'city-label';
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'city-name';
-        const pin = document.createElementNS('http://www.w3.org/2000/svg','svg');
-        pin.setAttribute('width','10'); pin.setAttribute('height','10');
-        pin.setAttribute('viewBox','0 0 24 24'); pin.setAttribute('fill','#38bdf8');
-        pin.style.cssText = 'vertical-align:middle;margin-right:2px;flex-shrink:0;';
-        const p = document.createElementNS('http://www.w3.org/2000/svg','path');
-        p.setAttribute('d','M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z');
-        pin.appendChild(p); nameSpan.appendChild(pin);
-        nameSpan.appendChild(document.createTextNode('You'));
-        const yb = document.createElement('span'); yb.className = 'you-badge'; yb.textContent = 'YOU';
-        nameSpan.appendChild(yb);
-        lbl.appendChild(nameSpan);
-        const clockSpan = document.createElement('span'); clockSpan.className = 'city-clock';
-        clockSpan.textContent = new Date().toLocaleTimeString('en-US', {timeZone:city.tz, hour:'2-digit', minute:'2-digit', hour12:!h24});
-        lbl.appendChild(clockSpan);
-        const hint = document.createElement('span'); hint.className = 'city-offset';
-        hint.textContent = lang === 'ar' ? 'اضغط 🔴 لتحديد الموقع' : 'Tap 🔴 to set location';
-        lbl.appendChild(hint);
-        row.appendChild(lbl);
-        const strip = document.createElement('div');
-        strip.style.cssText = 'flex:1;position:relative;background:var(--surface);display:flex;align-items:center;justify-content:center;';
-        const msg = document.createElement('span');
-        msg.style.cssText = 'font-size:0.75rem;color:var(--muted);';
-        msg.textContent = lang === 'ar' ? 'اضغط الزر الأحمر في الشريط العلوي لتفعيل الموقع' : 'Tap the red location pin in the status bar to show prayer times';
-        strip.appendChild(msg);
-        row.appendChild(strip);
-        return row;
-    }
-
     const pd  = await fetchPrayer(city);
 
     /*
@@ -1023,12 +991,9 @@ async function renderRow(city) {
     if (city.geo && pd.tz && city.tz !== pd.tz) {
         city.tz = pd.tz;
     }
-    if (city.isUser && pd.tz) {
-        city.tz = pd.tz;
-    }
 
     const row = document.createElement('div');
-    row.className = 'city-row' + (city.isUser ? ' user-row' : '');
+    row.className = 'city-row';
     row.dataset.id = city.id;
 
     // ── City label (sticky-left, safe DOM construction)
@@ -1037,18 +1002,7 @@ async function renderRow(city) {
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'city-name';
-    if (city.isUser) {
-        // Pin icon for user's detected location
-        const pin = document.createElementNS('http://www.w3.org/2000/svg','svg');
-        pin.setAttribute('width','10'); pin.setAttribute('height','10');
-        pin.setAttribute('viewBox','0 0 24 24'); pin.setAttribute('fill','#38bdf8');
-        pin.style.cssText = 'vertical-align:middle;margin-right:2px;flex-shrink:0;';
-        const p = document.createElementNS('http://www.w3.org/2000/svg','path');
-        p.setAttribute('d','M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z');
-        pin.appendChild(p); nameSpan.appendChild(pin);
-    }
     nameSpan.appendChild(document.createTextNode(city.name));
-    if (city.isUser) { const yb = document.createElement('span'); yb.className = 'you-badge'; yb.textContent = 'YOU'; nameSpan.appendChild(yb); }
     lbl.appendChild(nameSpan);
 
     const now = new Date();
@@ -1061,7 +1015,7 @@ async function renderRow(city) {
     lbl.appendChild(offSpan);
 
     // Remove button
-    if (!city.isUser && cities.length > 1) {
+    if (cities.length > 1) {
         const rb = document.createElement('button');
         rb.className = 'remove-btn'; rb.dataset.id = city.id; rb.title = 'Remove city';
         rb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
@@ -1096,6 +1050,7 @@ async function renderRow(city) {
         b.style.width = pct(Math.max(durHours, 0.15)) + '%';
         b.textContent = PRAYER_NAMES[lang]?.[name] || name;
         b.title = `${name}: ${fmtH(localH)} – ${fmtH(localH + durHours)}`;
+        b.setAttribute('aria-label', `${name}: ${fmtH(localH)} to ${fmtH(localH + durHours)}`);
         b.onclick = e => {
             e.stopPropagation();
             selStart = clamp(localH - selDur / 2, 0, 24 - selDur);
@@ -1125,7 +1080,7 @@ async function renderRow(city) {
         ev.className = 'class-ev';
         ev.style.left  = pct(ls) + '%';
         ev.style.width = pct(le > ls ? le - ls : (24 - ls + le)) + '%';
-        ev.textContent = cls.subject;
+        ev.textContent = SUBJECTS[lang]?.[cls.subject] || cls.subject;
         strip.appendChild(ev);
     });
 
@@ -1457,10 +1412,20 @@ document.addEventListener('keydown', e => {
 window.addEventListener('resize', () => { updateSel(); updateNow(); });
 
 /* ── Enrolled class schedule ─────────────────────────────────────── */
+function getOffsetForDate(tz, year, month, day) {
+    try {
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit',
+            hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'
+        }).formatToParts(new Date(Date.UTC(year, month-1, day, 12, 0, 0)));
+        const m = Object.fromEntries(parts.map(p => [p.type, p.value]));
+        const asUTC = Date.UTC(+m.year, +m.month-1, +m.day, +m.hour, +m.minute, +m.second);
+        return Math.round(((asUTC - Date.UTC(year, month-1, day, 12, 0, 0)) / 36e5) * 100) / 100;
+    } catch { return 0; }
+}
 function compCls(cls) {
     const [h, m]    = cls.start.split(':').map(Number);
     const [eh, em]  = cls.end.split(':').map(Number);
-    const dur = (eh + em / 60) - (h + m / 60);
 
     // Get London date parts using Intl (works in any timezone)
     const now = new Date();
@@ -1474,8 +1439,9 @@ function compCls(cls) {
     let d = cls.day - lp.dayOfWeek;
     if (d < 0) d += 7;
 
-    // Compute London offset (BST=UTC+1 in summer, GMT=UTC+0 in winter)
-    const londonOff = getOff('Europe/London');
+    // Compute London offset for the specific class date (handles DST transitions)
+    const classDate = new Date(Date.UTC(lp.year, lp.month - 1, lp.day + d));
+    const londonOff = getOffsetForDate('Europe/London', classDate.getUTCFullYear(), classDate.getUTCMonth()+1, classDate.getUTCDate());
     // Class times are in London local time, convert to UTC
     const utcStartH = h + m / 60 - londonOff;
     const utcEndH = eh + em / 60 - londonOff;
@@ -1641,8 +1607,9 @@ function exportICal() {
         'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Prayer Times//EN','CALSCALE:GREGORIAN',
     ];
 
-    // Export enrolled class events for the current week
+    // Export enrolled class events as recurring weekly events
     if (enrolled.length) {
+        const dayMapCal = ['SU','MO','TU','WE','TH','FR','SA'];
         enrolled.forEach(cls => {
             const computed = compCls(cls);
             if (!computed.ts) return;
@@ -1654,6 +1621,7 @@ function exportICal() {
                 `SUMMARY:${cls.subject} (${cls.teacher})`,
                 `DTSTART:${fmtUTC(startTs)}`,
                 `DTEND:${fmtUTC(endTs)}`,
+                `RRULE:FREQ=WEEKLY;BYDAY=${dayMapCal[cls.day]}`,
                 `DESCRIPTION:Sannatayn class with ${cls.teacher}`,
                 `UID:${cls.day}-${cls.start.replace(':','')}-${cls.subject}@prayer.mscarabia.com`,
                 'END:VEVENT'
@@ -1795,8 +1763,9 @@ function addCity(city) {
     saveCities(); cache = {}; renderAll(); closeM('#m-addcity');
 }
 
-// Geocoding search (Nominatim) with 400ms debounce
+// Geocoding search (Nominatim) with 400ms debounce + 1s rate limit
 let _geoTimer = null;
+let _lastGeoCall = 0;
 $('#city-search').oninput = () => {
     const q  = $('#city-search').value.trim();
     const sr = $('#search-results');
@@ -1806,6 +1775,9 @@ $('#city-search').oninput = () => {
     if (q.length < 2) { sr.innerHTML = ''; return; }
     if (local.length) renderSearchItems(local, sr); else sr.innerHTML = '<div class="search-spinner">Searching…</div>';
     _geoTimer = setTimeout(async () => {
+        const now = Date.now();
+        if (now - _lastGeoCall < 1000) return;
+        _lastGeoCall = now;
         try {
             const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
             const data = await (await fetch(url, {headers:{'Accept-Language':'en'}})).json();
@@ -1814,7 +1786,7 @@ $('#city-search').oninput = () => {
                 const name    = sanitizeName(d.address?.city || d.address?.town || d.address?.village || d.name || '').trim();
                 const country = d.address?.country || '';
                 if (!name) return;
-                const id = 'geo_' + name.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_' + Math.round(parseFloat(d.lat)) + '_' + Math.round(parseFloat(d.lon));
+                const id = 'geo_' + name.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_' + Math.round(parseFloat(d.lat)*100)/100 + '_' + Math.round(parseFloat(d.lon)*100)/100;
                 if (seen.has(id) || ex.has(id)) return;
                 seen.add(id);
                 /*
@@ -1948,7 +1920,7 @@ updateHeaderDate();
 setTimeout(scrollToNow, 600);
 setInterval(tickClocks, 1000);
 setInterval(updateCD, 10000); updateCD();
-setTimeout(() => { if (notifEnabled) schedulePrayerNotifs(); }, 2000);
+setTimeout(() => { if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); }, 2000);
 
 // Refresh at local midnight instead of every 30 min
 function scheduleMidnightRefresh() {
@@ -1960,7 +1932,7 @@ scheduleMidnightRefresh();
 
 // Try geolocation in background (non-blocking, 2s timeout)
 detectUser().then(async () => {
-    // Re-render with accurate coordinates, mOffset updated by renderRow via pd.tz
+    // Re-render with accurate coordinates (renderRow updates city.tz from API response)
     renderAll();
 });
 
