@@ -7,7 +7,7 @@
     <meta name="description" content="Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.">
     <meta name="theme-color" content="#0a0f1e">
     <meta name="color-scheme" content="dark light">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org; img-src 'self' data: blob:; media-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org https://www.google-analytics.com; img-src 'self' data: blob:; base-uri 'self'; upgrade-insecure-requests;">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0f1e'/%3E%3Ccircle cx='50' cy='35' r='12' fill='none' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 v-28' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 l18 20 H32z' fill='%2338bdf8' opacity='0.3'/%3E%3Cpath d='M25 67 Q50 55 75 67' fill='none' stroke='%2338bdf8' stroke-width='2'/%3E%3C/svg%3E">
 
     <meta property="og:title" content="Prayer Times – Coordinate Salah Across Cities">
@@ -1886,15 +1886,15 @@ $('#btn-howto').onclick    = () => { closeM('#m-settings'); openM('#m-help'); };
 $('#btn-now').onclick      = () => scrollToNow();
 $('#btn-location').onclick = () => requestLocation();
 
-$('#theme-btn').onclick = () => {
+$('#theme-btn')?.addEventListener('click', () => {
     dark = !dark;
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
     localStorage.setItem('wp_t', dark ? 'dark' : 'light');
     document.querySelector('meta[name="color-scheme"]').content = dark ? 'dark light' : 'light dark';
     if (window._dotGridRefreshAccent) window._dotGridRefreshAccent();
     updateUI();
-};
-$('#theme-btn').textContent = dark ? t('dark') : t('light');
+});
+$('#theme-btn') && ($('#theme-btn').textContent = dark ? t('dark') : t('light'));
 
 $('#fmt-btn').onclick = () => {
     h24 = !h24;
