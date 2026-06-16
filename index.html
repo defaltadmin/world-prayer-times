@@ -237,6 +237,35 @@
         }
         .border-glow .glow-inner { position: relative; z-index: 2; }
 
+        /* ── Spotlight Card ──────────────────────────────── */
+        .spotlight-card {
+            position: relative; overflow: hidden;
+            --mouse-x: 50%; --mouse-y: 50%;
+        }
+        .spotlight-card::before {
+            content: ''; position: absolute; inset: 0; border-radius: inherit;
+            background: radial-gradient(
+                350px circle at var(--mouse-x) var(--mouse-y),
+                rgba(255,255,255,0.08) 0%,
+                transparent 100%
+            );
+            opacity: 0; transition: opacity 0.3s ease;
+            pointer-events: none; z-index: 1;
+        }
+        .spotlight-card:hover::before { opacity: 1; }
+        [data-theme="light"] .spotlight-card::before {
+            background: radial-gradient(
+                350px circle at var(--mouse-x) var(--mouse-y),
+                rgba(0,0,0,0.04) 0%,
+                transparent 100%
+            );
+        }
+        /* Disable heavy effects on mobile/touch */
+        @media (pointer: coarse) {
+            .spotlight-card::before { display: none; }
+            .border-glow::before, .border-glow::after { display: none; }
+        }
+
         /* ── Header ──────────────────────────────────────── */
         .header {
             position: sticky; top: 0; z-index: 30; padding: 8px 16px;
@@ -2306,6 +2335,21 @@ detectUser().then(async () => {
         }
         sweepLogo();
     }
+})();
+
+/* ── Spotlight Card Effect ────────────────────────────────────── */
+(function initSpotlight() {
+    // Skip on touch devices for performance
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    const targets = $$('.info-link, .card-nav-item');
+    targets.forEach(el => {
+        el.classList.add('spotlight-card');
+        el.addEventListener('pointermove', e => {
+            const rect = el.getBoundingClientRect();
+            el.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+            el.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+        });
+    });
 })();
 
 /* ── Card Nav Menu ────────────────────────────────────────────── */
