@@ -3,8 +3,8 @@
 **Repo:** https://github.com/defaltadmin/world-prayer-times  
 **Live:** https://prayer.mscarabia.com  
 **Stack:** Single vanilla HTML file (index.html), no frameworks, no build tools  
-**Current version:** 1.7.10 (84 documented fixes across 10 audit rounds)  
-**Last audit:** Round 10 — all findings addressed. Codebase clean.
+**Current version:** 1.8.0 (84 fixes + visual overhaul across 10 audit rounds)  
+**Last audit:** Round 10 — codebase clean. Visual overhaul applied.
 
 ---
 
@@ -31,7 +31,7 @@
 
 | File | Purpose |
 |------|---------|
-| `index.html` | **The entire app** — HTML + CSS + JS in one file (~2004 lines) |
+| `index.html` | **The entire app** — HTML + CSS + JS in one file (~2170 lines) |
 | `wrangler.toml` | Cloudflare Pages config |
 | `_headers` | Cloudflare HTTP headers |
 | `_redirects` | Cloudflare redirects |
@@ -63,16 +63,17 @@ A prayer times coordination tool for Muslims worldwide. Users can:
 - Coarse pointer touch targets (`@media pointer: coarse`)
 - Reduced motion (`@media prefers-reduced-motion`)
 
-### HTML (~220 lines)
-- Loading screen, Islamic pattern background (CSS SVG)
-- Header with buttons (help, course, share, iCal, notifications, settings, location)
-- Status bar with conflict badge and "Use my location" button
+### HTML (~280 lines)
+- Loading screen, Islamic pattern background (CSS SVG) + dot grid canvas
+- Minimal header (logo, title, countdown, scroll-to-now, hamburger)
+- Card nav slide-out menu (Navigate, Course, Share, Settings groups)
+- Status bar with conflict badge
 - Legend strip, ruler, timeline with city rows
 - Modals: Settings, Help, Add City, Privacy
 - Course panel (slide-out with password gate)
 - Footer
 
-### JavaScript (~1300 lines)
+### JavaScript (~1500 lines)
 - **Config:** CITIES array (5 defaults), POOL (13 cities), CLASSES (14 course sessions)
 - **State:** cities, cache, selection, userCity, lang, enrolled
 - **i18n:** English + Arabic translations for all UI strings, SUBJECTS map for class names
@@ -81,6 +82,8 @@ A prayer times coordination tool for Muslims worldwide. Users can:
 - **Rendering:** renderRow(), renderAll(), renderRuler(), updateSel()
 - **Conflicts:** checkConflicts() using local prayer times from API
 - **Course:** Password gate, class schedule, enrollment toggles
+- **Dot grid:** Canvas interactive background with mouse proximity effect
+- **Card nav:** Slide-out menu with grouped navigation cards
 - **Geolocation:** "Use my location" button (NOT auto-prompt)
 - **Init:** Renders immediately with browser timezone, geolocation optional
 

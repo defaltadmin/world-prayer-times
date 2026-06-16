@@ -2,6 +2,15 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.8.0] – 2026-06-16
+
+### Added
+- **Dot grid interactive background** — Canvas-based dot grid with mouse proximity effect (dots light up and push away from cursor, spring back with damping). Respects prefers-reduced-motion.
+- **Card nav menu** — Hamburger menu replaces 8 header buttons with a slide-out panel grouped into cards: Navigate, Course, Share & Export, Settings.
+- **Glass morphism enhanced** — Added saturate(180%) and box-shadow to glass surfaces
+- **Animations** — Fade-in on load, prayer block hover spring, card lift on hover, NOW line pulse, chip bounce, selection bar glow
+- **Arabic NOW label** — `[lang="ar"]` CSS override for "الآن"
+
 ## [1.7.10] – 2026-06-16
 
 ### Fixed
