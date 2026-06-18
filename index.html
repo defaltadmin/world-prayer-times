@@ -968,6 +968,7 @@ let dragging = false, resL = false, resR = false, dragX = 0, dragSL = 0, dragSD 
 let h24 = false, dark = true, userCity = null;
 let _cachedLabelW = 140;
 function getLabelW() { return _cachedLabelW; }
+let enrolled;
 try {
     const parsed = JSON.parse(localStorage.getItem('wp_e') || '[]');
     enrolled = Array.isArray(parsed) ? parsed.filter(c => c && typeof c.start === 'string' && typeof c.end === 'string' && Number.isInteger(c.day)) : [];
