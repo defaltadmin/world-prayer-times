@@ -339,8 +339,8 @@
         .ruler-mark.major { background: rgba(128,128,128,0.2); }
         .ruler-lbl {
             position: absolute; top: 3px; transform: translateX(-50%);
-            font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
-            color: var(--muted); pointer-events: none;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+            color: var(--text); pointer-events: none;
         }
 
         /* ── City rows ───────────────────────────────────── */
@@ -376,25 +376,26 @@
         .prayer-block {
             position: absolute; top: 5px; bottom: 5px; border-radius: 3px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 0.55rem; letter-spacing: 0.04em;
+            font-weight: 700; font-size: 0.6rem; letter-spacing: 0.04em;
             cursor: pointer; z-index: 2; overflow: hidden;
             writing-mode: vertical-rl; text-orientation: mixed;
             text-transform: uppercase; border-left: 3px solid;
             transition: transform 0.12s, filter 0.12s;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            text-shadow: 0 0 4px rgba(255,255,255,0.5);
         }
         .prayer-block:hover { transform: scaleY(1.06); filter: brightness(1.15); z-index: 5; }
         .prayer-block:focus { outline: 2px solid var(--accent); outline-offset: 2px; z-index: 5; }
-        .prayer-block.fajr    { background: rgba(103,232,249,0.35); color: #0c4a6e; border-color: var(--prayer-fajr); }
-        .prayer-block.dhuhr   { background: rgba(251,191,36,0.38);  color: #713f12; border-color: var(--prayer-dhuhr); }
-        .prayer-block.asr     { background: rgba(251,146,60,0.38);  color: #7c2d12; border-color: var(--prayer-asr); }
-        .prayer-block.maghrib { background: rgba(248,113,113,0.35); color: #7f1d1d; border-color: var(--prayer-maghrib); }
-        .prayer-block.isha    { background: rgba(167,139,250,0.38); color: #4c1d95; border-color: var(--prayer-isha); }
-        [data-theme="light"] .prayer-block.fajr    { background: rgba(6,182,212,0.35); }
-        [data-theme="light"] .prayer-block.dhuhr   { background: rgba(251,191,36,0.35); }
-        [data-theme="light"] .prayer-block.asr     { background: rgba(251,146,60,0.35); }
-        [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.3); }
-        [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.3); }
+        .prayer-block.fajr    { background: rgba(103,232,249,0.45); color: #0c4a6e; border-color: var(--prayer-fajr); }
+        .prayer-block.dhuhr   { background: rgba(251,191,36,0.48);  color: #713f12; border-color: var(--prayer-dhuhr); }
+        .prayer-block.asr     { background: rgba(251,146,60,0.48);  color: #7c2d12; border-color: var(--prayer-asr); }
+        .prayer-block.maghrib { background: rgba(248,113,113,0.45); color: #7f1d1d; border-color: var(--prayer-maghrib); }
+        .prayer-block.isha    { background: rgba(167,139,250,0.48); color: #4c1d95; border-color: var(--prayer-isha); }
+        [data-theme="light"] .prayer-block.fajr    { background: rgba(6,182,212,0.45); }
+        [data-theme="light"] .prayer-block.dhuhr   { background: rgba(251,191,36,0.45); }
+        [data-theme="light"] .prayer-block.asr     { background: rgba(251,146,60,0.45); }
+        [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.4); }
+        [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.4); }
 
         /* ── Class event overlays ────────────────────────── */
         .class-ev {
@@ -1873,7 +1874,7 @@ $$('.modal-bg').forEach(m => m.onclick = e => { if (e.target === m) closeM('#' +
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         $$('.modal-bg.open').forEach(m => closeM('#' + m.id));
-        if ($('#card-nav-menu')?.classList.contains('open')) { $('#card-nav-overlay')?.classList.remove('open'); $('#card-nav-menu')?.classList.remove('open'); $('#btn-menu')?.setAttribute('aria-expanded','false'); }
+        if ($('#card-nav-menu')?.classList.contains('open')) { $('#app')?.removeAttribute('inert'); $('#card-nav-overlay')?.classList.remove('open'); $('#card-nav-menu')?.classList.remove('open'); $('#btn-menu')?.setAttribute('aria-expanded','false'); }
     }
 });
 
