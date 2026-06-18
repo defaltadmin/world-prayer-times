@@ -2,6 +2,24 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.11.0] — 2026-06-18
+
+### Fixed
+- **Loader timing** — Spinner now waits 1.5s for Aladhan API responses instead of hiding after 100ms (fixes blank/broken page on slow connections)
+- **Midnight refresh guard** — If calculated time-to-midnight is < 5 min, waits a full 24h instead of re-firing every 60s (prevents rapid re-render loop)
+- **Double renderAll removed** — Eliminated redundant second `renderAll()` call on init that caused race conditions and unnecessary API requests
+- **Cache-busting meta tags** — Added `Cache-Control: no-cache, no-store, must-revalidate` to HTML head (belt-and-suspenders with _headers)
+- **iCal DTSTAMP** — Added required `DTSTAMP` field to all VEVENT entries per RFC 5545 (was missing, caused import failures in some calendar apps)
+- **Fetch timeout** — Aladhan API calls now have 10s timeout via `AbortSignal.timeout()` (prevents hanging on slow connections)
+- **Nominatim User-Agent** — Updated version string to 1.11.0 with contact email per Nominatim ToS
+- **localStorage safety** — Added try/catch to all localStorage.setItem calls (prevents QuotaExceededError crashes)
+- **package.json** — Version updated to 1.11.0
+- **SECURITY.md** — Supported versions updated
+
+### Audit Notes
+- Z.ai audit: 4 real fixes applied (DTSTAMP, fetch timeout, User-Agent, localStorage safety)
+- Z.ai audit: 8 claims dismissed as false positives (race condition already handled by `_renderGen`, cache cleared at midnight, Aladhan API handles calculations, CSP `'unsafe-inline'` required for static site, accessibility already implemented)
+
 ## [1.10.0] — 2026-06-16
 
 ### Fixed

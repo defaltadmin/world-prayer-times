@@ -8,6 +8,9 @@
     <meta name="theme-color" content="#0a0f1e">
     <meta name="color-scheme" content="dark light">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org https://www.google-analytics.com; img-src 'self' data: blob:; base-uri 'self'; upgrade-insecure-requests;">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0f1e'/%3E%3Ccircle cx='50' cy='35' r='12' fill='none' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 v-28' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 l18 20 H32z' fill='%2338bdf8' opacity='0.3'/%3E%3Cpath d='M25 67 Q50 55 75 67' fill='none' stroke='%2338bdf8' stroke-width='2'/%3E%3C/svg%3E">
 
     <meta property="og:title" content="Prayer Times – Coordinate Salah Across Cities">
@@ -1190,7 +1193,7 @@ async function fetchPrayer(city) {
 
     const url = `https://api.aladhan.com/v1/timings/${dk}?latitude=${city.lat}&longitude=${city.lng}&method=${city.method}`;
     try {
-        const r = await fetch(url), j = await r.json();
+            const r = await fetch(url, {signal: AbortSignal.timeout(10000)}), j = await r.json();
         if (j.code !== 200) throw new Error('API');
 
         const tz  = j.data.meta.timezone || city.tz;
@@ -1348,8 +1351,9 @@ async function renderRow(city) {
         strip.appendChild(sr);
     }
 
-    // Enrolled class overlays — convert UTC times to this city's local time
-    enrolled.forEach(cls => {
+    // Enrolled class overlays — only show today's classes
+    const today = new Date().getDay();
+    enrolled.filter(cls => cls.day === today).forEach(cls => {
         if (cls.utcStart === undefined) return;
         // cls.utcStart/utcEnd are now proper UTC hours from compCls
         let ls = (cls.utcStart + pd.off + 24) % 24;
@@ -1744,7 +1748,7 @@ function compCls(cls) {
 }
 function updateEnrolled() {
     enrolled = enrolled.map(c => { const d = compCls(c); return {...c, ...d}; });
-    localStorage.setItem('wp_e', JSON.stringify(enrolled.map(({day,start,end,subject,teacher}) => ({day,start,end,subject,teacher}))));
+    try { localStorage.setItem('wp_e', JSON.stringify(enrolled.map(({day,start,end,subject,teacher}) => ({day,start,end,subject,teacher})))); } catch {}
 }
 function renderToggles() {
     const ct = $('#class-timetable');
@@ -1950,6 +1954,7 @@ function exportICal() {
             const endTs = startTs + durMs;
             lines.push(
                 'BEGIN:VEVENT',
+                `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').slice(0,15)}Z`,
                 `SUMMARY:${cls.subject} (${cls.teacher})`,
                 `DTSTART:${fmtUTC(startTs)}`,
                 `DTEND:${fmtUTC(endTs)}`,
@@ -1973,6 +1978,7 @@ function exportICal() {
     const meetingEnd = Date.UTC(+tzMap.year, +tzMap.month-1, +tzMap.day, endH - userOff, endM);
     lines.push(
         'BEGIN:VEVENT',
+        'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z',
         'SUMMARY:Safe Meeting Window (No Salah Conflict)',
         `DTSTART:${fmtUTC(meetingStart)}`,
         `DTEND:${fmtUTC(meetingEnd)}`,
@@ -2078,7 +2084,7 @@ function renderPopular() {
     });
 }
 
-function saveCities() { localStorage.setItem(STORAGE_CITIES, JSON.stringify(cities.map(c=>c.id))); }
+function saveCities() { try { localStorage.setItem(STORAGE_CITIES, JSON.stringify(cities.map(c=>c.id))); } catch {} }
 function loadSavedCities() {
     // Restore custom (geocoded) cities FIRST so POOL.find() can find them
     const custom = localStorage.getItem('wp_custom_cities');
@@ -2103,7 +2109,7 @@ function addCity(city) {
         const custom = JSON.parse(localStorage.getItem('wp_custom_cities') || '[]');
         custom.push(city);
         if (custom.length > 20) custom.splice(0, custom.length - 20);
-        localStorage.setItem('wp_custom_cities', JSON.stringify(custom));
+        try { localStorage.setItem('wp_custom_cities', JSON.stringify(custom)); } catch {}
     }
     saveCities(); cache = {}; renderAll(); closeM('#m-addcity');
 }
@@ -2129,7 +2135,7 @@ $('#city-search').oninput = () => {
         try {
             const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
             _geoAbort = new AbortController();
-            const data = await (await fetch(url, {signal:_geoAbort.signal, headers:{'Accept-Language':'en','User-Agent':'PrayerTimesApp/1.8.2 (https://prayer.mscarabia.com)'}})).json();
+            const data = await (await fetch(url, {signal:_geoAbort.signal, headers:{'Accept-Language':'en','User-Agent':'PrayerTimesApp/1.11.0 (https://prayer.mscarabia.com; princeshezy@gmail.com)'}})).json();
             const results = [], seen = new Set(local.map(c=>c.id));
             data.forEach(d => {
                 const name    = sanitizeName(d.address?.city || d.address?.town || d.address?.village || d.name || '').trim();
@@ -2271,8 +2277,15 @@ try {
 } catch {}
 if (!userCity) userCity = { id:'user', name:'You', tz:initTz, lat:51.51, lng:-0.13, method:3, isUser:true };
 
-// Hide loader immediately
-setTimeout(() => { const l = $('#loader'); if (l) { l.classList.add('hide'); setTimeout(() => l.remove(), 600); } }, 100);
+// Hide loader after giving API calls time to resolve
+function hideLoader() {
+    const l = $('#loader');
+    if (l && !l.classList.contains('hide')) {
+        l.classList.add('hide');
+        setTimeout(() => l.remove(), 600);
+    }
+}
+setTimeout(hideLoader, 1500);
 window.addEventListener('error', () => { const l = $('#loader'); if (l && !l.classList.contains('hide')) l.querySelector('.loader-text').textContent = 'Something went wrong. Please refresh.'; });
 
 // Render right away (no waiting for geolocation)
@@ -2294,13 +2307,15 @@ function scheduleMidnightRefresh() {
     const p = Object.fromEntries(parts.map(x => [x.type, x.value]));
     const midnight = new Date(Date.UTC(+p.year, +p.month-1, +p.day+1) - getOff(tz)*3600000);
     const msUntilMidnight = midnight - now;
-    setTimeout(() => { cache = {}; dateKey._cache = {}; renderAll(); if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); scheduleMidnightRefresh(); }, Math.max(msUntilMidnight, 60000) + 5000);
+    // Safety: if calculated time is < 5 min or negative, wait a full day instead
+    const delay = msUntilMidnight > 300000 ? msUntilMidnight + 5000 : 86400000;
+    setTimeout(() => { cache = {}; dateKey._cache = {}; renderAll(); if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); scheduleMidnightRefresh(); }, delay);
 }
 scheduleMidnightRefresh();
 
 // Try geolocation in background (non-blocking, 2s timeout)
 detectUser();
-if (userCity && !userCity.needsLocation) renderAll();
+// renderAll() already called above — skip redundant second call
 
 /* ── Dot Grid Background (vanilla JS canvas) ───────────────────── */
 (function initDotGrid() {
