@@ -23,5 +23,5 @@ Email **princeshezy@gmail.com**. Do not open public GitHub issues for security r
 
 | Version | Supported |
 |---------|-----------|
-| 1.11.x | Yes |
-| < 1.9  | No |
+| 1.12.x | Yes |
+| < 1.10 | No |

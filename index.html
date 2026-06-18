@@ -968,7 +968,10 @@ let dragging = false, resL = false, resR = false, dragX = 0, dragSL = 0, dragSD 
 let h24 = false, dark = true, userCity = null;
 let _cachedLabelW = 140;
 function getLabelW() { return _cachedLabelW; }
-let enrolled = JSON.parse(localStorage.getItem('wp_e') || '[]');
+try {
+    const parsed = JSON.parse(localStorage.getItem('wp_e') || '[]');
+    enrolled = Array.isArray(parsed) ? parsed.filter(c => c && typeof c.start === 'string' && typeof c.end === 'string' && Number.isInteger(c.day)) : [];
+} catch { enrolled = []; }
 let lang = localStorage.getItem('wp_l') || 'en';
 let alarm = localStorage.getItem('wp_a') || 'ting';
 const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
@@ -1351,9 +1354,9 @@ async function renderRow(city) {
         strip.appendChild(sr);
     }
 
-    // Enrolled class overlays — only show today's classes
-    const today = new Date().getDay();
-    enrolled.filter(cls => cls.day === today).forEach(cls => {
+    // Enrolled class overlays — only show today's classes (London time, consistent with CLASSES day definitions)
+    const londonDay = {Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[new Intl.DateTimeFormat('en-US',{timeZone:'Europe/London',weekday:'short'}).format(new Date())];
+    enrolled.filter(cls => cls.day === londonDay).forEach(cls => {
         if (cls.utcStart === undefined) return;
         // cls.utcStart/utcEnd are now proper UTC hours from compCls
         let ls = (cls.utcStart + pd.off + 24) % 24;
@@ -1807,10 +1810,10 @@ function updateClsCountdown() {
 let _audioCtx = null;
 function getAudioCtx() {
     if (!_audioCtx || _audioCtx.state === 'closed') _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+    if (_audioCtx.state === 'suspended') _audioCtx.resume().catch(()=>{});
     return _audioCtx;
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden && _audioCtx) _audioCtx.resume(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && _audioCtx) _audioCtx.resume().catch(()=>{}); });
 function playAlarm() {
     const ctx = getAudioCtx();
     const s = {
@@ -1884,9 +1887,7 @@ document.addEventListener('keydown', e => {
 if (localStorage.getItem('wp_privacy_ok')) { const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); }
 
 /* ── Settings ────────────────────────────────────────────────────── */
-$('#btn-settings').onclick = () => openM('#m-settings');
-$('#btn-help').onclick     = () => openM('#m-help');
-$('#btn-howto').onclick    = () => { closeM('#m-settings'); openM('#m-help'); };
+const btnHowto = $('#btn-howto'); if (btnHowto) btnHowto.onclick = () => { closeM('#m-settings'); openM('#m-help'); };
 $('#btn-now').onclick      = () => scrollToNow();
 $('#btn-location').onclick = () => requestLocation();
 
@@ -1900,24 +1901,30 @@ $('#theme-btn')?.addEventListener('click', () => {
 });
 $('#theme-btn') && ($('#theme-btn').textContent = dark ? t('dark') : t('light'));
 
-$('#fmt-btn').onclick = () => {
-    h24 = !h24;
-    localStorage.setItem('wp_24', h24 ? '1' : '0');
-    $('#fmt-btn').textContent = h24 ? '12h' : '24h';
-    renderRuler(); updateSel(); renderAll();
-};
-$('#fmt-btn').textContent = h24 ? '12h' : '24h';
+const fmtBtn = $('#fmt-btn');
+if (fmtBtn) {
+    fmtBtn.onclick = () => {
+        h24 = !h24;
+        localStorage.setItem('wp_24', h24 ? '1' : '0');
+        fmtBtn.textContent = h24 ? '12h' : '24h';
+        renderRuler(); updateSel(); renderAll();
+    };
+    fmtBtn.textContent = h24 ? '12h' : '24h';
+}
 
-$('#lang-sel').onchange = function() {
+const langSel = $('#lang-sel');
+if (langSel) langSel.onchange = function() {
     lang = this.value; localStorage.setItem('wp_l', lang);
     document.documentElement.lang = lang;
-document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
-document.title = lang === 'ar' ? 'أوقات الصلاة' : 'Prayer Times – Coordinate Salah Across Cities';
+    document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+    document.title = lang === 'ar' ? 'أوقات الصلاة' : 'Prayer Times – Coordinate Salah Across Cities';
     checkConflicts(); updateClsCountdown(); updateUI();
 };
 
-$('#alarm-sel').onchange = function() { alarm = this.value; localStorage.setItem('wp_a', alarm); };
-$('#test-chime').onclick  = () => playAlarm();
+const alarmSel = $('#alarm-sel');
+if (alarmSel) alarmSel.onchange = function() { alarm = this.value; localStorage.setItem('wp_a', alarm); };
+const testChime = $('#test-chime');
+if (testChime) testChime.onclick  = () => playAlarm();
 
 /* ── Share & iCal ────────────────────────────────────────────────── */
 function genShareLink() {
@@ -1927,13 +1934,6 @@ function genShareLink() {
     if (lang === 'ar') p.set('lang','ar');
     return { url: `${window.location.origin}${window.location.pathname}?${p.toString()}`, hasGeo };
 }
-$('#btn-share').onclick = async () => {
-    const { url, hasGeo } = genShareLink();
-    const msg = hasGeo ? 'Link copied! (custom cities not included) 🔗' : 'Link copied! 🔗';
-    try { await navigator.clipboard.writeText(url); toast(msg); }
-    catch { window.prompt('Share link:', url); }
-};
-$('#btn-ical').onclick = () => exportICal();
 function exportICal() {
     const now   = new Date();
     const fmtUTC = ts => new Date(ts).toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z';
@@ -2038,7 +2038,7 @@ function attemptUnlock() {
         setTimeout(() => inp.classList.remove('error'), 400);
     }
 }
-$('#btn-course').onclick = () => {
+function openCoursePanel() {
     // Lazy-load Amiri font for course panel header
     if (!document.querySelector('link[data-font="amiri"]')) {
         const l = document.createElement('link');
@@ -2054,15 +2054,16 @@ $('#btn-course').onclick = () => {
     } else {
         lockCourse();
     }
-};
-$('#close-panel').onclick = $('#panel-bg').onclick = () => {
+}
+const closePanelBtn = $('#close-panel');
+if (closePanelBtn) closePanelBtn.onclick = $('#panel-bg').onclick = () => {
     $('#course-panel').classList.remove('open'); $('#panel-bg').classList.remove('open');
     const pw = $('#course-pw-input'); if (pw) pw.value = '';
     const hint = $('#course-pw-hint'); if (hint) hint.textContent = '';
 };
-$('#course-pw-btn').onclick = attemptUnlock;
-$('#course-pw-input').addEventListener('keydown', e => { if (e.key==='Enter') attemptUnlock(); });
-$('#course-lock-btn').onclick = lockCourse;
+const cpwBtn = $('#course-pw-btn'); if (cpwBtn) cpwBtn.onclick = attemptUnlock;
+const cpwInput = $('#course-pw-input'); if (cpwInput) cpwInput.addEventListener('keydown', e => { if (e.key==='Enter') attemptUnlock(); });
+const cpLockBtn = $('#course-lock-btn'); if (cpLockBtn) cpLockBtn.onclick = lockCourse;
 if (isCourseUnlocked()) unlockCourse();
 $('#enroll-toggle').onchange = function() {
     $('#enroll-content').classList.toggle('hidden', !this.checked);
@@ -2135,7 +2136,7 @@ $('#city-search').oninput = () => {
         try {
             const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
             _geoAbort = new AbortController();
-            const data = await (await fetch(url, {signal:_geoAbort.signal, headers:{'Accept-Language':'en','User-Agent':'PrayerTimesApp/1.11.0 (https://prayer.mscarabia.com; princeshezy@gmail.com)'}})).json();
+            const data = await (await fetch(url, {signal:_geoAbort.signal, headers:{'Accept-Language':'en'}})).json();
             const results = [], seen = new Set(local.map(c=>c.id));
             data.forEach(d => {
                 const name    = sanitizeName(d.address?.city || d.address?.town || d.address?.village || d.name || '').trim();
@@ -2220,28 +2221,20 @@ function requestLocation() {
 
 /* ── Prayer notifications ────────────────────────────────────────── */
 let notifEnabled = localStorage.getItem('wp_notif') === '1';
-$('#btn-notify').onclick = async () => {
-    if (!('Notification' in window)) { alert('Notifications not supported'); return; }
-    if (notifEnabled) { notifEnabled = false; localStorage.setItem('wp_notif','0'); $('#btn-notify').classList.remove('active'); return; }
-    const p = await Notification.requestPermission();
-    if (p === 'granted') {
-        notifEnabled = true; localStorage.setItem('wp_notif','1'); $('#btn-notify').classList.add('active');
-        schedulePrayerNotifs();
-    } else { alert('Enable notifications in your browser settings to get prayer alerts.'); }
-};
-if (notifEnabled && 'Notification' in window && Notification.permission === 'granted') $('#btn-notify').classList.add('active');
 
 const NOTIF_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23091117'/%3E%3Ccircle cx='50' cy='35' r='12' fill='none' stroke='%232dd4bf' stroke-width='3'/%3E%3C/svg%3E";
+let _notifTimers = [];
 function schedulePrayerNotifs() {
+    _notifTimers.forEach(clearTimeout); _notifTimers = [];
     if (!userCity || !notifEnabled) return;
     fetchPrayer(userCity).then(pd => {
         const lh = getLocalHours(pd.tz || userCity.tz);
         ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
             const pt = pd.loc[name]; if (!pt || pt < lh) return;
             const ms = (pt - lh) * 3600000 - 300000; // 5 min before
-            if (ms > 0) setTimeout(() => {
+            if (ms > 0) _notifTimers.push(setTimeout(() => {
                 if (notifEnabled) new Notification(`${PRAYER_NAMES[lang]?.[name] || name} Prayer`, { body:`Time for ${name}`, icon:NOTIF_ICON });
-            }, ms);
+            }, ms));
         });
     });
 }
@@ -2286,7 +2279,7 @@ function hideLoader() {
     }
 }
 setTimeout(hideLoader, 1500);
-window.addEventListener('error', () => { const l = $('#loader'); if (l && !l.classList.contains('hide')) l.querySelector('.loader-text').textContent = 'Something went wrong. Please refresh.'; });
+window.addEventListener('error', () => { hideLoader(); });
 
 // Render right away (no waiting for geolocation)
 renderRuler();
@@ -2467,7 +2460,7 @@ let _updateNotifyBadge;
     if (overlay) overlay.onclick = closeMenu;
     // Wire nav items directly (no hidden orphan buttons)
     $('#nav-now')?.addEventListener('click', () => { closeMenu(); scrollToNow(); });
-    $('#nav-course')?.addEventListener('click', () => { closeMenu(); $('#btn-course')?.click?.(); });
+    $('#nav-course')?.addEventListener('click', () => { closeMenu(); openCoursePanel(); });
     $('#nav-share')?.addEventListener('click', () => { closeMenu(); const { url, hasGeo } = genShareLink(); const msg = hasGeo ? 'Link copied! (custom cities not included) 🔗' : 'Link copied! 🔗'; navigator.clipboard?.writeText(url).then(()=>toast(msg)).catch(()=>window.prompt('Share link:',url)); });
     $('#nav-ical')?.addEventListener('click', () => { closeMenu(); exportICal(); });
     $('#nav-notify')?.addEventListener('click', async () => {

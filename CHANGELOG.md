@@ -2,23 +2,23 @@
 
 All notable changes to World Prayer Times are documented here.
 
-## [1.11.0] — 2026-06-18
+## [1.12.0] — 2026-06-18
 
 ### Fixed
-- **Loader timing** — Spinner now waits 1.5s for Aladhan API responses instead of hiding after 100ms (fixes blank/broken page on slow connections)
-- **Midnight refresh guard** — If calculated time-to-midnight is < 5 min, waits a full 24h instead of re-firing every 60s (prevents rapid re-render loop)
-- **Double renderAll removed** — Eliminated redundant second `renderAll()` call on init that caused race conditions and unnecessary API requests
-- **Cache-busting meta tags** — Added `Cache-Control: no-cache, no-store, must-revalidate` to HTML head (belt-and-suspenders with _headers)
-- **iCal DTSTAMP** — Added required `DTSTAMP` field to all VEVENT entries per RFC 5545 (was missing, caused import failures in some calendar apps)
-- **Fetch timeout** — Aladhan API calls now have 10s timeout via `AbortSignal.timeout()` (prevents hanging on slow connections)
-- **Nominatim User-Agent** — Updated version string to 1.11.0 with contact email per Nominatim ToS
-- **localStorage safety** — Added try/catch to all localStorage.setItem calls (prevents QuotaExceededError crashes)
-- **package.json** — Version updated to 1.11.0
-- **SECURITY.md** — Supported versions updated
+- **CRITICAL: Blank page on load** — Deleted 6 orphan `#btn-*` wirings (btn-settings, btn-help, btn-share, btn-ical, btn-course, btn-notify) that threw `TypeError` on null elements removed by Card Nav redesign. These buttons were replaced by `#nav-*` items in `initCardNav()` but the old JS wirings were never cleaned up, killing the entire IIFE and leaving `#rows` empty.
+- **Course panel wiring** — Extracted `openCoursePanel()` function; `initCardNav` now calls it directly instead of trying to click a non-existent `#btn-course`
+- **Class overlay day filter** — Uses London day-of-week (`Intl.DateTimeFormat('Europe/London')`) instead of browser-local `getDay()`. Fixes class overlays showing wrong day for users east/west of London.
+- **Notification timer leak** — `schedulePrayerNotifs()` now tracks setTimeout IDs in `_notifTimers[]` and clears them before re-scheduling. Previously, toggling notifications or midnight refresh accumulated orphan timers.
+- **Null guards** — Added `if (el)` guards to `#fmt-btn`, `#lang-sel`, `#alarm-sel`, `#test-chime`, `#close-panel`, `#course-pw-btn`, `#course-pw-input`, `#course-lock-btn` assignments
+- **AudioContext resume** — Added `.catch(()=>{})` to prevent unhandled rejections on Safari
+- **Loader error path** — Error handler now calls `hideLoader()` instead of leaving spinner spinning alongside error message
+- **Enrolled shape validation** — `localStorage` loaded enrolled data validated for correct shape (array of objects with string start/end, integer day)
+- **Nominatim User-Agent** — Removed dead code (browser fetch strips forbidden headers; Referer is sufficient)
+- **package.json** — Version updated to 1.12.0
 
 ### Audit Notes
-- Z.ai audit: 4 real fixes applied (DTSTAMP, fetch timeout, User-Agent, localStorage safety)
-- Z.ai audit: 8 claims dismissed as false positives (race condition already handled by `_renderGen`, cache cleared at midnight, Aladhan API handles calculations, CSP `'unsafe-inline'` required for static site, accessibility already implemented)
+- GLM 5.2 audit: 1 critical + 4 high + 4 medium + 2 low fixes applied
+- GLM 5.2 audit: 2 findings dismissed (H1 conflict wrap mathematically correct for actual use cases, L5 Permissions-Policy not exploitable as-is)
 
 ## [1.10.0] — 2026-06-16
 
