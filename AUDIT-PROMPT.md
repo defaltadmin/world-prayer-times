@@ -53,7 +53,7 @@ world-prayer-times/
 | Init/bootstrap | ~80 | Loads saved state, renders, starts intervals |
 | Visual effects | ~100 | Dot grid canvas, border glow, spotlight cards |
 
-## Bugs Already Fixed (v1.11.0)
+## Bugs Already Fixed (v1.12.0)
 
 These were identified and fixed in prior audits. **Do NOT report these again:**
 
@@ -64,8 +64,16 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 5. **Cache busting** — Added no-cache meta tags for browser caching
 6. **iCal DTSTAMP** — Added required `DTSTAMP` field to all VEVENT entries per RFC 5545
 7. **Fetch timeout** — Aladhan API calls now have 10s timeout via `AbortSignal.timeout()`
-8. **Nominatim User-Agent** — Updated to v1.11.0 with contact email per ToS
+8. **Nominatim User-Agent** — Removed dead code (browser strips forbidden headers; Referer is sufficient)
 9. **localStorage safety** — Added try/catch to all `setItem` calls
+10. **CRITICAL blank page** — Deleted 6 orphan `#btn-*` wirings (btn-settings/help/share/ical/course/notify) that threw TypeError on null elements removed by Card Nav redesign
+11. **Class overlay day** — Uses London day-of-week via `Intl.DateTimeFormat('Europe/London')` instead of browser-local `getDay()`
+12. **Notification timer leak** — `schedulePrayerNotifs()` tracks setTimeout IDs in `_notifTimers[]` and clears before re-scheduling
+13. **Null guards** — All `$('#fmt-btn')`, `$('#lang-sel')`, `$('#alarm-sel')`, `$('#test-chime')`, course panel buttons wrapped in `if (el)` checks
+14. **AudioContext resume** — Added `.catch(()=>{})` to prevent Safari unhandled rejections
+15. **Loader error path** — Error handler calls `hideLoader()` instead of leaving spinner spinning
+16. **Enrolled validation** — Loaded from localStorage with shape check (array of objects with string start/end, integer day)
+17. **Course panel** — Extracted `openCoursePanel()` called directly from `initCardNav()`
 
 ## Design Decisions (do NOT flag as issues)
 
@@ -74,6 +82,8 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 - **Aladhan API handles all prayer time calculations** — the client only positions blocks using the returned times
 - **Cache is cleared at midnight** — memory impact is negligible (max ~600 entries for 20 cities × 30 days)
 - **Prayer blocks already have** `tabindex="0"`, `role="button"`, `aria-label`, and keyboard handlers
+- **Card Nav is the single wiring site** — all header actions (share, ical, notify, course, settings, help) are wired in `initCardNav()` via `#nav-*` items. The old `#btn-*` header buttons no longer exist in HTML.
+- **Nominatim User-Agent** cannot be set client-side (browser strips forbidden headers); Referer header is sufficient for low-volume use
 
 ## What to Audit
 
