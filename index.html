@@ -376,26 +376,27 @@
         .prayer-block {
             position: absolute; top: 5px; bottom: 5px; border-radius: 3px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 0.6rem; letter-spacing: 0.04em;
+            font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em;
             cursor: pointer; z-index: 2; overflow: hidden;
             writing-mode: vertical-rl; text-orientation: mixed;
             text-transform: uppercase; border-left: 3px solid;
             transition: transform 0.12s, filter 0.12s;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            text-shadow: 0 0 4px rgba(255,255,255,0.5);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+            color: #fff;
         }
         .prayer-block:hover { transform: scaleY(1.06); filter: brightness(1.15); z-index: 5; }
         .prayer-block:focus { outline: 2px solid var(--accent); outline-offset: 2px; z-index: 5; }
-        .prayer-block.fajr    { background: rgba(103,232,249,0.45); color: #0c4a6e; border-color: var(--prayer-fajr); }
-        .prayer-block.dhuhr   { background: rgba(251,191,36,0.48);  color: #713f12; border-color: var(--prayer-dhuhr); }
-        .prayer-block.asr     { background: rgba(251,146,60,0.48);  color: #7c2d12; border-color: var(--prayer-asr); }
-        .prayer-block.maghrib { background: rgba(248,113,113,0.45); color: #7f1d1d; border-color: var(--prayer-maghrib); }
-        .prayer-block.isha    { background: rgba(167,139,250,0.48); color: #4c1d95; border-color: var(--prayer-isha); }
-        [data-theme="light"] .prayer-block.fajr    { background: rgba(6,182,212,0.45); }
-        [data-theme="light"] .prayer-block.dhuhr   { background: rgba(251,191,36,0.45); }
-        [data-theme="light"] .prayer-block.asr     { background: rgba(251,146,60,0.45); }
-        [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.4); }
-        [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.4); }
+        .prayer-block.fajr    { background: rgba(103,232,249,0.55); border-color: var(--prayer-fajr); }
+        .prayer-block.dhuhr   { background: rgba(251,191,36,0.55);  border-color: var(--prayer-dhuhr); }
+        .prayer-block.asr     { background: rgba(251,146,60,0.55);  border-color: var(--prayer-asr); }
+        .prayer-block.maghrib { background: rgba(248,113,113,0.55); border-color: var(--prayer-maghrib); }
+        .prayer-block.isha    { background: rgba(167,139,250,0.55); border-color: var(--prayer-isha); }
+        [data-theme="light"] .prayer-block.fajr    { background: rgba(6,182,212,0.55); }
+        [data-theme="light"] .prayer-block.dhuhr   { background: rgba(251,191,36,0.55); }
+        [data-theme="light"] .prayer-block.asr     { background: rgba(251,146,60,0.55); }
+        [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.5); }
+        [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.5); }
 
         /* ── Class event overlays ────────────────────────── */
         .class-ev {
@@ -1315,21 +1316,12 @@ async function renderRow(city) {
     const strip = document.createElement('div');
     strip.style.cssText = 'flex:1;position:relative;background:var(--surface);';
 
-    // Prayer blocks — use local prayer times directly (pd.loc) for positioning
+    // Prayer blocks — fixed 30-minute duration for visual consistency
     ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
         const localH = pd.loc[name];
         if (localH === undefined) return;
 
-        // Compute duration from local prayer window
-        let durHours;
-        if (pd.pw && pd.pw[name] !== undefined) {
-            // pw is in UTC, convert duration to local (same difference)
-            let d = pd.pw[name] - pd.utc[name];
-            if (d < 0) d += 24;
-            durHours = d;
-        } else {
-            durHours = FALLBACK_DUR[name] || 0.5;
-        }
+        const durHours = 0.5; // Fixed 30 minutes
 
         const b = document.createElement('div');
         b.className = `prayer-block ${name.toLowerCase()}`;
@@ -1885,6 +1877,8 @@ document.addEventListener('keydown', e => {
     if (!banner) return;
     $('#privacy-ok').onclick  = () => { localStorage.setItem('wp_privacy_ok','1'); banner.classList.add('hidden'); };
     $('#privacy-link').onclick = e => { e.preventDefault(); openM('#m-privacy'); };
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => { if (!localStorage.getItem('wp_privacy_ok')) { banner.classList.add('hidden'); localStorage.setItem('wp_privacy_ok','1'); } }, 5000);
 })();
 if (localStorage.getItem('wp_privacy_ok')) { const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); }
 
