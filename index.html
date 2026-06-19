@@ -7,7 +7,7 @@
     <meta name="description" content="Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.">
     <meta name="theme-color" content="#0a0f1e">
     <meta name="color-scheme" content="dark light">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org https://www.google-analytics.com; img-src 'self' data: blob:; base-uri 'self'; upgrade-insecure-requests;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org https://www.google-analytics.com https://cloudflareinsights.com; img-src 'self' data: blob:; base-uri 'self'; upgrade-insecure-requests;">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -20,9 +20,8 @@
     <meta name="twitter:card" content="summary">
     <link rel="canonical" href="https://prayer.mscarabia.com">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
 
     <style>
         :root {
@@ -793,7 +792,6 @@
                 <button id="course-lock-btn" style="margin-left:6px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.65rem;padding:0;" title="Lock">lock</button>
             </div>
             <div class="info-card"><div class="info-card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Attendance</div><div class="info-card-body">Missing 2 lessons without notice releases your place. Excused absences cover up to 5 days.</div></div>
-            <div class="info-card"><div class="info-card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Deposit</div><div class="info-card-body">£100 refundable. Contact your teacher for payment details.</div></div>
             <div id="quick-links-heading" style="margin:12px 0 8px;font-size:0.75rem;font-weight:600;color:var(--heading);">Quick Links</div>
             <a href="https://chat.whatsapp.com/LhyQf7mVW5BKwrsQHWQgZz" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><div class="info-link-text"><div class="info-link-title">Sannatayn (Men) – WhatsApp</div><div class="info-link-desc">Join the men's group chat</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
             <a href="https://chat.whatsapp.com/IFkpHOR1vzb59O9s7ZyR0E" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><div class="info-link-text"><div class="info-link-title">Tafseer (All) – WhatsApp</div><div class="info-link-desc">Men &amp; Women, 3:30–5:30 PM BST</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
@@ -843,6 +841,15 @@
     <div class="privacy-banner" id="privacy-banner">
         <span>Preferences stored locally only. No cookies, no tracking. <a href="#" id="privacy-link">Learn more</a></span>
         <div class="pb-actions"><button class="btn btn-accent" id="privacy-ok" style="padding:5px 14px;">OK</button></div>
+    </div>
+
+    <!-- ══════════════ LOCATION ONBOARDING BANNER ══════════════ -->
+    <div class="privacy-banner" id="location-banner" style="display:none;bottom:0;z-index:95;">
+        <span>📍 <span id="loc-banner-text">Enable location for accurate prayer times where you are.</span></span>
+        <div class="pb-actions">
+            <button class="btn" id="loc-dismiss" style="padding:5px 12px;">Not now</button>
+            <button class="btn btn-accent" id="loc-enable" style="padding:5px 12px;">Enable</button>
+        </div>
     </div>
 
     <!-- ══════════════ FOOTER ══════════════ -->
@@ -931,20 +938,26 @@ const POOL=[...CITIES,
 
 // Class schedule (all times in Europe/London timezone)
 const CLASSES=[
-    {day:4,start:'14:30',end:'15:30',subject:'Fiqh',    teacher:'Aakif'},
-    {day:5,start:'15:30',end:'16:30',subject:'Tafseer', teacher:'Abdel-Nasser'},
-    {day:5,start:'16:30',end:'17:30',subject:'Tafseer', teacher:'Abdel-Nasser'},
-    {day:0,start:'17:25',end:'18:25',subject:'Seerah',  teacher:'Ammar'},
-    {day:1,start:'17:25',end:'18:25',subject:'Seerah',  teacher:'Ammar'},
-    {day:2,start:'17:25',end:'18:25',subject:'Fiqh',    teacher:'Aakif'},
-    {day:3,start:'17:25',end:'18:25',subject:'Adab',    teacher:'Ammar'},
-    {day:4,start:'17:25',end:'18:25',subject:'Adab',    teacher:'Ammar'},
-    {day:6,start:'17:25',end:'18:25',subject:'Seerah',  teacher:'Ammar'},
-    {day:1,start:'18:30',end:'19:30',subject:'Arabic',  teacher:'Abdelaziz'},
-    {day:2,start:'18:30',end:'19:30',subject:'Hadith',  teacher:'Ahmad'},
-    {day:3,start:'18:30',end:'19:30',subject:'Arabic',  teacher:'Abdelaziz'},
-    {day:4,start:'18:30',end:'19:30',subject:'Hadith',  teacher:'Ahmad'},
-    {day:6,start:'18:30',end:'19:30',subject:'Aqaaid',  teacher:'Ahmad'},
+    // Seerah - Sun/Mon/Tue 17:25-18:25 (Sheikh Ammar)
+    {day:0,start:'17:25',end:'18:25',subject:'Seerah',  teacher:'Sheikh Ammar'},
+    {day:1,start:'17:25',end:'18:25',subject:'Seerah',  teacher:'Sheikh Ammar'},
+    {day:2,start:'17:25',end:'18:25',subject:'Seerah',  teacher:'Sheikh Ammar'},
+    // Adab - Thu 17:25-18:25 (Sheikh Ammar)
+    {day:4,start:'17:25',end:'18:25',subject:'Adab',    teacher:'Sheikh Ammar'},
+    // Fiqh - Wed 17:25-18:25 + Sat 14:30-15:30 (Sheikh Aakif)
+    {day:3,start:'17:25',end:'18:25',subject:'Fiqh',    teacher:'Sheikh Aakif'},
+    {day:6,start:'14:30',end:'15:30',subject:'Fiqh',    teacher:'Sheikh Aakif'},
+    // Tafseer - Sat 15:30-17:30 (Sheikh Abdel-Nasser)
+    {day:6,start:'15:30',end:'16:30',subject:'Tafseer', teacher:'Sheikh Abdel-Nasser'},
+    {day:6,start:'16:30',end:'17:30',subject:'Tafseer', teacher:'Sheikh Abdel-Nasser'},
+    // Hadith - Wed/Fri 18:30-19:30 (Sheikh Ahmad)
+    {day:3,start:'18:30',end:'19:30',subject:'Hadith',  teacher:'Sheikh Ahmad'},
+    {day:5,start:'18:30',end:'19:30',subject:'Hadith',  teacher:'Sheikh Ahmad'},
+    // Aqaaid - Sun 18:30-19:30 (Sheikh Ahmad)
+    {day:0,start:'18:30',end:'19:30',subject:'Aqaaid',  teacher:'Sheikh Ahmad'},
+    // Arabic - Tue/Thu 18:30-19:30 (Sheikh Abdelaziz)
+    {day:2,start:'18:30',end:'19:30',subject:'Arabic',  teacher:'Sheikh Abdelaziz'},
+    {day:4,start:'18:30',end:'19:30',subject:'Arabic',  teacher:'Sheikh Abdelaziz'},
 ];
 
 /*
@@ -975,7 +988,7 @@ let _cachedLabelW = 140;
 function getLabelW() { return _cachedLabelW; }
 let enrolled;
 try {
-    const parsed = JSON.parse(localStorage.getItem('wp_e') || '[]');
+    const parsed = JSON.parse(localStorage.getItem('wp_e2') || '[]');
     enrolled = Array.isArray(parsed) ? parsed.filter(c => c && typeof c.start === 'string' && typeof c.end === 'string' && Number.isInteger(c.day)) : [];
 } catch { enrolled = []; }
 let lang = localStorage.getItem('wp_l') || 'en';
@@ -1004,7 +1017,7 @@ const i18n = {
         meetingLinks:'Meeting Links',meetingLinksDesc:'Zoom / Google Meet links for each class',
         recordingLinks:'Recording Links',recordingLinksDesc:'Access past lesson recordings',
         enterPassword:'Enter the group password to access course links and class schedule.',passwordPlaceholder:'Enter password...',incorrectPw:'Incorrect password. Ask your teacher.',
-        privacyBanner:'Preferences stored locally only. No cookies, no tracking.',useLocation:'Use my location',locationDenied:'Location access denied',locationNotSupported:'Geolocation not supported'
+        privacyBanner:'Preferences stored locally only. No cookies, no tracking.',useLocation:'Use my location',locPrompt:'Enable location for accurate prayer times where you are.',enableLoc:'Enable',notNow:'Not now',locEnabled:'Location enabled - showing your local times',locationDenied:'Location access denied',locationNotSupported:'Geolocation not supported'
     },
     ar: {
         safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:',sunrise:'شروق',now:'الآن',selection:'التحديد',
@@ -1021,7 +1034,7 @@ const i18n = {
         meetingLinks:'روابط الاجتماعات',meetingLinksDesc:'روابط Zoom / Google Meet لكل فصل',
         recordingLinks:'روابط التسجيلات',recordingLinksDesc:'الوصول لتسجيلات الدروس السابقة',
         enterPassword:'أدخل كلمة مرور المجموعة للوصول إلى روابط الدورة والجدول.',passwordPlaceholder:'أدخل كلمة المرور...',incorrectPw:'كلمة مرور خاطئة. اسأل معلمك.',
-        privacyBanner:'التفضيلات محفوظة محلياً فقط. لا ملفات تعريف ارتباط، لا تتبع.',useLocation:'تحديد موقعي',locationDenied:'تم رفض الوصول للموقع',locationNotSupported:'تحديد الموقع غير مدعوم'
+        privacyBanner:'التفضيلات محفوظة محلياً فقط. لا ملفات تعريف ارتباط، لا تتبع.',useLocation:'تحديد موقعي',locPrompt:'فعّل الموقع لأوقات صلاة دقيقة حيث أنت.',enableLoc:'تفعيل',notNow:'لاحقاً',locEnabled:'تم تفعيل الموقع - عرض أوقاتك المحلية',locationDenied:'تم رفض الوصول للموقع',locationNotSupported:'تحديد الموقع غير مدعوم'
     },
 };
 const t = k => i18n[lang]?.[k] || i18n.en[k] || k;
@@ -1081,10 +1094,6 @@ function updateUI() {
     // Course panel content translations
     const cpCards = $$('.info-card-title');
     if (cpCards[0]) cpCards[0].innerHTML = cpCards[0].querySelector('svg').outerHTML + t('attendance');
-    if (cpCards[1]) cpCards[1].innerHTML = cpCards[1].querySelector('svg').outerHTML + t('deposit');
-    const cpBodies = $$('.info-card-body');
-    if (cpBodies[0]) cpBodies[0].textContent = t('attendanceDesc');
-    if (cpBodies[1]) cpBodies[1].textContent = t('depositDesc');
     const qlh = $('#quick-links-heading'); if (qlh) qlh.textContent = t('quickLinks');
     // Translate link titles and descriptions
     const linkTitles = $$('.info-link-title');
@@ -1750,7 +1759,7 @@ function compCls(cls) {
 }
 function updateEnrolled() {
     enrolled = enrolled.map(c => { const d = compCls(c); return {...c, ...d}; });
-    try { localStorage.setItem('wp_e', JSON.stringify(enrolled.map(({day,start,end,subject,teacher}) => ({day,start,end,subject,teacher})))); } catch {}
+    try { localStorage.setItem('wp_e2', JSON.stringify(enrolled.map(({day,start,end,subject,teacher}) => ({day,start,end,subject,teacher})))); } catch {}
 }
 function renderToggles() {
     const ct = $('#class-timetable');
@@ -1886,6 +1895,13 @@ document.addEventListener('keydown', e => {
     setTimeout(() => { if (!localStorage.getItem('wp_privacy_ok')) { banner.classList.add('hidden'); localStorage.setItem('wp_privacy_ok','1'); } }, 5000);
 })();
 if (localStorage.getItem('wp_privacy_ok')) { const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); }
+
+/* ── Location onboarding banner ──────────────────────────────────── */
+if (!localStorage.getItem('wp_loc_prompted') && !localStorage.getItem('wp_u')) {
+    const lb = $('#location-banner'); if (lb) lb.style.display = 'flex';
+}
+$('#loc-enable')?.addEventListener('click', () => { localStorage.setItem('wp_loc_prompted','1'); const b=$('#location-banner'); if(b) b.style.display='none'; requestLocation(); });
+$('#loc-dismiss')?.addEventListener('click', () => { localStorage.setItem('wp_loc_prompted','1'); const b=$('#location-banner'); if(b) b.style.display='none'; });
 
 /* ── Settings ────────────────────────────────────────────────────── */
 const btnHowto = $('#btn-howto'); if (btnHowto) btnHowto.onclick = () => { closeM('#m-settings'); openM('#m-help'); };

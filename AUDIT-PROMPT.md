@@ -54,7 +54,7 @@ world-prayer-times/
 | Init/bootstrap | ~80 | Loads saved state, renders, starts intervals |
 | Visual effects | ~100 | Dot grid canvas, border glow, spotlight cards |
 
-## Bugs Already Fixed (v1.14.0)
+## Bugs Already Fixed (v1.15.0)
 
 These were identified and fixed in prior audits. **Do NOT report these again:**
 
@@ -92,6 +92,13 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 32. **Ruler label readability** — Font size 0.6rem → 0.65rem.
 33. **Lighthouse a11y** — Added `role="main"` and `aria-label` to timeline region.
 34. **Border-radius consistency** — Modal/info-card standardized to 12px.
+35. **CSP Cloudflare beacon** — Added `static.cloudflareinsights.com` to script-src and `cloudflareinsights.com` to connect-src (meta + _headers).
+36. **Class timetable corrected** — Re-parsed from TQG PDF. Removed phantom Fri 17:25 & Mon 18:30 slots. Exact match.
+37. **Sheikh prefix** — All teacher names now include "Sheikh" prefix.
+38. **Enrolled storage key** — Bumped wp_e → wp_e2 for clean slate.
+39. **Location onboarding** — Dismissible banner prompts new users for geolocation.
+40. **Non-render-blocking fonts** — media="print" onload swap pattern.
+41. **Deposit removed** — £100 deposit info-card removed from course panel.
 
 ## Design Decisions (do NOT flag as issues)
 
@@ -108,6 +115,8 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 - **Countdown uses 2-min grace** — `l > lh - GRACE` prevents a just-passed prayer from flickering as "next"
 - **`pd.loc[name]` values are in `pd.tz` timezone** — comparing against `getLocalHours(pd.tz)` is correct. Do NOT switch to browser timezone.
 - **`robots.txt` is a static file** — excluded from SPA catch-all in `_redirects`. Cloudflare may inject AI-crawler blocks (ClaudeBot, GPTBot) — that's their managed feature, not our code.
+- **Deposit info removed** — The £100 deposit card was removed from the course panel. The i18n keys (`deposit`, `depositDesc`) still exist but are unused.
+- **Location banner is non-blocking** — Does not auto-fire the browser permission prompt. Shows a dismissible banner instead; browsers block reflex-denied prompts permanently.
 
 ## What to Audit
 

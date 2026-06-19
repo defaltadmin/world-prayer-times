@@ -2,6 +2,21 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.15.0] — 2026-06-19
+
+### Fixed
+- **CSP blocks Cloudflare beacon** — Added `https://static.cloudflareinsights.com` to `script-src` and `https://cloudflareinsights.com` to `connect-src` in both meta tag and `_headers`. Cloudflare beacon now loads without CSP violations.
+- **Class timetable corrected** — Re-parsed from TQG PDF. Previous AI had ~9 of 14 wrong (wrong days, swapped subjects, phantom slots). Now exact match to official timetable. Removed Friday classes (no class from now on).
+- **Teacher names** — Added "Sheikh" prefix to all teacher names (Sheikh Ammar, Sheikh Aakif, Sheikh Abdel-Nasser, Sheikh Ahmad, Sheikh Abdelaziz).
+- **Enrolled storage key** — Bumped `wp_e` → `wp_e2` so users get a clean slate with corrected schedule.
+
+### Added
+- **Location onboarding banner** — Dismissible bottom banner: "Enable location for accurate prayer times where you are" with Enable / Not now buttons. Remembered via `wp_loc_prompted`. Auto-shows for new users without saved location. Header 📍 button remains as persistent fallback.
+- **Non-render-blocking fonts** — Google Fonts loaded with `media="print" onload` swap pattern. Eliminates render-blocking CSS for Performance score.
+
+### Removed
+- **Deposit info-card** — Removed £100 deposit card from course panel (Attendance card + Quick Links untouched).
+
 ## [1.14.0] — 2026-06-19
 
 ### Fixed
