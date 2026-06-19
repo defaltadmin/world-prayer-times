@@ -2,6 +2,13 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.16.1] — 2026-06-19
+
+### Fixed
+- **Palette reverted** — Restored original teal/cyan palette (gold experiment reverted per user preference). All 52 hardcoded color literals restored.
+- **Location popup viewport clamp** — Coach-mark now centers under button, clamps to 12px viewport margins, adds caret arrow, repositions on resize. Mobile bottom-sheet at ≤520px. (Sonnet audit fix)
+- **FAB icon color** — Updated to match teal palette (#091117 on #2dd4bf accent).
+
 ## [1.16.0] — 2026-06-19
 
 ### Visual Overhaul

@@ -1,8 +1,8 @@
-# Audit Prompt for LLMs (DeepSeek, Kimi, Qwen, MiniMax, Opus, Sonnet, etc.)
+# Audit Prompt for LLMs (DeepSeek, Kimi, Qwen, MiniMax, Opus, Sonnet, GLM, etc.)
 
 ## What You're Reviewing
 
-A single-page prayer times web app (`index.html`, ~2550 lines, ~150KB). Pure vanilla JS, no frameworks. Deploys to Cloudflare Pages. Current version: **v1.16.0**.
+A single-page prayer times web app (`index.html`, ~2560 lines, ~150KB). Pure vanilla JS, no frameworks. Deploys to Cloudflare Pages. Current version: **v1.16.1**.
 
 ## Folder Structure
 
@@ -57,7 +57,7 @@ world-prayer-times/
 | Init/bootstrap | ~80 | Loads saved state, renders, starts intervals |
 | Visual effects | ~100 | Dot grid canvas, border glow, spotlight cards, location coach-mark |
 
-## Bugs Already Fixed (v1.16.0)
+## Bugs Already Fixed (v1.16.1)
 
 These were identified and fixed in prior audits. **Do NOT report these again:**
 
@@ -116,6 +116,9 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 53. **Friday Hadith removed** — Confirmed no classes on Friday (only Adab was previously removed).
 54. **Prayer blocks fixed 30min** — Reverted from variable pw windows to fixed 30-minute visual duration.
 55. **Scroll-to-now removed** — Header button and card nav item deleted (not useful).
+56. **Palette reverted** — Gold experiment reverted. Original teal/cyan palette restored with all 52 hardcoded literals.
+57. **Location popup viewport clamp** — Coach-mark centers under button, clamps to 12px margins, adds caret arrow, repositions on resize. Mobile bottom-sheet at ≤520px.
+58. **FAB icon color** — Updated to #091117 (matches teal palette).
 
 ## Design Decisions (do NOT flag as issues)
 
@@ -136,7 +139,7 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 - **Location coach-mark is non-blocking** — Does not auto-fire the browser permission prompt. Shows a spotlight overlay with ring instead; browsers block reflex-denied prompts permanently.
 - **15-min snapping is intentional** — Users requested finer control than 30-min. Arrow keys step 0.25h, Shift+Arrow steps 1h.
 - **Gridlines are CSS-only** — Drawn once by `drawGridlines()` into `#tl-inner`. They don't re-render on `renderAll()` since `#rows` is rebuilt separately.
-- **Palette is warm gold + navy** — Chosen to remove the "AI-generated website" look. Gold accent (#e2b714) for prayer Dhuhr and CTAs, teal-green (#2ec4b6) for safe/selection.
+- **Palette is teal/cyan (original)** — Gold experiment was tried and reverted. The current palette uses CSS variables — changes to `:root` propagate everywhere. Do NOT change to a gold/navy palette.
 - **Font is IBM Plex Sans Arabic** — Supports both Latin and Arabic natively. More distinctive than Inter. JetBrains Mono kept for clocks/numbers.
 - **Prayer blocks are fixed 30min** — Visual duration is intentionally decoupled from conflict detection windows (pw). Blocks are markers; conflicts use full pw.
 - **FAB only visible on mobile** — `#fab-add` has `display:none` by default, shown via `@media (max-width: 768px)`. Desktop uses the inline add-row button.
