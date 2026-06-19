@@ -2,6 +2,25 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.16.0] — 2026-06-19
+
+### Visual Overhaul
+- **Color palette** — Warm gold + deep navy replaces teal/cyan. Prayer colors: Fajr=dawn blue, Dhuhr=gold, Asr=amber, Maghrib=sunset, Isha=twilight purple. Removed AI-generated look.
+- **Font** — IBM Plex Sans Arabic replaces Inter. Native Arabic support, more distinctive.
+- **NOW line** — Single continuous line across ruler and timeline (z-index 60, ruler-now bridges border gap).
+- **30-min gridlines** — Faint dotted vertical lines every 30 minutes as drag reference.
+- **Selection bar** — Snaps to 15-minute increments (quarters) instead of 30-minute halves.
+- **Prayer text overflow** — Ellipsis on narrow blocks, min-width 22px prevents collapse.
+- **Smooth animations** — Material Design easing `cubic-bezier(0.4,0,0.2,1)` on modals, menus, transitions.
+- **Location spotlight** — Coach-mark overlay with pulsing ring around location button, dimmed background, "Enable" / "Skip" CTA. Replaces floating tooltip.
+- **Mobile responsive** — Label width 90px, horizontal prayer text, floating action button (FAB) for add city.
+- **Loading progress** — Percentage bar + "Loading prayer times… (3/5)" with per-city tracking.
+
+### Fixed
+- **CSP violations** — Added Cloudflare Zaraz/RUM domains to both `_headers` CSP and meta tag. Console errors cleared.
+- **Friday Hadith** — Removed (confirmed: no classes on Friday).
+- **Prayer blocks** — Fixed 30-minute visual duration (reverted from variable pw windows).
+
 ## [1.15.0] — 2026-06-19
 
 ### Fixed
