@@ -2,7 +2,7 @@
 
 ## What You're Reviewing
 
-A single-page prayer times web app (`index.html`, ~2560 lines, ~150KB). Pure vanilla JS, no frameworks. Deploys to Cloudflare Pages. Current version: **v1.16.1**.
+A single-page prayer times web app (`index.html`, ~2600 lines, ~150KB). Pure vanilla JS, no frameworks. Deploys to Cloudflare Pages. Current version: **v1.17.0**.
 
 ## Folder Structure
 
@@ -57,7 +57,7 @@ world-prayer-times/
 | Init/bootstrap | ~80 | Loads saved state, renders, starts intervals |
 | Visual effects | ~100 | Dot grid canvas, border glow, spotlight cards, location coach-mark |
 
-## Bugs Already Fixed (v1.16.1)
+## Bugs Already Fixed (v1.17.0)
 
 These were identified and fixed in prior audits. **Do NOT report these again:**
 
@@ -119,6 +119,20 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 56. **Palette reverted** — Gold experiment reverted. Original teal/cyan palette restored with all 52 hardcoded literals.
 57. **Location popup viewport clamp** — Coach-mark centers under button, clamps to 12px margins, adds caret arrow, repositions on resize. Mobile bottom-sheet at ≤520px.
 58. **FAB icon color** — Updated to #091117 (matches teal palette).
+59. **GPS coords rounded to ±11km** — Stored as 1dp (was 3dp). Migration downgrades existing. Matches privacy policy.
+60. **CSP cleaned** — Removed dead Google Analytics/Zaraz/RUM. Only Aladhan + Nominatim allowed.
+61. **Privacy banner no longer fakes consent** — Auto-hide only hides, doesn't write wp_privacy_ok.
+62. **iCal SUMMARY escaped** — esc() applied to SUMMARY and class DESCRIPTION.
+63. **Card nav focus trap** — trapFocus() added to card nav menu.
+64. **Resize handles ARIA** — Removed role="button" (keyboard resize via Arrow/[/]).
+65. **Safari AbortSignal fallback** — Feature-detects AbortSignal.timeout before using.
+66. **Scroll sync** — requestAnimationFrame-based sync replaces decorative lock.
+67. **AudioContext unlock** — Pre-arms on first pointerdown/keydown for reliable alarms.
+68. **Prayer text horizontal** — clamp() for dynamic scaling across screen sizes.
+69. **Location coach-mark** — No dark overlay, just floating suggestion with ring.
+70. **Privacy policy link** — Footer link opens privacy modal.
+71. **Volume slider** — Alarm volume control (0-100%) in settings UI.
+72. **iCal line folding** — Fixed off-by-one (72 chars, was 73).
 
 ## Design Decisions (do NOT flag as issues)
 

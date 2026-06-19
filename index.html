@@ -7,7 +7,7 @@
     <meta name="description" content="Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.">
     <meta name="theme-color" content="#0a0f1e">
     <meta name="color-scheme" content="dark light">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org https://www.google-analytics.com https://cloudflareinsights.com; img-src 'self' data: blob:; base-uri 'self'; upgrade-insecure-requests;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org; img-src 'self' data: blob:; base-uri 'self'; upgrade-insecure-requests;">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -100,10 +100,10 @@
         }
         body::before {
             content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-            background: linear-gradient(135deg, rgba(45,212,191,0.03) 0%, transparent 40%, rgba(45,212,191,0.03) 60%, transparent 100%);
+            background: linear-gradient(135deg, rgba(45,212,191,0.03) 0%, transparent 40%, rgba(56,189,248,0.03) 60%, transparent 100%);
             background-size: 400% 400%; animation: gradientShift 20s ease infinite;
         }
-        [data-theme="light"] body::before { background: linear-gradient(135deg, rgba(45,212,191,0.04) 0%, transparent 40%, rgba(45,212,191,0.04) 60%, transparent 100%); background-size: 400% 400%; animation: gradientShift 20s ease infinite; }
+        [data-theme="light"] body::before { background: linear-gradient(135deg, rgba(45,212,191,0.04) 0%, transparent 40%, rgba(56,189,248,0.04) 60%, transparent 100%); background-size: 400% 400%; animation: gradientShift 20s ease infinite; }
 
         /* Page load fade-in */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -280,9 +280,9 @@
         .header-left { display: flex; align-items: center; gap: 10px; }
         .logo {
             width: 36px; height: 36px; border-radius: 10px;
-            background: linear-gradient(135deg, #2dd4bf, #6366f1);
+            background: linear-gradient(135deg, #38bdf8, #6366f1);
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 12px rgba(45,212,191,0.3); flex-shrink: 0;
+            box-shadow: 0 2px 12px rgba(56,189,248,0.3); flex-shrink: 0;
         }
         .header-title { font-size: 0.95rem; font-weight: 700; color: var(--heading); letter-spacing: -0.01em; }
         .header-date { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
@@ -290,7 +290,7 @@
         .countdown-pill {
             display: none; padding: 4px 10px; border-radius: 20px;
             font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;
-            background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.25); color: var(--accent); white-space: nowrap;
+            background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.25); color: var(--accent); white-space: nowrap;
         }
         @media (min-width: 640px) { .countdown-pill { display: inline-flex; align-items: center; gap: 4px; } }
 
@@ -302,7 +302,7 @@
             transition: all 0.15s ease;
         }
         .icon-btn:hover { border-color: #475569; color: var(--text); background: var(--card); }
-        .icon-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(45,212,191,0.1); }
+        .icon-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(56,189,248,0.1); }
         .icon-btn svg { width: 16px; height: 16px; }
 
         /* ── Status bar ──────────────────────────────────── */
@@ -378,9 +378,9 @@
         .prayer-block {
             position: absolute; top: 4px; bottom: 18px; border-radius: 3px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em;
+            font-weight: 700; font-size: clamp(0.5rem, 1.2vw, 0.7rem); letter-spacing: 0.04em;
             cursor: pointer; z-index: 2; overflow: hidden; text-overflow: ellipsis; min-width: 22px;
-            writing-mode: vertical-rl; text-orientation: mixed;
+            writing-mode: horizontal-tb; text-orientation: mixed;
             text-transform: uppercase; border-left: 3px solid;
             transition: transform 0.12s, filter 0.12s;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
@@ -449,10 +449,11 @@
         /* ── Add city row ─────────────────────────────────── */
         .add-row {
             display: flex; align-items: center; justify-content: center;
-            padding: 8px; border-bottom: 1px solid var(--border);
+            padding: 10px; border-bottom: 1px solid var(--border);
             cursor: pointer; color: var(--muted); transition: all 0.15s;
+            background: linear-gradient(180deg, transparent, rgba(0,0,0,0.15));
         }
-        .add-row:hover { background: rgba(45,212,191,0.03); color: var(--accent); }
+        .add-row:hover { background: rgba(56,189,248,0.03); color: var(--accent); }
         .add-row svg { width: 16px; height: 16px; margin-right: 4px; }
 
         /* ── Buttons ─────────────────────────────────────── */
@@ -525,7 +526,7 @@
             color: var(--text); text-decoration: none; font-size: 0.75rem;
             transition: all 0.15s; margin-bottom: 6px;
         }
-        .info-link:hover { border-color: var(--accent); background: rgba(45,212,191,0.05); }
+        .info-link:hover { border-color: var(--accent); background: rgba(56,189,248,0.05); }
         .info-link svg { width: 16px; height: 16px; color: var(--accent); flex-shrink: 0; }
         .info-link-text { flex: 1; }
         .info-link-title { font-weight: 600; }
@@ -562,7 +563,7 @@
 
         /* ── Test chime button ───────────────────────────── */
         .chime-btn { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--accent); cursor: pointer; font-size: 0.7rem; font-weight: 600; transition: all 0.15s; }
-        .chime-btn:hover { background: rgba(45,212,191,0.1); border-color: var(--accent); }
+        .chime-btn:hover { background: rgba(56,189,248,0.1); border-color: var(--accent); }
 
         /* ── Toast ───────────────────────────────────────── */
         @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)} }
@@ -617,7 +618,6 @@
         /* ── Mobile ─────────────────────────────────────── */
         @media (max-width: 768px) {
             :root { --label-w: 90px; --tl-min: 600px; }
-            .prayer-block { writing-mode: horizontal-tb; font-size: 0.6rem; padding: 0 2px; }
             .header-title { font-size: 0.85rem; }
             #fab-add { display: flex; }
             .glass { backdrop-filter: blur(12px) saturate(120%); -webkit-backdrop-filter: blur(12px) saturate(120%); }
@@ -643,7 +643,7 @@
         #fab-add { display: none; position: fixed; right: 16px; bottom: 16px; z-index: 80; width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer; background: var(--accent); color: #091117; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.35); transition: transform 0.15s cubic-bezier(0.4,0,0.2,1); }
         #fab-add:hover { transform: scale(1.08); }
         #fab-add svg { width: 26px; height: 26px; }
-        #loc-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.55); backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px); display: none; }
+        #loc-overlay { position: fixed; inset: 0; z-index: 200; background: transparent; pointer-events: none; display: none; }
         #loc-overlay.show { display: block; }
         .loc-coach { position: fixed; z-index: 201; width: 260px; max-width: calc(100vw - 24px); padding: 14px 16px; background: var(--card); border: 1px solid var(--accent); border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08); display: none; animation: coachIn 0.25s cubic-bezier(0.4,0,0.2,1); }
         .loc-coach.show { display: block; }
@@ -656,7 +656,7 @@
             .loc-coach { left: 12px !important; right: 12px !important; width: auto !important; bottom: 16px !important; top: auto !important; }
             .loc-coach-arrow { display: none; }
         }
-        .loc-ring { position: fixed; z-index: 201; border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 4px var(--accent), 0 0 0 9999px rgba(0,0,0,0.55); display: none; animation: ringPulse 1.6s ease-in-out infinite; }
+        .loc-ring { position: fixed; z-index: 201; border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 3px var(--accent); display: none; }
         .loc-ring.show { display: block; }
         @keyframes ringPulse { 0%,100% { box-shadow: 0 0 0 4px var(--accent), 0 0 0 9999px rgba(0,0,0,0.55); } 50% { box-shadow: 0 0 0 7px var(--accent), 0 0 0 9999px rgba(0,0,0,0.55); } }
         .modal-bg, .card-nav-menu, .card-nav-overlay { transition-timing-function: cubic-bezier(0.4,0,0.2,1) !important; }
@@ -740,8 +740,8 @@
             </div>
             <!-- Selection bar -->
             <div class="sel-overlay" id="sel" style="left:41.67%;width:4.167%;top:0;bottom:0;" role="slider" aria-label="Meeting window selector" aria-valuemin="0" aria-valuemax="24" aria-valuenow="10" aria-valuetext="9:00 AM to 10:00 AM">
-                <div class="resize-h l" id="rz-l" tabindex="0" role="button" aria-label="Resize selection start"></div>
-                <div class="resize-h r" id="rz-r" tabindex="0" role="button" aria-label="Resize selection end"></div>
+                <div class="resize-h l" id="rz-l" tabindex="0" aria-label="Resize selection start"></div>
+                <div class="resize-h r" id="rz-r" tabindex="0" aria-label="Resize selection end"></div>
                 <div class="sel-handle t" id="h-top"></div>
                 <div class="sel-handle b" id="h-bot"></div>
             </div>
@@ -767,6 +767,7 @@
                 <span class="setting-label">Alarm Sound</span>
                 <div class="setting-control" style="display:flex;align-items:center;gap:6px;">
                     <select id="alarm-sel"><option value="ting">Ting</option><option value="chime">Chime</option><option value="bell">Bell</option></select>
+                    <input type="range" id="alarm-vol" min="0" max="100" value="70" style="width:60px;accent-color:var(--accent);" aria-label="Alarm volume">
                     <button class="chime-btn" id="test-chime"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Test</button>
                 </div>
             </div>
@@ -889,6 +890,7 @@
     <footer style="text-align:center;padding:12px 16px;font-size:0.65rem;color:var(--muted);border-top:1px solid var(--border);background:var(--card);margin-top:auto;">
         Made with ❤️ by <a href="https://www.linkedin.com/in/mohammed-ahmed-siddiqui/" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:600;">Mohammed Siddiqui</a> ·
         <a href="https://mscarabia.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;">mscarabia.com</a> ·
+        <a href="#" id="footer-privacy" style="color:var(--muted);text-decoration:none;">Privacy</a> ·
         Powered by <a href="https://aladhan.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;">Aladhan API</a>
     </footer>
 </div>
@@ -1041,7 +1043,7 @@ const i18n = {
         meetingLinks:'Meeting Links',meetingLinksDesc:'Zoom / Google Meet links for each class',
         recordingLinks:'Recording Links',recordingLinksDesc:'Access past lesson recordings',
         enterPassword:'Enter the group password to access course links and class schedule.',passwordPlaceholder:'Enter password...',incorrectPw:'Incorrect password. Ask your teacher.',
-        privacyBanner:'Preferences stored locally only. No cookies, no tracking.',useLocation:'Use my location',locPrompt:'Enable location for accurate prayer times where you are.',enableLoc:'Enable',notNow:'Not now',locEnabled:'Location enabled - showing your local times',locationDenied:'Location access denied',locationNotSupported:'Geolocation not supported'
+        privacyBanner:'Preferences stored locally only. No cookies, no tracking.',useLocation:'Use my location',locPrompt:'Enable location for accurate prayer times where you are.',enableLoc:'Enable',notNow:'Not now',locEnabled:'Location enabled - showing your local times',locationDenied:'Location access denied',locationNotSupported:'Geolocation not supported',privacyPolicy:'Privacy Policy'
     },
     ar: {
         safe:'نافذة آمنة',conflict:'تعارض',next:'القادمة:',noClass:'لا فصول قادمة',nextClass:'الفصل القادم:',sunrise:'شروق',now:'الآن',selection:'التحديد',
@@ -1058,7 +1060,7 @@ const i18n = {
         meetingLinks:'روابط الاجتماعات',meetingLinksDesc:'روابط Zoom / Google Meet لكل فصل',
         recordingLinks:'روابط التسجيلات',recordingLinksDesc:'الوصول لتسجيلات الدروس السابقة',
         enterPassword:'أدخل كلمة مرور المجموعة للوصول إلى روابط الدورة والجدول.',passwordPlaceholder:'أدخل كلمة المرور...',incorrectPw:'كلمة مرور خاطئة. اسأل معلمك.',
-        privacyBanner:'التفضيلات محفوظة محلياً فقط. لا ملفات تعريف ارتباط، لا تتبع.',useLocation:'تحديد موقعي',locPrompt:'فعّل الموقع لأوقات صلاة دقيقة حيث أنت.',enableLoc:'تفعيل',notNow:'لاحقاً',locEnabled:'تم تفعيل الموقع - عرض أوقاتك المحلية',locationDenied:'تم رفض الوصول للموقع',locationNotSupported:'تحديد الموقع غير مدعوم'
+        privacyBanner:'التفضيلات محفوظة محلياً فقط. لا ملفات تعريف ارتباط، لا تتبع.',useLocation:'تحديد موقعي',locPrompt:'فعّل الموقع لأوقات صلاة دقيقة حيث أنت.',enableLoc:'تفعيل',notNow:'لاحقاً',locEnabled:'تم تفعيل الموقع - عرض أوقاتك المحلية',locationDenied:'تم رفض الوصول للموقع',locationNotSupported:'تحديد الموقع غير مدعوم',privacyPolicy:'سياسة الخصوصية'
     },
 };
 const t = k => i18n[lang]?.[k] || i18n.en[k] || k;
@@ -1229,7 +1231,7 @@ async function fetchPrayer(city) {
 
     const url = `https://api.aladhan.com/v1/timings/${dk}?latitude=${city.lat}&longitude=${city.lng}&method=${city.method}`;
     try {
-            const r = await fetch(url, {signal: AbortSignal.timeout(10000)}), j = await r.json();
+            const r = await fetch(url, {signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined}), j = await r.json();
         if (j.code !== 200) throw new Error('API');
 
         const tz  = j.data.meta.timezone || city.tz;
@@ -1707,19 +1709,10 @@ $('#ruler').onclick = e => {
  * FIX: Scroll sync used direct assignment which can cause infinite loop
  * if both handlers fire at once. Guard with a lock flag.
  */
-let _scrollLock = false;
-$('#tl-scroll').addEventListener('scroll', () => {
-    if (_scrollLock) return;
-    _scrollLock = true;
-    $('#ruler-scroll').scrollLeft = $('#tl-scroll').scrollLeft;
-    _scrollLock = false;
-});
-$('#ruler-scroll').addEventListener('scroll', () => {
-    if (_scrollLock) return;
-    _scrollLock = true;
-    $('#tl-scroll').scrollLeft = $('#ruler-scroll').scrollLeft;
-    _scrollLock = false;
-});
+let _syncing = false;
+function syncScroll(a, b) { if (_syncing) return; _syncing = true; b.scrollLeft = a.scrollLeft; requestAnimationFrame(() => { _syncing = false; }); }
+$('#tl-scroll').addEventListener('scroll', () => syncScroll($('#tl-scroll'), $('#ruler-scroll')));
+$('#ruler-scroll').addEventListener('scroll', () => syncScroll($('#ruler-scroll'), $('#tl-scroll')));
 
 // Keyboard controls: arrow keys move, [ ] resize
 document.addEventListener('keydown', e => {
@@ -1850,8 +1843,12 @@ function getAudioCtx() {
     return _audioCtx;
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && _audioCtx) _audioCtx.resume().catch(()=>{}); });
+const _unlockAudio = () => { getAudioCtx(); window.removeEventListener('pointerdown', _unlockAudio); window.removeEventListener('keydown', _unlockAudio); };
+window.addEventListener('pointerdown', _unlockAudio, {once:true});
+window.addEventListener('keydown', _unlockAudio, {once:true});
 function playAlarm() {
     const ctx = getAudioCtx();
+    const vol = ($('#alarm-vol')?.value || 70) / 100;
     const s = {
         ting:  [880,.08,0,.02,1100,.12],
         chime: [523,.1,0,.03,659,.1,0,.03,784,.15],
@@ -1862,7 +1859,8 @@ function playAlarm() {
     for (let i = 0; i < p.length; i += 2) {
         if (p[i] === 0) { t += p[i+1]; continue; }
         const o = ctx.createOscillator(); o.type = 'sine';
-        o.frequency.setValueAtTime(p[i], t); o.connect(ctx.destination);
+        const g = ctx.createGain(); g.gain.value = vol;
+        o.frequency.setValueAtTime(p[i], t); o.connect(g).connect(ctx.destination);
         o.start(t); o.stop(t + p[i+1]);
         o.addEventListener('ended', () => o.disconnect());
         t += p[i+1] + 0.02;
@@ -1901,6 +1899,7 @@ function closeM(id) {
 }
 ['#m-settings','#m-help','#m-addcity','#m-privacy'].forEach(id => { const el = $(id); if (el) trapFocus(el); });
 const cp = $('#course-panel'); if (cp) trapFocus(cp);
+const cnav = $('#card-nav-menu'); if (cnav) trapFocus(cnav);
 $$('[data-close]').forEach(b => b.onclick = () => closeM('#' + b.dataset.close));
 // Privacy "Got it" also dismisses the banner
 $('#privacy-gotit').onclick = () => { closeM('#m-privacy'); localStorage.setItem('wp_privacy_ok','1'); const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); };
@@ -1919,8 +1918,9 @@ document.addEventListener('keydown', e => {
     if (!banner) return;
     $('#privacy-ok').onclick  = () => { localStorage.setItem('wp_privacy_ok','1'); banner.classList.add('hidden'); };
     $('#privacy-link').onclick = e => { e.preventDefault(); openM('#m-privacy'); };
+$('#footer-privacy')?.addEventListener('click', e => { e.preventDefault(); openM('#m-privacy'); });
     // Auto-dismiss after 5 seconds
-    setTimeout(() => { if (!localStorage.getItem('wp_privacy_ok')) { banner.classList.add('hidden'); localStorage.setItem('wp_privacy_ok','1'); } }, 5000);
+    setTimeout(() => { if (!localStorage.getItem('wp_privacy_ok')) { banner.classList.add('hidden'); } }, 5000);
 })();
 if (localStorage.getItem('wp_privacy_ok')) { const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); }
 
@@ -1978,7 +1978,7 @@ function exportICal() {
     const now   = new Date();
     const fmtUTC = ts => new Date(ts).toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z';
     const esc = s => String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
-    const fold = l => l.replace(/(.{73})/g, '$1\r\n ');
+    const fold = l => l.replace(/(.{72})/g, '$1\r\n ');
     const lines = [
         'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Prayer Times//EN','CALSCALE:GREGORIAN',
     ];
@@ -1997,11 +1997,11 @@ function exportICal() {
             lines.push(
                 'BEGIN:VEVENT',
                 `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').slice(0,15)}Z`,
-                `SUMMARY:${cls.subject} (${cls.teacher})`,
+                `SUMMARY:${esc(cls.subject + ' (' + cls.teacher + ')')}`,
                 `DTSTART:${fmtUTC(startTs)}`,
                 `DTEND:${fmtUTC(endTs)}`,
                 `RRULE:FREQ=WEEKLY;BYDAY=${dayMapCal[cls.day]}`,
-                `DESCRIPTION:Sannatayn class with ${cls.teacher}`,
+                `DESCRIPTION:${esc('Sannatayn class with ' + cls.teacher)}`,
                 `UID:${cls.day}-${cls.start.replace(':','')}-${cls.subject}-${cls.teacher}@prayer.mscarabia.com`,
                 'END:VEVENT'
             );
@@ -2239,7 +2239,7 @@ function detectUser() {
     if (sv) { try { userCity = JSON.parse(sv); return; } catch {} }
     // Use browser timezone for immediate detection (no permission needed)
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    userCity = { id:'user', name:'You', tz, lat: userCity?.lat || 51.51, lng: userCity?.lng || -0.13, method:3, isUser:true, needsLocation:true };
+    userCity = { id:'user', name:'You', tz, lat: userCity?.lat || 51.51, lng: userCity?.lng || -0.13, method:3, isUser:true };
     // Show location button if no saved location
     const locBtn = $('#btn-location');
     if (locBtn) locBtn.style.display = '';
@@ -2253,7 +2253,7 @@ function requestLocation() {
         pos => {
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
             userCity = { id:'user', name:'You', tz, lat:pos.coords.latitude, lng:pos.coords.longitude, method:3, isUser:true };
-            localStorage.setItem('wp_u', JSON.stringify({ id:userCity.id, name:userCity.name, tz:userCity.tz, lat:Math.round(userCity.lat*1000)/1000, lng:Math.round(userCity.lng*1000)/1000, method:userCity.method, isUser:userCity.isUser }));
+            localStorage.setItem('wp_u', JSON.stringify({ id:userCity.id, name:userCity.name, tz:userCity.tz, lat:Math.round(userCity.lat*10)/10, lng:Math.round(userCity.lng*10)/10, method:userCity.method, isUser:userCity.isUser }));
             if (locBtn) locBtn.style.display = 'none';
             renderAll();
         },
@@ -2302,12 +2302,10 @@ try {
     const sv = localStorage.getItem('wp_u');
     if (sv) {
         const u = JSON.parse(sv);
-        // Migrate 1dp coords to 3dp for cache key consistency
-        if (u.lat && String(u.lat).split('.')[1]?.length < 3) {
-            u.lat = Math.round(u.lat * 1000) / 1000;
-            u.lng = Math.round(u.lng * 1000) / 1000;
-            localStorage.setItem('wp_u', JSON.stringify(u));
-        }
+        // Round stored coords to 1 dp (±11 km) to match privacy policy
+        u.lat = Math.round(u.lat * 10) / 10;
+        u.lng = Math.round(u.lng * 10) / 10;
+        localStorage.setItem('wp_u', JSON.stringify(u));
         userCity = u;
     }
 } catch {}

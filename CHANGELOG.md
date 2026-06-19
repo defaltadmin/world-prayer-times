@@ -2,6 +2,33 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.17.0] — 2026-06-19
+
+### Privacy (GLM audit)
+- **H1: Coords rounded to ±11km** — GPS stored as 1dp (was 3dp). Migration downgrades existing 3dp to 1dp. Matches privacy policy promise.
+- **H2: CSP cleaned** — Removed dead Google Analytics / Zaraz / RUM allowances from both meta tag and `_headers`. CSP now only allows Aladhan API + Nominatim.
+- **H3: Privacy banner no longer fakes consent** — Auto-hide after 5s only hides the banner, doesn't write `wp_privacy_ok`. Only the OK/Got it buttons mark consent.
+
+### Fixed
+- **M1: iCal SUMMARY escaped** — `esc()` applied to SUMMARY and class DESCRIPTION per RFC 5545.
+- **M2: Card nav focus trap** — Added `trapFocus()` to card nav menu (matches `aria-modal="true"`).
+- **M3: Resize handles ARIA** — Removed `role="button"` (keyboard resize is via Arrow/[/], not handles).
+- **M5: Safari AbortSignal fallback** — Feature-detects `AbortSignal.timeout` before using it. Safari 15 gets no signal instead of TypeError.
+- **M6: Scroll sync** — Replaced decorative `_scrollLock` with `requestAnimationFrame`-based sync.
+- **M7: AudioContext unlock** — Pre-arms on first `pointerdown`/`keydown` so class alarms play reliably.
+- **L3: Dead `needsLocation` flag removed.**
+- **L4: iCal line folding** — Fixed off-by-one (72 chars, was 73).
+
+### Added
+- **Prayer text horizontal** — Changed from vertical to horizontal with `clamp(0.5rem, 1.2vw, 0.7rem)` for dynamic scaling.
+- **Location popup soft suggestion** — No dark overlay, just a floating coach-mark with ring highlight. Dismissible.
+- **Privacy policy link** — Added to footer, opens privacy modal.
+- **Volume slider** — Added to alarm settings UI (0-100%, controls oscillator gain).
+- **Add city gradient** — Darker gradient background behind "Add City" row for visibility.
+
+### Removed
+- **Dark overlay from location coach-mark** — Replaced with transparent overlay (suggestion only).
+
 ## [1.16.1] — 2026-06-19
 
 ### Fixed
