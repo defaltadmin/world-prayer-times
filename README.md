@@ -41,12 +41,13 @@ wrangler pages deploy .
 ## Project Structure
 
 ```
-index.html       # The entire app (~2500 lines)
+index.html       # The entire app (2314 lines)
 _headers         # Cloudflare security headers
-_redirects       # Cloudflare redirects
+_redirects       # Cloudflare redirects + robots.txt exclusion
+robots.txt       # Search engine crawler directives
 wrangler.toml    # Cloudflare config
 package.json     # Deploy scripts only (no runtime deps)
-CHANGELOG.md     # Version history
+CHANGELOG.md     # Version history (1.0.0 → 1.14.0)
 LICENSE          # MIT License
 ```
 

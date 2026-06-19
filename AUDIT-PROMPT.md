@@ -1,19 +1,20 @@
-# Audit Prompt for LLMs (DeepSeek, Kimi, Qwen, MiniMax, etc.)
+# Audit Prompt for LLMs (DeepSeek, Kimi, Qwen, MiniMax, Opus, etc.)
 
 ## What You're Reviewing
 
-A single-page prayer times web app (`index.html`, ~2500 lines, ~150KB). Pure vanilla JS, no frameworks. Deploys to Cloudflare Pages.
+A single-page prayer times web app (`index.html`, 2314 lines, ~140KB). Pure vanilla JS, no frameworks. Deploys to Cloudflare Pages. Current version: **v1.14.0**.
 
 ## Folder Structure
 
 ```
 world-prayer-times/
-├── index.html          ← THE ENTIRE APP (HTML + inline CSS + inline JS, ~2500 lines)
+├── index.html          ← THE ENTIRE APP (HTML + inline CSS + inline JS, 2314 lines)
 ├── _headers            ← Cloudflare Pages HTTP headers (CSP, HSTS, cache control)
-├── _redirects          ← Cloudflare Pages redirects (SPA fallback)
+├── _redirects          ← Cloudflare Pages redirects (SPA fallback, robots.txt exclusion)
+├── robots.txt          ← Search engine crawler directives
 ├── wrangler.toml       ← Cloudflare Pages config
 ├── package.json        ← Scripts only (wrangler deploy), no runtime deps
-├── CHANGELOG.md        ← Version history (1.0.0 → 1.11.0)
+├── CHANGELOG.md        ← Version history (1.0.0 → 1.14.0)
 ├── SECURITY.md         ← Security policy
 ├── README.md           ← Project docs
 ├── LICENSE             ← MIT
@@ -21,7 +22,7 @@ world-prayer-times/
 └── .git/
 ```
 
-**Key fact:** There is only ONE source file — `index.html`. Everything (HTML structure, ~900 lines of CSS, ~1500 lines of JS) is inline. There are no imports, no bundler, no node_modules runtime dependency.
+**Key fact:** There is only ONE source file — `index.html`. Everything (HTML structure, ~630 lines of CSS, ~1380 lines of JS) is inline. There are no imports, no bundler, no node_modules runtime dependency.
 
 ## What the App Does
 
@@ -101,6 +102,12 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 - **Prayer blocks already have** `tabindex="0"`, `role="button"`, `aria-label`, and keyboard handlers
 - **Card Nav is the single wiring site** — all header actions (share, ical, notify, course, settings, help) are wired in `initCardNav()` via `#nav-*` items. The old `#btn-*` header buttons no longer exist in HTML.
 - **Nominatim User-Agent** cannot be set client-side (browser strips forbidden headers); Referer header is sufficient for low-volume use
+- **Card nav menu sits OUTSIDE `#app`** — so `inert` on `#app` freezes the background without disabling the menu. This is intentional, not a bug.
+- **Prayer blocks use upper lane, class overlays use bottom band** — stacked vertically to avoid text collision. Class overlays are `height:13px` at bottom of row.
+- **NOW line uses pure CSS calc** — `calc(var(--label-w) + (100% - var(--label-w)) * ${m/24})` matching ruler/blocks exactly. No JS pixel math.
+- **Countdown uses 2-min grace** — `l > lh - GRACE` prevents a just-passed prayer from flickering as "next"
+- **`pd.loc[name]` values are in `pd.tz` timezone** — comparing against `getLocalHours(pd.tz)` is correct. Do NOT switch to browser timezone.
+- **`robots.txt` is a static file** — excluded from SPA catch-all in `_redirects`. Cloudflare may inject AI-crawler blocks (ClaudeBot, GPTBot) — that's their managed feature, not our code.
 
 ## What to Audit
 
