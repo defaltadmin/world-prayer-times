@@ -10,6 +10,9 @@ All notable changes to World Prayer Times are documented here.
 - **Bug 3: Card nav menu frozen/broken** — Moved `#card-nav-overlay` and `#card-nav-menu` OUTSIDE `#app` so `inert` on `#app` no longer disables the menu. All menu items, close button, and overlay clicks now work. Root cause was inert scope, not focus trapping.
 - **Bug 4: Prayer + class text overlap** — Stacked vertically: prayer blocks in upper lane (`top:4px; bottom:18px`), class overlays as readable bottom bands (`height:13px; bottom:3px`). Row height bumped to 58px. Class text 0.45rem → 0.58rem with accent color.
 
+### Added
+- **robots.txt** — Static robots.txt for search engine crawlers. Excluded from SPA catch-all in `_redirects`. Fixes Lighthouse SEO `is-crawlable` flag (0.58 → 1.0).
+
 ### Polish
 - **Glassmorphism** — Enhanced `.glass` with gradient overlay, deeper blur (24px), inset top highlight. Same highlight added to card nav menu.
 - **Text readability** — Ruler labels 0.6rem → 0.65rem. Class overlay text bumped and given accent color for contrast.

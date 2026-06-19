@@ -1,3 +1,4 @@
 /.env*   /index.html 404
 /.git*   /index.html 404
+/robots.txt  /robots.txt  200
 /*       /index.html 200

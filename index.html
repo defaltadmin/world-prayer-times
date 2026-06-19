@@ -1103,12 +1103,6 @@ function updateUI() {
     const cpEnrolled = $$('.info-card-title');
     if (cpEnrolled[2]) cpEnrolled[2].innerHTML = cpEnrolled[2].querySelector('svg').outerHTML + t('imEnrolled');
     // Buttons
-    const btnSettings = $('#btn-settings'); if (btnSettings) btnSettings.title = t('settingsGear');
-    const btnShare = $('#btn-share'); if (btnShare) btnShare.title = t('share');
-    const btnIcal = $('#btn-ical'); if (btnIcal) btnIcal.title = t('exportCal');
-    const btnNotify = $('#btn-notify'); if (btnNotify) btnNotify.title = t('notifications');
-    const btnHelp = $('#btn-help'); if (btnHelp) btnHelp.title = t('howToUse');
-    const btnCourse = $('#btn-course'); if (btnCourse) btnCourse.title = lang === 'ar' ? 'معلومات الدورة' : 'Course info';
     const closePanel = $('#close-panel'); if (closePanel) closePanel.title = t('close');
     const testChime = $('#test-chime'); if (testChime) testChime.textContent = '🔊 ' + t('test');
 }
