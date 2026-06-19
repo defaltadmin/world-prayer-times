@@ -2,6 +2,19 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.13.0] — 2026-06-19
+
+### Fixed
+- **H1: Prayer block width matches conflict window** — Visual blocks now use the actual prayer window (pw) from the API instead of a fixed 30-minute duration. Fajr, Asr, Isha blocks now correctly span up to 1.5h, matching what conflict detection uses. Fixes the core trust issue where "Safe Window" could appear despite overlapping prayer windows.
+- **H2: Geocoded city cache-key drift** — prayerCacheKey() now includes `city.tz` in the key, preventing cache misses when renderRow updates a geocoded city's timezone from 'UTC' to the real tz. Also changed renderRow to use a local `tz` variable instead of mutating `city.tz`.
+- **M1: Mobile label-width misalignment** — `_cachedLabelW` now initialized from computed CSS at startup, not just on resize. Fixes 20px NOW line / selection bar offset on mobile at first load.
+- **M2: iCal line folding and escaping** — DESCRIPTION values now escaped (commas, semicolons, backslashes, newlines) per RFC 5545. All lines folded at 73 chars for Apple Calendar / Outlook compatibility.
+- **M3: Guard btn-now and btn-location wirings** — Added `if (el)` null guards consistent with v1.12.0 fix pattern, preventing TypeError if elements are removed.
+- **L1: Resize re-layouts selection bar** — Debounced `updateSel()` call added to resize handler so selection bar stays aligned after window resize / device rotation.
+- **L2: Prayer at 00:00 notification fix** — Changed `!pt` to `pt === undefined` so a prayer at exactly midnight (possible at extreme latitudes) is not skipped.
+- **L3: Midnight refresh DST-correct offset** — Uses `getOffsetForDate()` for the target midnight date instead of current offset, preventing 1h early/late refresh on DST transition nights.
+- **L4: Conflict detection O(n²) → O(n)** — checkConflicts() builds a Map once instead of searching arrays inside the loop.
+
 ## [1.12.0] — 2026-06-18
 
 ### Fixed

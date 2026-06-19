@@ -53,7 +53,7 @@ world-prayer-times/
 | Init/bootstrap | ~80 | Loads saved state, renders, starts intervals |
 | Visual effects | ~100 | Dot grid canvas, border glow, spotlight cards |
 
-## Bugs Already Fixed (v1.12.0)
+## Bugs Already Fixed (v1.13.0)
 
 These were identified and fixed in prior audits. **Do NOT report these again:**
 
@@ -74,6 +74,15 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 15. **Loader error path** — Error handler calls `hideLoader()` instead of leaving spinner spinning
 16. **Enrolled validation** — Loaded from localStorage with shape check (array of objects with string start/end, integer day)
 17. **Course panel** — Extracted `openCoursePanel()` called directly from `initCardNav()`
+18. **Prayer block width matches conflict window** — Visual blocks use pw (prayer window) from API instead of fixed 30min. `durHours` computed from `pd.pw[name]` converted to local time.
+19. **Geocoded city cache-key drift** — `prayerCacheKey()` includes `city.tz` in key; `renderRow()` uses local `tz` variable instead of mutating `city.tz`.
+20. **Mobile label-width init** — `_cachedLabelW` initialized from computed CSS at startup, not just on resize.
+21. **iCal line folding/escaping** — DESCRIPTION values escaped (`,;\n\`); lines folded at 73 chars per RFC 5545.
+22. **btn-now/btn-location null guards** — Added `if (el)` checks consistent with v1.12.0 pattern.
+23. **Resize re-layout** — Debounced `updateSel()` in resize handler.
+24. **Prayer at 00:00 notification** — `!pt` changed to `pt === undefined` to avoid falsy-zero skip.
+25. **Midnight refresh DST offset** — Uses `getOffsetForDate()` for target date, not current offset.
+26. **Conflict detection O(n²)** — City lookup uses Map instead of per-iteration `.find()`.
 
 ## Design Decisions (do NOT flag as issues)
 

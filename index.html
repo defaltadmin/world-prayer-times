@@ -1190,7 +1190,7 @@ function dateKey(tz) {
     return result;
 }
 function prayerCacheKey(city) {
-    return `${city.id}:${Number(city.lat||0).toFixed(3)}:${Number(city.lng||0).toFixed(3)}:${city.method||''}:${dateKey(city.tz||'UTC')}`;
+    return `${city.id}:${Number(city.lat||0).toFixed(3)}:${Number(city.lng||0).toFixed(3)}:${city.method||''}:${city.tz||'UTC'}:${dateKey(city.tz||'UTC')}`;
 }
 async function fetchPrayer(city) {
     const dk  = dateKey(city.tz || 'UTC');
@@ -1272,9 +1272,11 @@ async function renderRow(city) {
      * FIX: Geocoded cities (from Nominatim search) have tz set to the user's
      * local timezone at the time of the search. Update it from the API response,
      * which returns the actual timezone for the city's coordinates.
+     * Use a local variable instead of mutating city.tz to prevent cache-key drift.
      */
+    let tz = city.tz;
     if (city.geo && pd.tz && city.tz !== pd.tz) {
-        city.tz = pd.tz;
+        tz = pd.tz;
     }
 
     const row = document.createElement('div');
@@ -1291,8 +1293,8 @@ async function renderRow(city) {
     lbl.appendChild(nameSpan);
 
     const now = new Date();
-    const lt  = now.toLocaleTimeString('en-US', {timeZone:city.tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
-    const clockSpan = document.createElement('span'); clockSpan.className = 'city-clock'; clockSpan.dataset.tz = city.tz; clockSpan.textContent = lt;
+    const lt  = now.toLocaleTimeString('en-US', {timeZone:tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
+    const clockSpan = document.createElement('span'); clockSpan.className = 'city-clock'; clockSpan.dataset.tz = tz; clockSpan.textContent = lt;
     lbl.appendChild(clockSpan);
 
     const sign = pd.off >= 0 ? '+' : '-';
@@ -1316,12 +1318,16 @@ async function renderRow(city) {
     const strip = document.createElement('div');
     strip.style.cssText = 'flex:1;position:relative;background:var(--surface);';
 
-    // Prayer blocks — fixed 30-minute duration for visual consistency
+    // Prayer blocks — use prayer window (pw) matching conflict detection
     ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
         const localH = pd.loc[name];
         if (localH === undefined) return;
 
-        const durHours = 0.5; // Fixed 30 minutes
+        let endL = pd.pw?.[name];
+        endL = (endL === undefined)
+            ? localH + (FALLBACK_DUR[name] || 0.5)
+            : (pd.pw[name] + pd.off + 24) % 24;
+        let durHours = endL - localH; if (durHours < 0) durHours += 24;
 
         const b = document.createElement('div');
         b.className = `prayer-block ${name.toLowerCase()}`;
@@ -1498,9 +1504,10 @@ function checkConflicts() {
     const s = selStart, e = s + selDur;
     let cf = [];
     const ids = new Set([...cities.map(c => c.id), userCity?.id].filter(Boolean));
+    const cityMap = new Map([...cities, userCity].filter(Boolean).map(c => [c.id, c]));
 
     for (const id of ids) {
-        const city = [...cities, userCity].find(c => c && c.id === id);
+        const city = cityMap.get(id);
         if (!city) continue;
         const pd = cache[prayerCacheKey(city)];
         if (!pd) continue;
@@ -1699,7 +1706,10 @@ document.addEventListener('keyup', () => { const sel = $('#sel'); if (sel) sel.s
 
 // Window resize: recalculate overlay and NOW line
 let _cachedInnerW = 0;
-window.addEventListener('resize', () => { _cachedInnerW = 0; _cachedLabelW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140; });
+let _resizeDebounce;
+window.addEventListener('resize', () => { _cachedInnerW = 0; _cachedLabelW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140; clearTimeout(_resizeDebounce); _resizeDebounce = setTimeout(() => { updateSel(); }, 100); });
+// Initialize label width from computed CSS (fixes 20px mobile misalignment at load)
+_cachedLabelW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140;
 function getInnerW() { return _cachedInnerW || (_cachedInnerW = $('#tl-inner')?.offsetWidth || 1000); }
 
 /* ── Enrolled class schedule ─────────────────────────────────────── */
@@ -1884,8 +1894,8 @@ if (localStorage.getItem('wp_privacy_ok')) { const b = $('#privacy-banner'); if 
 
 /* ── Settings ────────────────────────────────────────────────────── */
 const btnHowto = $('#btn-howto'); if (btnHowto) btnHowto.onclick = () => { closeM('#m-settings'); openM('#m-help'); };
-$('#btn-now').onclick      = () => scrollToNow();
-$('#btn-location').onclick = () => requestLocation();
+const btnNow = $('#btn-now'); if (btnNow) btnNow.onclick = () => scrollToNow();
+const btnLoc = $('#btn-location'); if (btnLoc) btnLoc.onclick = () => requestLocation();
 
 $('#theme-btn')?.addEventListener('click', () => {
     dark = !dark;
@@ -1933,6 +1943,8 @@ function genShareLink() {
 function exportICal() {
     const now   = new Date();
     const fmtUTC = ts => new Date(ts).toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z';
+    const esc = s => String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+    const fold = l => l.replace(/(.{73})/g, '$1\r\n ');
     const lines = [
         'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Prayer Times//EN','CALSCALE:GREGORIAN',
     ];
@@ -1978,13 +1990,13 @@ function exportICal() {
         'SUMMARY:Safe Meeting Window (No Salah Conflict)',
         `DTSTART:${fmtUTC(meetingStart)}`,
         `DTEND:${fmtUTC(meetingEnd)}`,
-        `DESCRIPTION:Coordinated safe time across: ${cities.map(c=>c.name).join('\\, ')}`,
+        `DESCRIPTION:${esc('Coordinated safe time across: ' + cities.map(c=>c.name).join(', '))}`,
         `UID:${Date.now()}@prayer.mscarabia.com`,
         'END:VEVENT',
     );
 
     lines.push('END:VCALENDAR');
-    const ics = lines.join('\r\n');
+    const ics = lines.map(fold).join('\r\n');
     const blob = new Blob([ics], {type:'text/calendar'});
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a'); a.href = url; a.download = `prayer-sannatayn-${now.toISOString().slice(0,10)}.ics`;
@@ -2226,7 +2238,7 @@ function schedulePrayerNotifs() {
     fetchPrayer(userCity).then(pd => {
         const lh = getLocalHours(pd.tz || userCity.tz);
         ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
-            const pt = pd.loc[name]; if (!pt || pt < lh) return;
+            const pt = pd.loc[name]; if (pt === undefined || pt < lh) return;
             const ms = (pt - lh) * 3600000 - 300000; // 5 min before
             if (ms > 0) _notifTimers.push(setTimeout(() => {
                 if (notifEnabled) new Notification(`${PRAYER_NAMES[lang]?.[name] || name} Prayer`, { body:`Time for ${name}`, icon:NOTIF_ICON });
@@ -2294,7 +2306,7 @@ function scheduleMidnightRefresh() {
     const now = new Date();
     const parts = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(now);
     const p = Object.fromEntries(parts.map(x => [x.type, x.value]));
-    const midnight = new Date(Date.UTC(+p.year, +p.month-1, +p.day+1) - getOff(tz)*3600000);
+    const midnight = new Date(Date.UTC(+p.year, +p.month-1, +p.day+1) - getOffsetForDate(tz, +p.year, +p.month, +p.day+1)*3600000);
     const msUntilMidnight = midnight - now;
     // Safety: if calculated time is < 5 min or negative, wait a full day instead
     const delay = msUntilMidnight > 300000 ? msUntilMidnight + 5000 : 86400000;
