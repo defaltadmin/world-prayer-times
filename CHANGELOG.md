@@ -5,12 +5,12 @@ All notable changes to World Prayer Times are documented here.
 ## [1.16.0] — 2026-06-19
 
 ### Visual Overhaul
-- **Color palette** — Warm gold (#e2b714) + deep navy (#1a1a2e) replaces teal/cyan. Prayer colors updated: Fajr=dawn blue, Dhuhr=gold, Asr=amber, Maghrib=sunset, Isha=twilight purple. All 52 hardcoded color literals swept.
+- **Color palette** — Kept original teal/cyan palette (reverted gold experiment per user preference).
 - **Font** — IBM Plex Sans Arabic replaces Inter. Native Arabic/Latin support, more distinctive than generic Inter.
 - **NOW line** — Single continuous line across ruler and timeline (z-index 60, ruler-now bridges border gap with bottom:-4px).
 - **30-min gridlines** — Faint dotted vertical lines every 30 minutes via `drawGridlines()` for drag reference.
 - **Selection bar** — Snaps to 15-minute increments (quarters, 0.25h) instead of 30-minute halves. Keyboard step 0.25h.
-- **Location spotlight** — Coach-mark overlay with pulsing ring around location button, dimmed background, "Enable" / "Skip for now" CTA. Replaces floating tooltip.
+- **Location spotlight** — Coach-mark overlay with pulsing ring around location button, dimmed background, "Enable" / "Skip for now" CTA. Replaces floating tooltip. Now properly clamped to viewport, adds caret arrow, mobile bottom-sheet at ≤520px, repositions on resize.
 - **Mobile responsive** — Label width 90px (was 120px), horizontal prayer text on mobile, floating add-city FAB button (52px circle, fixed bottom-right).
 - **Loading progress** — Progress bar + "Loading prayer times… (3/5)" with per-city tracking in `renderAll()`.
 - **Smooth animations** — Material Design easing `cubic-bezier(0.4,0,0.2,1)` on modals, card nav, menu transitions.
