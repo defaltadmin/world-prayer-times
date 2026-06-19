@@ -1,9 +1,5 @@
 # Security Policy
 
-## Reporting Vulnerabilities
-
-Email **princeshezy@gmail.com**. Do not open public GitHub issues for security reports.
-
 ## Data Privacy
 
 - No user data collected — all data stays in your browser
