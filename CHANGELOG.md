@@ -5,21 +5,28 @@ All notable changes to World Prayer Times are documented here.
 ## [1.16.0] — 2026-06-19
 
 ### Visual Overhaul
-- **Color palette** — Warm gold + deep navy replaces teal/cyan. Prayer colors: Fajr=dawn blue, Dhuhr=gold, Asr=amber, Maghrib=sunset, Isha=twilight purple. Removed AI-generated look.
-- **Font** — IBM Plex Sans Arabic replaces Inter. Native Arabic support, more distinctive.
-- **NOW line** — Single continuous line across ruler and timeline (z-index 60, ruler-now bridges border gap).
-- **30-min gridlines** — Faint dotted vertical lines every 30 minutes as drag reference.
-- **Selection bar** — Snaps to 15-minute increments (quarters) instead of 30-minute halves.
+- **Color palette** — Warm gold (#e2b714) + deep navy (#1a1a2e) replaces teal/cyan. Prayer colors updated: Fajr=dawn blue, Dhuhr=gold, Asr=amber, Maghrib=sunset, Isha=twilight purple. All 52 hardcoded color literals swept.
+- **Font** — IBM Plex Sans Arabic replaces Inter. Native Arabic/Latin support, more distinctive than generic Inter.
+- **NOW line** — Single continuous line across ruler and timeline (z-index 60, ruler-now bridges border gap with bottom:-4px).
+- **30-min gridlines** — Faint dotted vertical lines every 30 minutes via `drawGridlines()` for drag reference.
+- **Selection bar** — Snaps to 15-minute increments (quarters, 0.25h) instead of 30-minute halves. Keyboard step 0.25h.
+- **Location spotlight** — Coach-mark overlay with pulsing ring around location button, dimmed background, "Enable" / "Skip for now" CTA. Replaces floating tooltip.
+- **Mobile responsive** — Label width 90px (was 120px), horizontal prayer text on mobile, floating add-city FAB button (52px circle, fixed bottom-right).
+- **Loading progress** — Progress bar + "Loading prayer times… (3/5)" with per-city tracking in `renderAll()`.
+- **Smooth animations** — Material Design easing `cubic-bezier(0.4,0,0.2,1)` on modals, card nav, menu transitions.
 - **Prayer text overflow** — Ellipsis on narrow blocks, min-width 22px prevents collapse.
-- **Smooth animations** — Material Design easing `cubic-bezier(0.4,0,0.2,1)` on modals, menus, transitions.
-- **Location spotlight** — Coach-mark overlay with pulsing ring around location button, dimmed background, "Enable" / "Skip" CTA. Replaces floating tooltip.
-- **Mobile responsive** — Label width 90px, horizontal prayer text, floating action button (FAB) for add city.
-- **Loading progress** — Percentage bar + "Loading prayer times… (3/5)" with per-city tracking.
 
 ### Fixed
-- **CSP violations** — Added Cloudflare Zaraz/RUM domains to both `_headers` CSP and meta tag. Console errors cleared.
-- **Friday Hadith** — Removed (confirmed: no classes on Friday).
+- **CSP violations** — Added Cloudflare Zaraz/RUM domains to `_headers` CSP (`prayer.mscarabia.com/cdn-cgi/zaraz`, `/rum`). Console errors cleared.
+- **Friday classes** — Confirmed no classes on Friday (Hadith removed, only Adab was previously removed).
 - **Prayer blocks** — Fixed 30-minute visual duration (reverted from variable pw windows).
+- **Scroll-to-now removed** — Header button and card nav item deleted (not useful).
+- **Location popup** — Replaced floating tooltip with spotlight coach-mark (overlay + ring + positioned card).
+
+### Removed
+- **Scroll-to-now button** — Header clock icon and card nav "Scroll to Now" item
+- **Location floating popup** — Replaced with spotlight coach-mark
+- **Old loc-popup CSS** — Removed `.loc-popup` and `.loc-popup-arrow` styles
 
 ## [1.15.0] — 2026-06-19
 

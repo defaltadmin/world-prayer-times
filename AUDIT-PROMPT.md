@@ -1,60 +1,63 @@
-# Audit Prompt for LLMs (DeepSeek, Kimi, Qwen, MiniMax, Opus, etc.)
+# Audit Prompt for LLMs (DeepSeek, Kimi, Qwen, MiniMax, Opus, Sonnet, etc.)
 
 ## What You're Reviewing
 
-A single-page prayer times web app (`index.html`, 2314 lines, ~140KB). Pure vanilla JS, no frameworks. Deploys to Cloudflare Pages. Current version: **v1.14.0**.
+A single-page prayer times web app (`index.html`, ~2550 lines, ~150KB). Pure vanilla JS, no frameworks. Deploys to Cloudflare Pages. Current version: **v1.16.0**.
 
 ## Folder Structure
 
 ```
 world-prayer-times/
-├── index.html          ← THE ENTIRE APP (HTML + inline CSS + inline JS, 2314 lines)
+├── index.html          ← THE ENTIRE APP (HTML + inline CSS + inline JS, ~2550 lines)
 ├── _headers            ← Cloudflare Pages HTTP headers (CSP, HSTS, cache control)
 ├── _redirects          ← Cloudflare Pages redirects (SPA fallback, robots.txt exclusion)
 ├── robots.txt          ← Search engine crawler directives
 ├── wrangler.toml       ← Cloudflare Pages config
 ├── package.json        ← Scripts only (wrangler deploy), no runtime deps
-├── CHANGELOG.md        ← Version history (1.0.0 → 1.14.0)
+├── CHANGELOG.md        ← Version history (1.0.0 → 1.16.0)
 ├── SECURITY.md         ← Security policy
 ├── README.md           ← Project docs
+├── PRD.md              ← Product requirements document
 ├── LICENSE             ← MIT
 ├── .gitignore
 └── .git/
 ```
 
-**Key fact:** There is only ONE source file — `index.html`. Everything (HTML structure, ~630 lines of CSS, ~1380 lines of JS) is inline. There are no imports, no bundler, no node_modules runtime dependency.
+**Key fact:** There is only ONE source file — `index.html`. Everything (HTML structure, ~650 lines of CSS, ~1400 lines of JS) is inline. There are no imports, no bundler, no node_modules runtime dependency.
 
 ## What the App Does
 
 1. **Prayer times timeline** — Fetches real prayer times from Aladhan API for multiple cities, renders them as colored blocks on a 24h horizontal timeline
-2. **Conflict detection** — Users drag a selection bar to find safe meeting windows that don't overlap prayer times
+2. **Conflict detection** — Users drag a selection bar (15-min snapping) to find safe meeting windows that don't overlap prayer times
 3. **Class schedule** — Overlays enrolled class times (Fiqh, Tafseer, Seerah, etc.) on the timeline, filtered by day of week
 4. **Multi-city** — Users can add cities worldwide via Nominatim geocoding
 5. **iCal export** — Exports meeting windows and class schedules as .ics files
 6. **Notifications** — Browser notifications 5 min before prayer times
 7. **Dark/light theme** — Toggle with CSS custom properties
 8. **EN/AR language** — Full Arabic support including RTL
+9. **Location spotlight** — Coach-mark overlay with pulsing ring to prompt geolocation
+10. **30-min gridlines** — Faint dotted reference lines every 30 minutes on timeline
 
 ## Architecture (inside index.html)
 
 | Section | Lines | What it does |
 |---------|-------|-------------|
-| `<style>` | ~900 | All CSS — CSS vars, glass morphism, dot grid, responsive |
+| `<style>` | ~650 | All CSS — CSS vars, glass morphism, gridlines, spotlight, responsive |
 | Constants | ~200 | City presets, class schedule, prayer windows, i18n strings |
 | State | ~30 | Global variables (cities, cache, selections, language) |
 | Utilities | ~100 | `getOff()`, `getLocalHours()`, `fmtH()`, `pct()`, `clamp()` |
 | API | ~80 | `fetchPrayer()` — Aladhan API with caching + 10s timeout |
-| Rendering | ~300 | `renderRow()`, `renderAll()`, `renderRuler()`, `renderToggles()` |
+| Rendering | ~300 | `renderRow()`, `renderAll()`, `renderRuler()`, `drawGridlines()`, `renderToggles()` |
 | Conflict | ~60 | `checkConflicts()` — prayer/selection overlap detection |
 | Class schedule | ~100 | `compCls()` — converts London class times to UTC, `updateEnrolled()` |
 | Geocoding | ~80 | Nominatim search with debounce + 1s rate limit |
 | iCal | ~60 | ICS file generation with RRULE + DTSTAMP per RFC 5545 |
 | Notifications | ~40 | Browser Notification API scheduling |
-| UI interactions | ~200 | Drag selection, resize handles, keyboard shortcuts |
+| UI interactions | ~200 | Drag selection (15-min snap), resize handles, keyboard shortcuts |
 | Init/bootstrap | ~80 | Loads saved state, renders, starts intervals |
-| Visual effects | ~100 | Dot grid canvas, border glow, spotlight cards |
+| Visual effects | ~100 | Dot grid canvas, border glow, spotlight cards, location coach-mark |
 
-## Bugs Already Fixed (v1.15.0)
+## Bugs Already Fixed (v1.16.0)
 
 These were identified and fixed in prior audits. **Do NOT report these again:**
 
@@ -99,6 +102,20 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 39. **Location onboarding** — Dismissible banner prompts new users for geolocation.
 40. **Non-render-blocking fonts** — media="print" onload swap pattern.
 41. **Deposit removed** — £100 deposit info-card removed from course panel.
+42. **Visual overhaul — palette** — Warm gold (#e2b714) + deep navy (#1a1a2e) replaces teal/cyan. All 52 hardcoded color literals swept.
+43. **Visual overhaul — font** — IBM Plex Sans Arabic replaces Inter. Native Arabic support.
+44. **NOW line continuous** — Extended top:-28px + z-index 60 + ruler-now bridges border gap. Single unbroken line.
+45. **30-min gridlines** — Faint dashed vertical lines every 30 minutes via `drawGridlines()`.
+46. **15-min snapping** — Selection bar snaps to quarters (0.25h) instead of halves. Keyboard step 0.25h.
+47. **Location spotlight** — Coach-mark overlay with pulsing ring, dimmed background, "Enable"/"Skip" CTA. Replaces floating tooltip.
+48. **Mobile responsive** — Label width 90px, horizontal prayer text on mobile, floating add-city FAB button.
+49. **Loading progress** — Progress bar + "Loading prayer times… (3/5)" with per-city tracking in `renderAll()`.
+50. **Smooth animations** — Material Design easing `cubic-bezier(0.4,0,0.2,1)` on modals, menus, transitions.
+51. **Prayer text overflow** — Ellipsis on narrow blocks, min-width 22px.
+52. **CSP Zaraz/RUM** — Added `prayer.mscarabia.com/cdn-cgi/zaraz` and `/rum` to script-src and connect-src in `_headers`. Console errors cleared.
+53. **Friday Hadith removed** — Confirmed no classes on Friday (only Adab was previously removed).
+54. **Prayer blocks fixed 30min** — Reverted from variable pw windows to fixed 30-minute visual duration.
+55. **Scroll-to-now removed** — Header button and card nav item deleted (not useful).
 
 ## Design Decisions (do NOT flag as issues)
 
@@ -116,7 +133,13 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 - **`pd.loc[name]` values are in `pd.tz` timezone** — comparing against `getLocalHours(pd.tz)` is correct. Do NOT switch to browser timezone.
 - **`robots.txt` is a static file** — excluded from SPA catch-all in `_redirects`. Cloudflare may inject AI-crawler blocks (ClaudeBot, GPTBot) — that's their managed feature, not our code.
 - **Deposit info removed** — The £100 deposit card was removed from the course panel. The i18n keys (`deposit`, `depositDesc`) still exist but are unused.
-- **Location banner is non-blocking** — Does not auto-fire the browser permission prompt. Shows a dismissible banner instead; browsers block reflex-denied prompts permanently.
+- **Location coach-mark is non-blocking** — Does not auto-fire the browser permission prompt. Shows a spotlight overlay with ring instead; browsers block reflex-denied prompts permanently.
+- **15-min snapping is intentional** — Users requested finer control than 30-min. Arrow keys step 0.25h, Shift+Arrow steps 1h.
+- **Gridlines are CSS-only** — Drawn once by `drawGridlines()` into `#tl-inner`. They don't re-render on `renderAll()` since `#rows` is rebuilt separately.
+- **Palette is warm gold + navy** — Chosen to remove the "AI-generated website" look. Gold accent (#e2b714) for prayer Dhuhr and CTAs, teal-green (#2ec4b6) for safe/selection.
+- **Font is IBM Plex Sans Arabic** — Supports both Latin and Arabic natively. More distinctive than Inter. JetBrains Mono kept for clocks/numbers.
+- **Prayer blocks are fixed 30min** — Visual duration is intentionally decoupled from conflict detection windows (pw). Blocks are markers; conflicts use full pw.
+- **FAB only visible on mobile** — `#fab-add` has `display:none` by default, shown via `@media (max-width: 768px)`. Desktop uses the inline add-row button.
 
 ## What to Audit
 
@@ -165,3 +188,5 @@ For each issue found, provide:
 - Must not break existing features
 - Must maintain CSP compliance (no new external scripts)
 - Arabic (RTL) support must be preserved
+- Palette uses CSS variables — changes to `:root` propagate everywhere
+- Prayer block duration is intentionally 30min (fixed), not prayer window width
