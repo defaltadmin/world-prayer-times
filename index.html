@@ -433,7 +433,7 @@
 
         /* ── NOW line ────────────────────────────────────── */
         .now-line {
-            position: absolute; top: 0; bottom: 0; width: 2.5px;
+            position: absolute; top: -28px; bottom: 0; width: 2.5px;
             background: var(--danger); z-index: 9; pointer-events: none;
             box-shadow: 0 0 10px var(--danger), 0 0 3px var(--danger);
             /* NO transition — ruler sync uses % and rows use px; transition would misalign them */
@@ -614,6 +614,26 @@
             .icon-btn, .btn, .chip, .modal-close, .chime-btn { min-height: 44px; min-width: 44px; }
         }
 
+        /* ── Location popup ────────────────────────────── */
+        .loc-popup {
+            position: fixed; bottom: 60px; right: 16px; z-index: 95;
+            background: var(--card); border: 1px solid var(--accent);
+            border-radius: 12px; padding: 12px 14px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 16px rgba(45,212,191,0.15);
+            display: flex; flex-direction: column; gap: 4px;
+            animation: fadeInUp 0.3s ease-out;
+            max-width: 260px;
+        }
+        .loc-popup-arrow {
+            position: absolute; bottom: -8px; right: 36px;
+            width: 16px; height: 8px;
+            background: var(--card);
+            border-right: 1px solid var(--accent);
+            border-bottom: 1px solid var(--accent);
+            transform: rotate(45deg);
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.15);
+        }
+
         /* ── Mobile ─────────────────────────────────────── */
         @media (max-width: 768px) {
             :root { --label-w: 120px; --tl-min: 700px; }
@@ -662,9 +682,6 @@
         </div>
         <div class="header-right">
             <span class="countdown-pill" id="countdown"><span id="cd-text">--</span></span>
-            <button class="icon-btn" id="btn-now" title="Scroll to current time" aria-label="Scroll to current time">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </button>
             <button class="icon-btn" id="btn-menu" title="Menu" aria-label="Open menu" aria-expanded="false">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
@@ -751,11 +768,11 @@
             <div class="modal-head"><span class="modal-title">How to Use</span><button class="modal-close" data-close="m-help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
             <div style="font-size:0.78rem;color:var(--muted);line-height:1.6;">
                 <p style="margin-bottom:10px;"><strong style="color:var(--accent);">1.</strong> The ruler shows your local time. The red <strong>NOW</strong> line marks the current moment.</p>
-                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">2.</strong> Prayer blocks show the full window for each Salah — wider blocks reflect longer prayer windows (e.g. Fajr spans from Adhan to Sunrise).</p>
+                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">2.</strong> Prayer blocks show a 30-minute window for each Salah on the timeline.</p>
                 <p style="margin-bottom:10px;"><strong style="color:var(--accent);">3.</strong> <span style="color:var(--selection);font-weight:600;">Drag the cyan bar</span> to select a meeting window. Resize by dragging the left/right edges. Arrow keys also move it.</p>
                 <p style="margin-bottom:10px;"><strong style="color:var(--accent);">4.</strong> The status badge turns <span style="color:var(--danger);">red</span> if your selection overlaps any prayer window, <span style="color:var(--safe);">green</span> if it's clear for everyone.</p>
-                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">5.</strong> Click the 📖 icon to view Sannatayn course links and enroll in classes.</p>
-                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">6.</strong> Use the 🕐 button to scroll the timeline back to the current time.</p>
+                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">5.</strong> Click the 📖 icon in the menu to view Sannatayn course links and enroll in classes.</p>
+                <p style="margin-bottom:10px;"><strong style="color:var(--accent);">6.</strong> Enable location for accurate countdown and prayer times for your area.</p>
             </div>
             <button class="btn btn-ghost" data-close="m-help" style="width:100%;justify-content:center;margin-top:12px;">Got it</button>
         </div>
@@ -843,18 +860,19 @@
         <div class="pb-actions"><button class="btn btn-accent" id="privacy-ok" style="padding:5px 14px;">OK</button></div>
     </div>
 
-    <!-- ══════════════ LOCATION ONBOARDING BANNER ══════════════ -->
-    <div class="privacy-banner" id="location-banner" style="display:none;bottom:0;z-index:95;">
-        <span>📍 <span id="loc-banner-text">Enable location for accurate prayer times where you are.</span></span>
-        <div class="pb-actions">
-            <button class="btn" id="loc-dismiss" style="padding:5px 12px;">Not now</button>
-            <button class="btn btn-accent" id="loc-enable" style="padding:5px 12px;">Enable</button>
+    <!-- ══════════════ LOCATION ONBOARDING POPUP ══════════════ -->
+    <div id="location-popup" class="loc-popup" style="display:none;">
+        <div class="loc-popup-arrow"></div>
+        <span style="font-size:0.75rem;color:var(--text);">📍 Enable location for accurate prayer times</span>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+            <button class="btn" id="loc-dismiss" style="padding:4px 10px;font-size:0.7rem;">Not now</button>
+            <button class="btn btn-accent" id="loc-enable" style="padding:4px 10px;font-size:0.7rem;">Enable</button>
         </div>
     </div>
 
     <!-- ══════════════ FOOTER ══════════════ -->
     <footer style="text-align:center;padding:12px 16px;font-size:0.65rem;color:var(--muted);border-top:1px solid var(--border);background:var(--card);margin-top:auto;">
-        Made with ❤️ by <a href="https://mscarabia.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:600;">Mohammed Siddiqui</a> ·
+        Made with ❤️ by <a href="https://www.linkedin.com/in/mohammed-ahmed-siddiqui/" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:600;">Mohammed Siddiqui</a> ·
         <a href="https://mscarabia.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;">mscarabia.com</a> ·
         Powered by <a href="https://aladhan.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;">Aladhan API</a>
     </footer>
@@ -867,14 +885,6 @@
         <span class="card-nav-title">Menu</span>
         <button class="modal-close" id="close-card-nav" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
-    <div class="card-nav-group">
-        <div class="card-nav-group-label">Navigate</div>
-        <div class="card-nav-item" id="nav-now">
-            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <div class="card-nav-text"><div class="card-nav-text-title">Scroll to Now</div><div class="card-nav-text-desc">Jump to current time</div></div>
-        </div>
-    </div>
-    <div class="card-nav-divider"></div>
     <div class="card-nav-group">
         <div class="card-nav-group-label">Course</div>
         <div class="card-nav-item" id="nav-course">
@@ -1399,17 +1409,7 @@ function updateOverlayH() {
     // Height is handled by top:0;bottom:0 on #sel — no explicit set needed
 }
 
-/* ── NOW line (pixel-positioned to match prayer blocks exactly) ────── */
-function scrollToNow() {
-    const tz = userCity?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const m  = getLocalHours(tz);
-    const scroll = $('#tl-scroll'), inner = $('#tl-inner');
-    if (!scroll || !inner) return;
-    const viewW = scroll.clientWidth, innerW = inner.offsetWidth;
-    const targetPx = (m / 24) * innerW;
-    scroll.scrollTo({left: Math.max(0, Math.min(targetPx - viewW * 0.4, innerW - viewW)), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
-}
-
+/* ── NOW line ──────────────────────────────────────────────────── */
 function updateNow() {
     const tz = userCity?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
     const m  = getLocalHours(tz);
@@ -1891,16 +1891,11 @@ document.addEventListener('keydown', e => {
 })();
 if (localStorage.getItem('wp_privacy_ok')) { const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); }
 
-/* ── Location onboarding banner ──────────────────────────────────── */
-if (!localStorage.getItem('wp_loc_prompted') && !localStorage.getItem('wp_u')) {
-    const lb = $('#location-banner'); if (lb) lb.style.display = 'flex';
-}
-$('#loc-enable')?.addEventListener('click', () => { localStorage.setItem('wp_loc_prompted','1'); const b=$('#location-banner'); if(b) b.style.display='none'; requestLocation(); });
-$('#loc-dismiss')?.addEventListener('click', () => { localStorage.setItem('wp_loc_prompted','1'); const b=$('#location-banner'); if(b) b.style.display='none'; });
+$('#loc-enable')?.addEventListener('click', () => { localStorage.setItem('wp_loc_prompted','1'); const p=$('#location-popup'); if(p) p.style.display='none'; requestLocation(); });
+$('#loc-dismiss')?.addEventListener('click', () => { localStorage.setItem('wp_loc_prompted','1'); const p=$('#location-popup'); if(p) p.style.display='none'; });
 
 /* ── Settings ────────────────────────────────────────────────────── */
 const btnHowto = $('#btn-howto'); if (btnHowto) btnHowto.onclick = () => { closeM('#m-settings'); openM('#m-help'); };
-const btnNow = $('#btn-now'); if (btnNow) btnNow.onclick = () => scrollToNow();
 const btnLoc = $('#btn-location'); if (btnLoc) btnLoc.onclick = () => requestLocation();
 
 $('#theme-btn')?.addEventListener('click', () => {
@@ -2302,7 +2297,6 @@ requestAnimationFrame(() => { updateSel(); updateNow(); });
 updateEnrolled();
 updateUI();
 updateHeaderDate();
-setTimeout(scrollToNow, 600);
 setInterval(tickClocks, 1000);
 setTimeout(() => { if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); }, 2000);
 
@@ -2322,7 +2316,19 @@ scheduleMidnightRefresh();
 
 // Try geolocation in background (non-blocking, 2s timeout)
 detectUser();
-// renderAll() already called above — skip redundant second call
+// Show location popup after detectUser has made the button visible
+if (!localStorage.getItem('wp_loc_prompted') && !localStorage.getItem('wp_u')) {
+    setTimeout(() => {
+        const popup = $('#location-popup');
+        const locBtn = $('#btn-location');
+        if (popup && locBtn && locBtn.style.display !== 'none') {
+            const rect = locBtn.getBoundingClientRect();
+            popup.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+            popup.style.right = (window.innerWidth - rect.right) + 'px';
+            popup.style.display = 'flex';
+        }
+    }, 500);
+}
 
 /* ── Dot Grid Background (vanilla JS canvas) ───────────────────── */
 (function initDotGrid() {
@@ -2473,7 +2479,6 @@ let _updateNotifyBadge;
     if (btnClose) btnClose.onclick = closeMenu;
     if (overlay) overlay.onclick = closeMenu;
     // Wire nav items directly (no hidden orphan buttons)
-    $('#nav-now')?.addEventListener('click', () => { closeMenu(); scrollToNow(); });
     $('#nav-course')?.addEventListener('click', () => { closeMenu(); openCoursePanel(); });
     $('#nav-share')?.addEventListener('click', () => { closeMenu(); const { url, hasGeo } = genShareLink(); const msg = hasGeo ? 'Link copied! (custom cities not included) 🔗' : 'Link copied! 🔗'; navigator.clipboard?.writeText(url).then(()=>toast(msg)).catch(()=>window.prompt('Share link:',url)); });
     $('#nav-ical')?.addEventListener('click', () => { closeMenu(); exportICal(); });
