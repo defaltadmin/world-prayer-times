@@ -2,6 +2,54 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.14.0] — 2026-06-19
+
+### Fixed
+- **Bug 1: Countdown wrong next prayer** — Added 2-min grace period so a just-passed prayer isn't skipped mid-minute. Uses `l > lh - GRACE` with undefined guard and `??` fallback for Fajr.
+- **Bug 2: NOW line misaligned** — Replaced JS pixel math with pure CSS `calc(var(--label-w) + (100% - var(--label-w)) * ${m/24})`, matching ruler-now and prayer blocks exactly. No more width cache drift.
+- **Bug 3: Card nav menu frozen/broken** — Moved `#card-nav-overlay` and `#card-nav-menu` OUTSIDE `#app` so `inert` on `#app` no longer disables the menu. All menu items, close button, and overlay clicks now work. Root cause was inert scope, not focus trapping.
+- **Bug 4: Prayer + class text overlap** — Stacked vertically: prayer blocks in upper lane (`top:4px; bottom:18px`), class overlays as readable bottom bands (`height:13px; bottom:3px`). Row height bumped to 58px. Class text 0.45rem → 0.58rem with accent color.
+
+### Added
+- **robots.txt** — Static robots.txt for search engine crawlers. Excluded from SPA catch-all in `_redirects`. Fixes Lighthouse SEO `is-crawlable` flag (0.58 → 1.0).
+
+### Polish
+- **Glassmorphism** — Enhanced `.glass` with gradient overlay, deeper blur (24px), inset top highlight. Same highlight added to card nav menu.
+- **Text readability** — Ruler labels 0.6rem → 0.65rem. Class overlay text bumped and given accent color for contrast.
+- **Lighthouse a11y** — Added `role="main"` and `aria-label` to timeline region.
+- **Border-radius** — Standardized modal and info-card from 14px/10px to 12px. Small elements (chips, buttons) keep 6-8px.
+
+## [1.13.0] — 2026-06-19
+
+### Fixed
+- **H1: Prayer block width matches conflict window** — Visual blocks now use the actual prayer window (pw) from the API instead of a fixed 30-minute duration. Fajr, Asr, Isha blocks now correctly span up to 1.5h, matching what conflict detection uses. Fixes the core trust issue where "Safe Window" could appear despite overlapping prayer windows.
+- **H2: Geocoded city cache-key drift** — prayerCacheKey() now includes `city.tz` in the key, preventing cache misses when renderRow updates a geocoded city's timezone from 'UTC' to the real tz. Also changed renderRow to use a local `tz` variable instead of mutating `city.tz`.
+- **M1: Mobile label-width misalignment** — `_cachedLabelW` now initialized from computed CSS at startup, not just on resize. Fixes 20px NOW line / selection bar offset on mobile at first load.
+- **M2: iCal line folding and escaping** — DESCRIPTION values now escaped (commas, semicolons, backslashes, newlines) per RFC 5545. All lines folded at 73 chars for Apple Calendar / Outlook compatibility.
+- **M3: Guard btn-now and btn-location wirings** — Added `if (el)` null guards consistent with v1.12.0 fix pattern, preventing TypeError if elements are removed.
+- **L1: Resize re-layouts selection bar** — Debounced `updateSel()` call added to resize handler so selection bar stays aligned after window resize / device rotation.
+- **L2: Prayer at 00:00 notification fix** — Changed `!pt` to `pt === undefined` so a prayer at exactly midnight (possible at extreme latitudes) is not skipped.
+- **L3: Midnight refresh DST-correct offset** — Uses `getOffsetForDate()` for the target midnight date instead of current offset, preventing 1h early/late refresh on DST transition nights.
+- **L4: Conflict detection O(n²) → O(n)** — checkConflicts() builds a Map once instead of searching arrays inside the loop.
+
+## [1.12.0] — 2026-06-18
+
+### Fixed
+- **CRITICAL: Blank page on load** — Deleted 6 orphan `#btn-*` wirings (btn-settings, btn-help, btn-share, btn-ical, btn-course, btn-notify) that threw `TypeError` on null elements removed by Card Nav redesign. These buttons were replaced by `#nav-*` items in `initCardNav()` but the old JS wirings were never cleaned up, killing the entire IIFE and leaving `#rows` empty.
+- **Course panel wiring** — Extracted `openCoursePanel()` function; `initCardNav` now calls it directly instead of trying to click a non-existent `#btn-course`
+- **Class overlay day filter** — Uses London day-of-week (`Intl.DateTimeFormat('Europe/London')`) instead of browser-local `getDay()`. Fixes class overlays showing wrong day for users east/west of London.
+- **Notification timer leak** — `schedulePrayerNotifs()` now tracks setTimeout IDs in `_notifTimers[]` and clears them before re-scheduling. Previously, toggling notifications or midnight refresh accumulated orphan timers.
+- **Null guards** — Added `if (el)` guards to `#fmt-btn`, `#lang-sel`, `#alarm-sel`, `#test-chime`, `#close-panel`, `#course-pw-btn`, `#course-pw-input`, `#course-lock-btn` assignments
+- **AudioContext resume** — Added `.catch(()=>{})` to prevent unhandled rejections on Safari
+- **Loader error path** — Error handler now calls `hideLoader()` instead of leaving spinner spinning alongside error message
+- **Enrolled shape validation** — `localStorage` loaded enrolled data validated for correct shape (array of objects with string start/end, integer day)
+- **Nominatim User-Agent** — Removed dead code (browser fetch strips forbidden headers; Referer is sufficient)
+- **package.json** — Version updated to 1.12.0
+
+### Audit Notes
+- GLM 5.2 audit: 1 critical + 4 high + 4 medium + 2 low fixes applied
+- GLM 5.2 audit: 2 findings dismissed (H1 conflict wrap mathematically correct for actual use cases, L5 Permissions-Policy not exploitable as-is)
+
 ## [1.10.0] — 2026-06-16
 
 ### Fixed

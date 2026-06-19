@@ -7,7 +7,10 @@
     <meta name="description" content="Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.">
     <meta name="theme-color" content="#0a0f1e">
     <meta name="color-scheme" content="dark light">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org; img-src 'self' data: blob:; media-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org https://www.google-analytics.com; img-src 'self' data: blob:; base-uri 'self'; upgrade-insecure-requests;">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0f1e'/%3E%3Ccircle cx='50' cy='35' r='12' fill='none' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 v-28' stroke='%2338bdf8' stroke-width='3'/%3E%3Cpath d='M50 47 l18 20 H32z' fill='%2338bdf8' opacity='0.3'/%3E%3Cpath d='M25 67 Q50 55 75 67' fill='none' stroke='%2338bdf8' stroke-width='2'/%3E%3C/svg%3E">
 
     <meta property="og:title" content="Prayer Times – Coordinate Salah Across Cities">
@@ -80,10 +83,13 @@
 
         /* ── Glass ───────────────────────────────────────── */
         .glass {
-            background: rgba(17,25,40,0.75); backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            background:
+              linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0) 40%),
+              rgba(17,25,40,0.72);
+            backdrop-filter: blur(24px) saturate(185%);
+            -webkit-backdrop-filter: blur(24px) saturate(185%);
             border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 4px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.10);
         }
         [data-theme="light"] .glass { background: rgba(255,255,255,0.85); border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 30px rgba(0,0,0,0.06); }
 
@@ -167,7 +173,7 @@
             position: fixed; top: 0; right: -100%; width: 340px; max-width: 90vw;
             height: 100vh; z-index: 46; background: var(--card);
             border-left: 1px solid var(--border);
-            box-shadow: -8px 0 40px rgba(0,0,0,0.3);
+            box-shadow: -8px 0 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.10);
             transition: right 0.35s cubic-bezier(0.22,0.61,0.36,1);
             overflow-y: auto; padding: 0;
         }
@@ -336,13 +342,13 @@
         .ruler-mark.major { background: rgba(128,128,128,0.2); }
         .ruler-lbl {
             position: absolute; top: 3px; transform: translateX(-50%);
-            font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
-            color: var(--muted); pointer-events: none;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+            color: var(--text); pointer-events: none;
         }
 
         /* ── City rows ───────────────────────────────────── */
         .city-row {
-            display: flex; align-items: stretch; min-height: 50px;
+            display: flex; align-items: stretch; min-height: 58px;
             border-bottom: 1px solid var(--border); background: var(--card);
         }
         .city-row:hover { background: rgba(255,255,255,0.03); }
@@ -371,35 +377,37 @@
 
         /* ── Prayer blocks ───────────────────────────────── */
         .prayer-block {
-            position: absolute; top: 5px; bottom: 5px; border-radius: 3px;
+            position: absolute; top: 4px; bottom: 18px; border-radius: 3px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 0.55rem; letter-spacing: 0.04em;
+            font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em;
             cursor: pointer; z-index: 2; overflow: hidden;
             writing-mode: vertical-rl; text-orientation: mixed;
             text-transform: uppercase; border-left: 3px solid;
             transition: transform 0.12s, filter 0.12s;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+            color: #fff;
         }
         .prayer-block:hover { transform: scaleY(1.06); filter: brightness(1.15); z-index: 5; }
         .prayer-block:focus { outline: 2px solid var(--accent); outline-offset: 2px; z-index: 5; }
-        .prayer-block.fajr    { background: rgba(103,232,249,0.35); color: #0c4a6e; border-color: var(--prayer-fajr); }
-        .prayer-block.dhuhr   { background: rgba(251,191,36,0.38);  color: #713f12; border-color: var(--prayer-dhuhr); }
-        .prayer-block.asr     { background: rgba(251,146,60,0.38);  color: #7c2d12; border-color: var(--prayer-asr); }
-        .prayer-block.maghrib { background: rgba(248,113,113,0.35); color: #7f1d1d; border-color: var(--prayer-maghrib); }
-        .prayer-block.isha    { background: rgba(167,139,250,0.38); color: #4c1d95; border-color: var(--prayer-isha); }
-        [data-theme="light"] .prayer-block.fajr    { background: rgba(6,182,212,0.35); }
-        [data-theme="light"] .prayer-block.dhuhr   { background: rgba(251,191,36,0.35); }
-        [data-theme="light"] .prayer-block.asr     { background: rgba(251,146,60,0.35); }
-        [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.3); }
-        [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.3); }
+        .prayer-block.fajr    { background: rgba(103,232,249,0.55); border-color: var(--prayer-fajr); }
+        .prayer-block.dhuhr   { background: rgba(251,191,36,0.55);  border-color: var(--prayer-dhuhr); }
+        .prayer-block.asr     { background: rgba(251,146,60,0.55);  border-color: var(--prayer-asr); }
+        .prayer-block.maghrib { background: rgba(248,113,113,0.55); border-color: var(--prayer-maghrib); }
+        .prayer-block.isha    { background: rgba(167,139,250,0.55); border-color: var(--prayer-isha); }
+        [data-theme="light"] .prayer-block.fajr    { background: rgba(6,182,212,0.55); }
+        [data-theme="light"] .prayer-block.dhuhr   { background: rgba(251,191,36,0.55); }
+        [data-theme="light"] .prayer-block.asr     { background: rgba(251,146,60,0.55); }
+        [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.5); }
+        [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.5); }
 
         /* ── Class event overlays ────────────────────────── */
         .class-ev {
-            position: absolute; top: 5px; bottom: 5px; border-radius: 3px;
-            background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.15);
-            z-index: 1; display: flex; align-items: center; justify-content: center;
-            font-size: 0.45rem; font-weight: 600; color: rgba(255,255,255,0.4);
-            pointer-events: none; overflow: hidden;
+            position: absolute; top: auto; bottom: 3px; height: 13px; border-radius: 7px;
+            background: rgba(45,212,191,0.14); border: 1px solid rgba(45,212,191,0.35);
+            z-index: 3; display: flex; align-items: center; justify-content: center;
+            font-size: 0.58rem; font-weight: 600; color: var(--accent);
+            padding: 0 5px; white-space: nowrap; pointer-events: none; overflow: hidden;
         }
 
         /* ── Selection overlay ───────────────────────────── */
@@ -481,7 +489,7 @@
         }
         .modal-bg.open { opacity: 1; visibility: visible; }
         .modal {
-            background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+            background: var(--card); border: 1px solid var(--border); border-radius: 12px;
             padding: 20px; max-width: 420px; width: 92%; max-height: 85vh; overflow-y: auto;
             box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             transform: scale(0.95); transition: transform 0.2s;
@@ -509,7 +517,7 @@
             overflow-y: auto; padding: 20px;
         }
         .panel.open { right: 0; }
-        .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+        .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
         .info-card-title { font-weight: 600; font-size: 0.8rem; color: var(--heading); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
         .info-card-body { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
         .info-link {
@@ -664,59 +672,6 @@
         </div>
     </header>
 
-    <!-- ══════════════ CARD NAV MENU ══════════════ -->
-    <div class="card-nav-overlay" id="card-nav-overlay"></div>
-    <nav class="card-nav-menu" id="card-nav-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
-        <div class="card-nav-header">
-            <span class="card-nav-title">Menu</span>
-            <button class="modal-close" id="close-card-nav" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-        </div>
-        <div class="card-nav-group">
-            <div class="card-nav-group-label">Navigate</div>
-            <div class="card-nav-item" id="nav-now">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Scroll to Now</div><div class="card-nav-text-desc">Jump to current time</div></div>
-            </div>
-        </div>
-        <div class="card-nav-divider"></div>
-        <div class="card-nav-group">
-            <div class="card-nav-group-label">Course</div>
-            <div class="card-nav-item" id="nav-course">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Sannatayn & Tafseer</div><div class="card-nav-text-desc">Course info, links & schedule</div></div>
-            </div>
-        </div>
-        <div class="card-nav-divider"></div>
-        <div class="card-nav-group">
-            <div class="card-nav-group-label">Share & Export</div>
-            <div class="card-nav-item" id="nav-share">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Share Link</div><div class="card-nav-text-desc">Copy shareable URL</div></div>
-            </div>
-            <div class="card-nav-item" id="nav-ical">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Export Calendar</div><div class="card-nav-text-desc">Download .ics file</div></div>
-            </div>
-            <div class="card-nav-item" id="nav-notify">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Notifications</div><div class="card-nav-text-desc">Prayer time alerts</div></div>
-                <span class="card-nav-badge" id="nav-notify-badge" style="display:none;">ON</span>
-            </div>
-        </div>
-        <div class="card-nav-divider"></div>
-        <div class="card-nav-group">
-            <div class="card-nav-group-label">Settings</div>
-            <div class="card-nav-item" id="nav-settings">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Settings</div><div class="card-nav-text-desc">Theme, language, format</div></div>
-            </div>
-            <div class="card-nav-item" id="nav-help">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">How to Use</div><div class="card-nav-text-desc">Guide & tips</div></div>
-            </div>
-        </div>
-    </nav>
-
     <!-- ══════════════ STATUS BAR ══════════════ -->
     <div class="status-bar">
         <span id="status-badge" class="status-badge safe" aria-live="polite">
@@ -748,7 +703,7 @@
     </div>
 
     <!-- ══════════════ TIMELINE ══════════════ -->
-    <div class="flex-1 tl-scroll" id="tl-scroll">
+    <div class="flex-1 tl-scroll" id="tl-scroll" role="main" aria-label="Prayer times timeline">
         <div style="position:relative;min-width:calc(var(--tl-min) + var(--label-w));" id="tl-inner">
             <div id="rows"></div>
             <div class="add-row" id="add-row" style="margin-left:var(--label-w);">
@@ -898,6 +853,59 @@
     </footer>
 </div>
 
+<!-- ══════════════ CARD NAV MENU (outside #app so inert doesn't disable it) ══════════════ -->
+<div class="card-nav-overlay" id="card-nav-overlay"></div>
+<nav class="card-nav-menu" id="card-nav-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+    <div class="card-nav-header">
+        <span class="card-nav-title">Menu</span>
+        <button class="modal-close" id="close-card-nav" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="card-nav-group">
+        <div class="card-nav-group-label">Navigate</div>
+        <div class="card-nav-item" id="nav-now">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Scroll to Now</div><div class="card-nav-text-desc">Jump to current time</div></div>
+        </div>
+    </div>
+    <div class="card-nav-divider"></div>
+    <div class="card-nav-group">
+        <div class="card-nav-group-label">Course</div>
+        <div class="card-nav-item" id="nav-course">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Sannatayn & Tafseer</div><div class="card-nav-text-desc">Course info, links & schedule</div></div>
+        </div>
+    </div>
+    <div class="card-nav-divider"></div>
+    <div class="card-nav-group">
+        <div class="card-nav-group-label">Share & Export</div>
+        <div class="card-nav-item" id="nav-share">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Share Link</div><div class="card-nav-text-desc">Copy shareable URL</div></div>
+        </div>
+        <div class="card-nav-item" id="nav-ical">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Export Calendar</div><div class="card-nav-text-desc">Download .ics file</div></div>
+        </div>
+        <div class="card-nav-item" id="nav-notify">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Notifications</div><div class="card-nav-text-desc">Prayer time alerts</div></div>
+            <span class="card-nav-badge" id="nav-notify-badge" style="display:none;">ON</span>
+        </div>
+    </div>
+    <div class="card-nav-divider"></div>
+    <div class="card-nav-group">
+        <div class="card-nav-group-label">Settings</div>
+        <div class="card-nav-item" id="nav-settings">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Settings</div><div class="card-nav-text-desc">Theme, language, format</div></div>
+        </div>
+        <div class="card-nav-item" id="nav-help">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">How to Use</div><div class="card-nav-text-desc">Guide & tips</div></div>
+        </div>
+    </div>
+</nav>
+
 <script>
 (function(){
 'use strict';
@@ -965,7 +973,11 @@ let dragging = false, resL = false, resR = false, dragX = 0, dragSL = 0, dragSD 
 let h24 = false, dark = true, userCity = null;
 let _cachedLabelW = 140;
 function getLabelW() { return _cachedLabelW; }
-let enrolled = JSON.parse(localStorage.getItem('wp_e') || '[]');
+let enrolled;
+try {
+    const parsed = JSON.parse(localStorage.getItem('wp_e') || '[]');
+    enrolled = Array.isArray(parsed) ? parsed.filter(c => c && typeof c.start === 'string' && typeof c.end === 'string' && Number.isInteger(c.day)) : [];
+} catch { enrolled = []; }
 let lang = localStorage.getItem('wp_l') || 'en';
 let alarm = localStorage.getItem('wp_a') || 'ting';
 const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
@@ -1091,12 +1103,6 @@ function updateUI() {
     const cpEnrolled = $$('.info-card-title');
     if (cpEnrolled[2]) cpEnrolled[2].innerHTML = cpEnrolled[2].querySelector('svg').outerHTML + t('imEnrolled');
     // Buttons
-    const btnSettings = $('#btn-settings'); if (btnSettings) btnSettings.title = t('settingsGear');
-    const btnShare = $('#btn-share'); if (btnShare) btnShare.title = t('share');
-    const btnIcal = $('#btn-ical'); if (btnIcal) btnIcal.title = t('exportCal');
-    const btnNotify = $('#btn-notify'); if (btnNotify) btnNotify.title = t('notifications');
-    const btnHelp = $('#btn-help'); if (btnHelp) btnHelp.title = t('howToUse');
-    const btnCourse = $('#btn-course'); if (btnCourse) btnCourse.title = lang === 'ar' ? 'معلومات الدورة' : 'Course info';
     const closePanel = $('#close-panel'); if (closePanel) closePanel.title = t('close');
     const testChime = $('#test-chime'); if (testChime) testChime.textContent = '🔊 ' + t('test');
 }
@@ -1181,7 +1187,7 @@ function dateKey(tz) {
     return result;
 }
 function prayerCacheKey(city) {
-    return `${city.id}:${Number(city.lat||0).toFixed(3)}:${Number(city.lng||0).toFixed(3)}:${city.method||''}:${dateKey(city.tz||'UTC')}`;
+    return `${city.id}:${Number(city.lat||0).toFixed(3)}:${Number(city.lng||0).toFixed(3)}:${city.method||''}:${city.tz||'UTC'}:${dateKey(city.tz||'UTC')}`;
 }
 async function fetchPrayer(city) {
     const dk  = dateKey(city.tz || 'UTC');
@@ -1190,7 +1196,7 @@ async function fetchPrayer(city) {
 
     const url = `https://api.aladhan.com/v1/timings/${dk}?latitude=${city.lat}&longitude=${city.lng}&method=${city.method}`;
     try {
-        const r = await fetch(url), j = await r.json();
+            const r = await fetch(url, {signal: AbortSignal.timeout(10000)}), j = await r.json();
         if (j.code !== 200) throw new Error('API');
 
         const tz  = j.data.meta.timezone || city.tz;
@@ -1263,9 +1269,11 @@ async function renderRow(city) {
      * FIX: Geocoded cities (from Nominatim search) have tz set to the user's
      * local timezone at the time of the search. Update it from the API response,
      * which returns the actual timezone for the city's coordinates.
+     * Use a local variable instead of mutating city.tz to prevent cache-key drift.
      */
+    let tz = city.tz;
     if (city.geo && pd.tz && city.tz !== pd.tz) {
-        city.tz = pd.tz;
+        tz = pd.tz;
     }
 
     const row = document.createElement('div');
@@ -1282,8 +1290,8 @@ async function renderRow(city) {
     lbl.appendChild(nameSpan);
 
     const now = new Date();
-    const lt  = now.toLocaleTimeString('en-US', {timeZone:city.tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
-    const clockSpan = document.createElement('span'); clockSpan.className = 'city-clock'; clockSpan.dataset.tz = city.tz; clockSpan.textContent = lt;
+    const lt  = now.toLocaleTimeString('en-US', {timeZone:tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
+    const clockSpan = document.createElement('span'); clockSpan.className = 'city-clock'; clockSpan.dataset.tz = tz; clockSpan.textContent = lt;
     lbl.appendChild(clockSpan);
 
     const sign = pd.off >= 0 ? '+' : '-';
@@ -1307,21 +1315,16 @@ async function renderRow(city) {
     const strip = document.createElement('div');
     strip.style.cssText = 'flex:1;position:relative;background:var(--surface);';
 
-    // Prayer blocks — use local prayer times directly (pd.loc) for positioning
+    // Prayer blocks — use prayer window (pw) matching conflict detection
     ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
         const localH = pd.loc[name];
         if (localH === undefined) return;
 
-        // Compute duration from local prayer window
-        let durHours;
-        if (pd.pw && pd.pw[name] !== undefined) {
-            // pw is in UTC, convert duration to local (same difference)
-            let d = pd.pw[name] - pd.utc[name];
-            if (d < 0) d += 24;
-            durHours = d;
-        } else {
-            durHours = FALLBACK_DUR[name] || 0.5;
-        }
+        let endL = pd.pw?.[name];
+        endL = (endL === undefined)
+            ? localH + (FALLBACK_DUR[name] || 0.5)
+            : (pd.pw[name] + pd.off + 24) % 24;
+        let durHours = endL - localH; if (durHours < 0) durHours += 24;
 
         const b = document.createElement('div');
         b.className = `prayer-block ${name.toLowerCase()}`;
@@ -1348,8 +1351,9 @@ async function renderRow(city) {
         strip.appendChild(sr);
     }
 
-    // Enrolled class overlays — convert UTC times to this city's local time
-    enrolled.forEach(cls => {
+    // Enrolled class overlays — only show today's classes (London time, consistent with CLASSES day definitions)
+    const londonDay = {Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[new Intl.DateTimeFormat('en-US',{timeZone:'Europe/London',weekday:'short'}).format(new Date())];
+    enrolled.filter(cls => cls.day === londonDay).forEach(cls => {
         if (cls.utcStart === undefined) return;
         // cls.utcStart/utcEnd are now proper UTC hours from compCls
         let ls = (cls.utcStart + pd.off + 24) % 24;
@@ -1407,18 +1411,11 @@ function updateNow() {
     const m  = getLocalHours(tz);
 
     /*
-     * The NOW line uses pixel positioning relative to tl-inner.
-     * It must match prayer blocks which use pct(m)% within their strip divs.
-     * strip width = tl-inner width (labelled by JS) – label width.
-     * NOW line left = label-w + (m/24) * stripW.
+     * The NOW line uses CSS calc matching ruler-now and prayer blocks exactly.
+     * No JS width caching needed — pure CSS, pixel-perfect.
      */
-    const lw  = getLabelW();
-    const iw  = getInnerW();
-    const stripW = iw - lw;
-    const nowPx  = lw + (m / 24) * stripW;
-
     const nl = $('#now-line');
-    if (nl) nl.style.left = nowPx + 'px';
+    if (nl) nl.style.left = `calc(var(--label-w) + (100% - var(--label-w)) * ${m / 24})`;
 
     if ($('#your-time')) $('#your-time').textContent = fmtH(m);
     updateHeaderDate();
@@ -1497,9 +1494,10 @@ function checkConflicts() {
     const s = selStart, e = s + selDur;
     let cf = [];
     const ids = new Set([...cities.map(c => c.id), userCity?.id].filter(Boolean));
+    const cityMap = new Map([...cities, userCity].filter(Boolean).map(c => [c.id, c]));
 
     for (const id of ids) {
-        const city = [...cities, userCity].find(c => c && c.id === id);
+        const city = cityMap.get(id);
         if (!city) continue;
         const pd = cache[prayerCacheKey(city)];
         if (!pd) continue;
@@ -1583,9 +1581,14 @@ async function updateCD() {
     const lh  = getLocalHours(tz);
 
     const ps  = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+    const GRACE = 2/60; // 2-min grace so a just-passed prayer isn't skipped mid-minute
     let next = null, nt = null;
-    for (const n of ps) { const l = pd.loc[n]; if (l > lh) { next = n; nt = l; break; } }
-    if (!next) { next = 'Fajr'; nt = (pd.loc.Fajr || 5) + 24; }
+    for (const n of ps) {
+        const l = pd.loc[n];
+        if (l === undefined) continue;
+        if (l > lh - GRACE) { next = n; nt = l; break; }
+    }
+    if (!next) { next = 'Fajr'; nt = (pd.loc.Fajr ?? 5) + 24; }
 
     const diff = Math.max(0, nt - lh) * 3600;
     const h = Math.floor(diff / 3600), m = Math.floor(diff % 3600 / 60), s = Math.floor(diff % 60);
@@ -1698,7 +1701,10 @@ document.addEventListener('keyup', () => { const sel = $('#sel'); if (sel) sel.s
 
 // Window resize: recalculate overlay and NOW line
 let _cachedInnerW = 0;
-window.addEventListener('resize', () => { _cachedInnerW = 0; _cachedLabelW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140; });
+let _resizeDebounce;
+window.addEventListener('resize', () => { _cachedInnerW = 0; _cachedLabelW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140; clearTimeout(_resizeDebounce); _resizeDebounce = setTimeout(() => { updateSel(); }, 100); });
+// Initialize label width from computed CSS (fixes 20px mobile misalignment at load)
+_cachedLabelW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-w')) || 140;
 function getInnerW() { return _cachedInnerW || (_cachedInnerW = $('#tl-inner')?.offsetWidth || 1000); }
 
 /* ── Enrolled class schedule ─────────────────────────────────────── */
@@ -1744,7 +1750,7 @@ function compCls(cls) {
 }
 function updateEnrolled() {
     enrolled = enrolled.map(c => { const d = compCls(c); return {...c, ...d}; });
-    localStorage.setItem('wp_e', JSON.stringify(enrolled.map(({day,start,end,subject,teacher}) => ({day,start,end,subject,teacher}))));
+    try { localStorage.setItem('wp_e', JSON.stringify(enrolled.map(({day,start,end,subject,teacher}) => ({day,start,end,subject,teacher})))); } catch {}
 }
 function renderToggles() {
     const ct = $('#class-timetable');
@@ -1803,10 +1809,10 @@ function updateClsCountdown() {
 let _audioCtx = null;
 function getAudioCtx() {
     if (!_audioCtx || _audioCtx.state === 'closed') _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+    if (_audioCtx.state === 'suspended') _audioCtx.resume().catch(()=>{});
     return _audioCtx;
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden && _audioCtx) _audioCtx.resume(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && _audioCtx) _audioCtx.resume().catch(()=>{}); });
 function playAlarm() {
     const ctx = getAudioCtx();
     const s = {
@@ -1865,7 +1871,7 @@ $$('.modal-bg').forEach(m => m.onclick = e => { if (e.target === m) closeM('#' +
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         $$('.modal-bg.open').forEach(m => closeM('#' + m.id));
-        if ($('#card-nav-menu')?.classList.contains('open')) { $('#card-nav-overlay')?.classList.remove('open'); $('#card-nav-menu')?.classList.remove('open'); $('#btn-menu')?.setAttribute('aria-expanded','false'); }
+        if ($('#card-nav-menu')?.classList.contains('open')) { $('#app')?.removeAttribute('inert'); $('#card-nav-overlay')?.classList.remove('open'); $('#card-nav-menu')?.classList.remove('open'); $('#btn-menu')?.setAttribute('aria-expanded','false'); }
     }
 });
 
@@ -1876,44 +1882,50 @@ document.addEventListener('keydown', e => {
     if (!banner) return;
     $('#privacy-ok').onclick  = () => { localStorage.setItem('wp_privacy_ok','1'); banner.classList.add('hidden'); };
     $('#privacy-link').onclick = e => { e.preventDefault(); openM('#m-privacy'); };
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => { if (!localStorage.getItem('wp_privacy_ok')) { banner.classList.add('hidden'); localStorage.setItem('wp_privacy_ok','1'); } }, 5000);
 })();
 if (localStorage.getItem('wp_privacy_ok')) { const b = $('#privacy-banner'); if (b) b.classList.add('hidden'); }
 
 /* ── Settings ────────────────────────────────────────────────────── */
-$('#btn-settings').onclick = () => openM('#m-settings');
-$('#btn-help').onclick     = () => openM('#m-help');
-$('#btn-howto').onclick    = () => { closeM('#m-settings'); openM('#m-help'); };
-$('#btn-now').onclick      = () => scrollToNow();
-$('#btn-location').onclick = () => requestLocation();
+const btnHowto = $('#btn-howto'); if (btnHowto) btnHowto.onclick = () => { closeM('#m-settings'); openM('#m-help'); };
+const btnNow = $('#btn-now'); if (btnNow) btnNow.onclick = () => scrollToNow();
+const btnLoc = $('#btn-location'); if (btnLoc) btnLoc.onclick = () => requestLocation();
 
-$('#theme-btn').onclick = () => {
+$('#theme-btn')?.addEventListener('click', () => {
     dark = !dark;
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
     localStorage.setItem('wp_t', dark ? 'dark' : 'light');
     document.querySelector('meta[name="color-scheme"]').content = dark ? 'dark light' : 'light dark';
     if (window._dotGridRefreshAccent) window._dotGridRefreshAccent();
     updateUI();
-};
-$('#theme-btn').textContent = dark ? t('dark') : t('light');
+});
+$('#theme-btn') && ($('#theme-btn').textContent = dark ? t('dark') : t('light'));
 
-$('#fmt-btn').onclick = () => {
-    h24 = !h24;
-    localStorage.setItem('wp_24', h24 ? '1' : '0');
-    $('#fmt-btn').textContent = h24 ? '12h' : '24h';
-    renderRuler(); updateSel(); renderAll();
-};
-$('#fmt-btn').textContent = h24 ? '12h' : '24h';
+const fmtBtn = $('#fmt-btn');
+if (fmtBtn) {
+    fmtBtn.onclick = () => {
+        h24 = !h24;
+        localStorage.setItem('wp_24', h24 ? '1' : '0');
+        fmtBtn.textContent = h24 ? '12h' : '24h';
+        renderRuler(); updateSel(); renderAll();
+    };
+    fmtBtn.textContent = h24 ? '12h' : '24h';
+}
 
-$('#lang-sel').onchange = function() {
+const langSel = $('#lang-sel');
+if (langSel) langSel.onchange = function() {
     lang = this.value; localStorage.setItem('wp_l', lang);
     document.documentElement.lang = lang;
-document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
-document.title = lang === 'ar' ? 'أوقات الصلاة' : 'Prayer Times – Coordinate Salah Across Cities';
+    document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+    document.title = lang === 'ar' ? 'أوقات الصلاة' : 'Prayer Times – Coordinate Salah Across Cities';
     checkConflicts(); updateClsCountdown(); updateUI();
 };
 
-$('#alarm-sel').onchange = function() { alarm = this.value; localStorage.setItem('wp_a', alarm); };
-$('#test-chime').onclick  = () => playAlarm();
+const alarmSel = $('#alarm-sel');
+if (alarmSel) alarmSel.onchange = function() { alarm = this.value; localStorage.setItem('wp_a', alarm); };
+const testChime = $('#test-chime');
+if (testChime) testChime.onclick  = () => playAlarm();
 
 /* ── Share & iCal ────────────────────────────────────────────────── */
 function genShareLink() {
@@ -1923,16 +1935,11 @@ function genShareLink() {
     if (lang === 'ar') p.set('lang','ar');
     return { url: `${window.location.origin}${window.location.pathname}?${p.toString()}`, hasGeo };
 }
-$('#btn-share').onclick = async () => {
-    const { url, hasGeo } = genShareLink();
-    const msg = hasGeo ? 'Link copied! (custom cities not included) 🔗' : 'Link copied! 🔗';
-    try { await navigator.clipboard.writeText(url); toast(msg); }
-    catch { window.prompt('Share link:', url); }
-};
-$('#btn-ical').onclick = () => exportICal();
 function exportICal() {
     const now   = new Date();
     const fmtUTC = ts => new Date(ts).toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z';
+    const esc = s => String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+    const fold = l => l.replace(/(.{73})/g, '$1\r\n ');
     const lines = [
         'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Prayer Times//EN','CALSCALE:GREGORIAN',
     ];
@@ -1950,6 +1957,7 @@ function exportICal() {
             const endTs = startTs + durMs;
             lines.push(
                 'BEGIN:VEVENT',
+                `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').slice(0,15)}Z`,
                 `SUMMARY:${cls.subject} (${cls.teacher})`,
                 `DTSTART:${fmtUTC(startTs)}`,
                 `DTEND:${fmtUTC(endTs)}`,
@@ -1973,16 +1981,17 @@ function exportICal() {
     const meetingEnd = Date.UTC(+tzMap.year, +tzMap.month-1, +tzMap.day, endH - userOff, endM);
     lines.push(
         'BEGIN:VEVENT',
+        'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z',
         'SUMMARY:Safe Meeting Window (No Salah Conflict)',
         `DTSTART:${fmtUTC(meetingStart)}`,
         `DTEND:${fmtUTC(meetingEnd)}`,
-        `DESCRIPTION:Coordinated safe time across: ${cities.map(c=>c.name).join('\\, ')}`,
+        `DESCRIPTION:${esc('Coordinated safe time across: ' + cities.map(c=>c.name).join(', '))}`,
         `UID:${Date.now()}@prayer.mscarabia.com`,
         'END:VEVENT',
     );
 
     lines.push('END:VCALENDAR');
-    const ics = lines.join('\r\n');
+    const ics = lines.map(fold).join('\r\n');
     const blob = new Blob([ics], {type:'text/calendar'});
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a'); a.href = url; a.download = `prayer-sannatayn-${now.toISOString().slice(0,10)}.ics`;
@@ -2032,7 +2041,7 @@ function attemptUnlock() {
         setTimeout(() => inp.classList.remove('error'), 400);
     }
 }
-$('#btn-course').onclick = () => {
+function openCoursePanel() {
     // Lazy-load Amiri font for course panel header
     if (!document.querySelector('link[data-font="amiri"]')) {
         const l = document.createElement('link');
@@ -2048,15 +2057,16 @@ $('#btn-course').onclick = () => {
     } else {
         lockCourse();
     }
-};
-$('#close-panel').onclick = $('#panel-bg').onclick = () => {
+}
+const closePanelBtn = $('#close-panel');
+if (closePanelBtn) closePanelBtn.onclick = $('#panel-bg').onclick = () => {
     $('#course-panel').classList.remove('open'); $('#panel-bg').classList.remove('open');
     const pw = $('#course-pw-input'); if (pw) pw.value = '';
     const hint = $('#course-pw-hint'); if (hint) hint.textContent = '';
 };
-$('#course-pw-btn').onclick = attemptUnlock;
-$('#course-pw-input').addEventListener('keydown', e => { if (e.key==='Enter') attemptUnlock(); });
-$('#course-lock-btn').onclick = lockCourse;
+const cpwBtn = $('#course-pw-btn'); if (cpwBtn) cpwBtn.onclick = attemptUnlock;
+const cpwInput = $('#course-pw-input'); if (cpwInput) cpwInput.addEventListener('keydown', e => { if (e.key==='Enter') attemptUnlock(); });
+const cpLockBtn = $('#course-lock-btn'); if (cpLockBtn) cpLockBtn.onclick = lockCourse;
 if (isCourseUnlocked()) unlockCourse();
 $('#enroll-toggle').onchange = function() {
     $('#enroll-content').classList.toggle('hidden', !this.checked);
@@ -2078,7 +2088,7 @@ function renderPopular() {
     });
 }
 
-function saveCities() { localStorage.setItem(STORAGE_CITIES, JSON.stringify(cities.map(c=>c.id))); }
+function saveCities() { try { localStorage.setItem(STORAGE_CITIES, JSON.stringify(cities.map(c=>c.id))); } catch {} }
 function loadSavedCities() {
     // Restore custom (geocoded) cities FIRST so POOL.find() can find them
     const custom = localStorage.getItem('wp_custom_cities');
@@ -2103,7 +2113,7 @@ function addCity(city) {
         const custom = JSON.parse(localStorage.getItem('wp_custom_cities') || '[]');
         custom.push(city);
         if (custom.length > 20) custom.splice(0, custom.length - 20);
-        localStorage.setItem('wp_custom_cities', JSON.stringify(custom));
+        try { localStorage.setItem('wp_custom_cities', JSON.stringify(custom)); } catch {}
     }
     saveCities(); cache = {}; renderAll(); closeM('#m-addcity');
 }
@@ -2129,7 +2139,7 @@ $('#city-search').oninput = () => {
         try {
             const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
             _geoAbort = new AbortController();
-            const data = await (await fetch(url, {signal:_geoAbort.signal, headers:{'Accept-Language':'en','User-Agent':'PrayerTimesApp/1.8.2 (https://prayer.mscarabia.com)'}})).json();
+            const data = await (await fetch(url, {signal:_geoAbort.signal, headers:{'Accept-Language':'en'}})).json();
             const results = [], seen = new Set(local.map(c=>c.id));
             data.forEach(d => {
                 const name    = sanitizeName(d.address?.city || d.address?.town || d.address?.village || d.name || '').trim();
@@ -2214,28 +2224,20 @@ function requestLocation() {
 
 /* ── Prayer notifications ────────────────────────────────────────── */
 let notifEnabled = localStorage.getItem('wp_notif') === '1';
-$('#btn-notify').onclick = async () => {
-    if (!('Notification' in window)) { alert('Notifications not supported'); return; }
-    if (notifEnabled) { notifEnabled = false; localStorage.setItem('wp_notif','0'); $('#btn-notify').classList.remove('active'); return; }
-    const p = await Notification.requestPermission();
-    if (p === 'granted') {
-        notifEnabled = true; localStorage.setItem('wp_notif','1'); $('#btn-notify').classList.add('active');
-        schedulePrayerNotifs();
-    } else { alert('Enable notifications in your browser settings to get prayer alerts.'); }
-};
-if (notifEnabled && 'Notification' in window && Notification.permission === 'granted') $('#btn-notify').classList.add('active');
 
 const NOTIF_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23091117'/%3E%3Ccircle cx='50' cy='35' r='12' fill='none' stroke='%232dd4bf' stroke-width='3'/%3E%3C/svg%3E";
+let _notifTimers = [];
 function schedulePrayerNotifs() {
+    _notifTimers.forEach(clearTimeout); _notifTimers = [];
     if (!userCity || !notifEnabled) return;
     fetchPrayer(userCity).then(pd => {
         const lh = getLocalHours(pd.tz || userCity.tz);
         ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
-            const pt = pd.loc[name]; if (!pt || pt < lh) return;
+            const pt = pd.loc[name]; if (pt === undefined || pt < lh) return;
             const ms = (pt - lh) * 3600000 - 300000; // 5 min before
-            if (ms > 0) setTimeout(() => {
+            if (ms > 0) _notifTimers.push(setTimeout(() => {
                 if (notifEnabled) new Notification(`${PRAYER_NAMES[lang]?.[name] || name} Prayer`, { body:`Time for ${name}`, icon:NOTIF_ICON });
-            }, ms);
+            }, ms));
         });
     });
 }
@@ -2271,9 +2273,16 @@ try {
 } catch {}
 if (!userCity) userCity = { id:'user', name:'You', tz:initTz, lat:51.51, lng:-0.13, method:3, isUser:true };
 
-// Hide loader immediately
-setTimeout(() => { const l = $('#loader'); if (l) { l.classList.add('hide'); setTimeout(() => l.remove(), 600); } }, 100);
-window.addEventListener('error', () => { const l = $('#loader'); if (l && !l.classList.contains('hide')) l.querySelector('.loader-text').textContent = 'Something went wrong. Please refresh.'; });
+// Hide loader after giving API calls time to resolve
+function hideLoader() {
+    const l = $('#loader');
+    if (l && !l.classList.contains('hide')) {
+        l.classList.add('hide');
+        setTimeout(() => l.remove(), 600);
+    }
+}
+setTimeout(hideLoader, 1500);
+window.addEventListener('error', () => { hideLoader(); });
 
 // Render right away (no waiting for geolocation)
 renderRuler();
@@ -2292,15 +2301,17 @@ function scheduleMidnightRefresh() {
     const now = new Date();
     const parts = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(now);
     const p = Object.fromEntries(parts.map(x => [x.type, x.value]));
-    const midnight = new Date(Date.UTC(+p.year, +p.month-1, +p.day+1) - getOff(tz)*3600000);
+    const midnight = new Date(Date.UTC(+p.year, +p.month-1, +p.day+1) - getOffsetForDate(tz, +p.year, +p.month, +p.day+1)*3600000);
     const msUntilMidnight = midnight - now;
-    setTimeout(() => { cache = {}; dateKey._cache = {}; renderAll(); if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); scheduleMidnightRefresh(); }, Math.max(msUntilMidnight, 60000) + 5000);
+    // Safety: if calculated time is < 5 min or negative, wait a full day instead
+    const delay = msUntilMidnight > 300000 ? msUntilMidnight + 5000 : 86400000;
+    setTimeout(() => { cache = {}; dateKey._cache = {}; renderAll(); if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); scheduleMidnightRefresh(); }, delay);
 }
 scheduleMidnightRefresh();
 
 // Try geolocation in background (non-blocking, 2s timeout)
 detectUser();
-if (userCity && !userCity.needsLocation) renderAll();
+// renderAll() already called above — skip redundant second call
 
 /* ── Dot Grid Background (vanilla JS canvas) ───────────────────── */
 (function initDotGrid() {
@@ -2452,7 +2463,7 @@ let _updateNotifyBadge;
     if (overlay) overlay.onclick = closeMenu;
     // Wire nav items directly (no hidden orphan buttons)
     $('#nav-now')?.addEventListener('click', () => { closeMenu(); scrollToNow(); });
-    $('#nav-course')?.addEventListener('click', () => { closeMenu(); $('#btn-course')?.click?.(); });
+    $('#nav-course')?.addEventListener('click', () => { closeMenu(); openCoursePanel(); });
     $('#nav-share')?.addEventListener('click', () => { closeMenu(); const { url, hasGeo } = genShareLink(); const msg = hasGeo ? 'Link copied! (custom cities not included) 🔗' : 'Link copied! 🔗'; navigator.clipboard?.writeText(url).then(()=>toast(msg)).catch(()=>window.prompt('Share link:',url)); });
     $('#nav-ical')?.addEventListener('click', () => { closeMenu(); exportICal(); });
     $('#nav-notify')?.addEventListener('click', async () => {
