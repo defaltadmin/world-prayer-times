@@ -1323,16 +1323,12 @@ async function renderRow(city) {
     const strip = document.createElement('div');
     strip.style.cssText = 'flex:1;position:relative;background:var(--surface);';
 
-    // Prayer blocks — use prayer window (pw) matching conflict detection
+    // Prayer blocks — fixed 30-minute duration for visual consistency
     ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(name => {
         const localH = pd.loc[name];
         if (localH === undefined) return;
 
-        let endL = pd.pw?.[name];
-        endL = (endL === undefined)
-            ? localH + (FALLBACK_DUR[name] || 0.5)
-            : (pd.pw[name] + pd.off + 24) % 24;
-        let durHours = endL - localH; if (durHours < 0) durHours += 24;
+        const durHours = 0.5; // Fixed 30 minutes
 
         const b = document.createElement('div');
         b.className = `prayer-block ${name.toLowerCase()}`;
