@@ -2,6 +2,20 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.14.0] — 2026-06-19
+
+### Fixed
+- **Bug 1: Countdown wrong next prayer** — Added 2-min grace period so a just-passed prayer isn't skipped mid-minute. Uses `l > lh - GRACE` with undefined guard and `??` fallback for Fajr.
+- **Bug 2: NOW line misaligned** — Replaced JS pixel math with pure CSS `calc(var(--label-w) + (100% - var(--label-w)) * ${m/24})`, matching ruler-now and prayer blocks exactly. No more width cache drift.
+- **Bug 3: Card nav menu frozen/broken** — Moved `#card-nav-overlay` and `#card-nav-menu` OUTSIDE `#app` so `inert` on `#app` no longer disables the menu. All menu items, close button, and overlay clicks now work. Root cause was inert scope, not focus trapping.
+- **Bug 4: Prayer + class text overlap** — Stacked vertically: prayer blocks in upper lane (`top:4px; bottom:18px`), class overlays as readable bottom bands (`height:13px; bottom:3px`). Row height bumped to 58px. Class text 0.45rem → 0.58rem with accent color.
+
+### Polish
+- **Glassmorphism** — Enhanced `.glass` with gradient overlay, deeper blur (24px), inset top highlight. Same highlight added to card nav menu.
+- **Text readability** — Ruler labels 0.6rem → 0.65rem. Class overlay text bumped and given accent color for contrast.
+- **Lighthouse a11y** — Added `role="main"` and `aria-label` to timeline region.
+- **Border-radius** — Standardized modal and info-card from 14px/10px to 12px. Small elements (chips, buttons) keep 6-8px.
+
 ## [1.13.0] — 2026-06-19
 
 ### Fixed

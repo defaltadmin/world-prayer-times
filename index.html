@@ -83,10 +83,13 @@
 
         /* ── Glass ───────────────────────────────────────── */
         .glass {
-            background: rgba(17,25,40,0.75); backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            background:
+              linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0) 40%),
+              rgba(17,25,40,0.72);
+            backdrop-filter: blur(24px) saturate(185%);
+            -webkit-backdrop-filter: blur(24px) saturate(185%);
             border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 4px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.10);
         }
         [data-theme="light"] .glass { background: rgba(255,255,255,0.85); border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 30px rgba(0,0,0,0.06); }
 
@@ -170,7 +173,7 @@
             position: fixed; top: 0; right: -100%; width: 340px; max-width: 90vw;
             height: 100vh; z-index: 46; background: var(--card);
             border-left: 1px solid var(--border);
-            box-shadow: -8px 0 40px rgba(0,0,0,0.3);
+            box-shadow: -8px 0 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.10);
             transition: right 0.35s cubic-bezier(0.22,0.61,0.36,1);
             overflow-y: auto; padding: 0;
         }
@@ -339,13 +342,13 @@
         .ruler-mark.major { background: rgba(128,128,128,0.2); }
         .ruler-lbl {
             position: absolute; top: 3px; transform: translateX(-50%);
-            font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
             color: var(--text); pointer-events: none;
         }
 
         /* ── City rows ───────────────────────────────────── */
         .city-row {
-            display: flex; align-items: stretch; min-height: 50px;
+            display: flex; align-items: stretch; min-height: 58px;
             border-bottom: 1px solid var(--border); background: var(--card);
         }
         .city-row:hover { background: rgba(255,255,255,0.03); }
@@ -374,7 +377,7 @@
 
         /* ── Prayer blocks ───────────────────────────────── */
         .prayer-block {
-            position: absolute; top: 5px; bottom: 5px; border-radius: 3px;
+            position: absolute; top: 4px; bottom: 18px; border-radius: 3px;
             display: flex; align-items: center; justify-content: center;
             font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em;
             cursor: pointer; z-index: 2; overflow: hidden;
@@ -400,11 +403,11 @@
 
         /* ── Class event overlays ────────────────────────── */
         .class-ev {
-            position: absolute; top: 5px; bottom: 5px; border-radius: 3px;
-            background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.15);
-            z-index: 1; display: flex; align-items: center; justify-content: center;
-            font-size: 0.45rem; font-weight: 600; color: rgba(255,255,255,0.4);
-            pointer-events: none; overflow: hidden;
+            position: absolute; top: auto; bottom: 3px; height: 13px; border-radius: 7px;
+            background: rgba(45,212,191,0.14); border: 1px solid rgba(45,212,191,0.35);
+            z-index: 3; display: flex; align-items: center; justify-content: center;
+            font-size: 0.58rem; font-weight: 600; color: var(--accent);
+            padding: 0 5px; white-space: nowrap; pointer-events: none; overflow: hidden;
         }
 
         /* ── Selection overlay ───────────────────────────── */
@@ -486,7 +489,7 @@
         }
         .modal-bg.open { opacity: 1; visibility: visible; }
         .modal {
-            background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+            background: var(--card); border: 1px solid var(--border); border-radius: 12px;
             padding: 20px; max-width: 420px; width: 92%; max-height: 85vh; overflow-y: auto;
             box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             transform: scale(0.95); transition: transform 0.2s;
@@ -514,7 +517,7 @@
             overflow-y: auto; padding: 20px;
         }
         .panel.open { right: 0; }
-        .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+        .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
         .info-card-title { font-weight: 600; font-size: 0.8rem; color: var(--heading); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
         .info-card-body { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
         .info-link {
@@ -669,59 +672,6 @@
         </div>
     </header>
 
-    <!-- ══════════════ CARD NAV MENU ══════════════ -->
-    <div class="card-nav-overlay" id="card-nav-overlay"></div>
-    <nav class="card-nav-menu" id="card-nav-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
-        <div class="card-nav-header">
-            <span class="card-nav-title">Menu</span>
-            <button class="modal-close" id="close-card-nav" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-        </div>
-        <div class="card-nav-group">
-            <div class="card-nav-group-label">Navigate</div>
-            <div class="card-nav-item" id="nav-now">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Scroll to Now</div><div class="card-nav-text-desc">Jump to current time</div></div>
-            </div>
-        </div>
-        <div class="card-nav-divider"></div>
-        <div class="card-nav-group">
-            <div class="card-nav-group-label">Course</div>
-            <div class="card-nav-item" id="nav-course">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Sannatayn & Tafseer</div><div class="card-nav-text-desc">Course info, links & schedule</div></div>
-            </div>
-        </div>
-        <div class="card-nav-divider"></div>
-        <div class="card-nav-group">
-            <div class="card-nav-group-label">Share & Export</div>
-            <div class="card-nav-item" id="nav-share">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Share Link</div><div class="card-nav-text-desc">Copy shareable URL</div></div>
-            </div>
-            <div class="card-nav-item" id="nav-ical">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Export Calendar</div><div class="card-nav-text-desc">Download .ics file</div></div>
-            </div>
-            <div class="card-nav-item" id="nav-notify">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Notifications</div><div class="card-nav-text-desc">Prayer time alerts</div></div>
-                <span class="card-nav-badge" id="nav-notify-badge" style="display:none;">ON</span>
-            </div>
-        </div>
-        <div class="card-nav-divider"></div>
-        <div class="card-nav-group">
-            <div class="card-nav-group-label">Settings</div>
-            <div class="card-nav-item" id="nav-settings">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">Settings</div><div class="card-nav-text-desc">Theme, language, format</div></div>
-            </div>
-            <div class="card-nav-item" id="nav-help">
-                <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-                <div class="card-nav-text"><div class="card-nav-text-title">How to Use</div><div class="card-nav-text-desc">Guide & tips</div></div>
-            </div>
-        </div>
-    </nav>
-
     <!-- ══════════════ STATUS BAR ══════════════ -->
     <div class="status-bar">
         <span id="status-badge" class="status-badge safe" aria-live="polite">
@@ -753,7 +703,7 @@
     </div>
 
     <!-- ══════════════ TIMELINE ══════════════ -->
-    <div class="flex-1 tl-scroll" id="tl-scroll">
+    <div class="flex-1 tl-scroll" id="tl-scroll" role="main" aria-label="Prayer times timeline">
         <div style="position:relative;min-width:calc(var(--tl-min) + var(--label-w));" id="tl-inner">
             <div id="rows"></div>
             <div class="add-row" id="add-row" style="margin-left:var(--label-w);">
@@ -902,6 +852,59 @@
         Powered by <a href="https://aladhan.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;">Aladhan API</a>
     </footer>
 </div>
+
+<!-- ══════════════ CARD NAV MENU (outside #app so inert doesn't disable it) ══════════════ -->
+<div class="card-nav-overlay" id="card-nav-overlay"></div>
+<nav class="card-nav-menu" id="card-nav-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+    <div class="card-nav-header">
+        <span class="card-nav-title">Menu</span>
+        <button class="modal-close" id="close-card-nav" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="card-nav-group">
+        <div class="card-nav-group-label">Navigate</div>
+        <div class="card-nav-item" id="nav-now">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Scroll to Now</div><div class="card-nav-text-desc">Jump to current time</div></div>
+        </div>
+    </div>
+    <div class="card-nav-divider"></div>
+    <div class="card-nav-group">
+        <div class="card-nav-group-label">Course</div>
+        <div class="card-nav-item" id="nav-course">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Sannatayn & Tafseer</div><div class="card-nav-text-desc">Course info, links & schedule</div></div>
+        </div>
+    </div>
+    <div class="card-nav-divider"></div>
+    <div class="card-nav-group">
+        <div class="card-nav-group-label">Share & Export</div>
+        <div class="card-nav-item" id="nav-share">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Share Link</div><div class="card-nav-text-desc">Copy shareable URL</div></div>
+        </div>
+        <div class="card-nav-item" id="nav-ical">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Export Calendar</div><div class="card-nav-text-desc">Download .ics file</div></div>
+        </div>
+        <div class="card-nav-item" id="nav-notify">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Notifications</div><div class="card-nav-text-desc">Prayer time alerts</div></div>
+            <span class="card-nav-badge" id="nav-notify-badge" style="display:none;">ON</span>
+        </div>
+    </div>
+    <div class="card-nav-divider"></div>
+    <div class="card-nav-group">
+        <div class="card-nav-group-label">Settings</div>
+        <div class="card-nav-item" id="nav-settings">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">Settings</div><div class="card-nav-text-desc">Theme, language, format</div></div>
+        </div>
+        <div class="card-nav-item" id="nav-help">
+            <div class="card-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="card-nav-text"><div class="card-nav-text-title">How to Use</div><div class="card-nav-text-desc">Guide & tips</div></div>
+        </div>
+    </div>
+</nav>
 
 <script>
 (function(){
@@ -1414,18 +1417,11 @@ function updateNow() {
     const m  = getLocalHours(tz);
 
     /*
-     * The NOW line uses pixel positioning relative to tl-inner.
-     * It must match prayer blocks which use pct(m)% within their strip divs.
-     * strip width = tl-inner width (labelled by JS) – label width.
-     * NOW line left = label-w + (m/24) * stripW.
+     * The NOW line uses CSS calc matching ruler-now and prayer blocks exactly.
+     * No JS width caching needed — pure CSS, pixel-perfect.
      */
-    const lw  = getLabelW();
-    const iw  = getInnerW();
-    const stripW = iw - lw;
-    const nowPx  = lw + (m / 24) * stripW;
-
     const nl = $('#now-line');
-    if (nl) nl.style.left = nowPx + 'px';
+    if (nl) nl.style.left = `calc(var(--label-w) + (100% - var(--label-w)) * ${m / 24})`;
 
     if ($('#your-time')) $('#your-time').textContent = fmtH(m);
     updateHeaderDate();
@@ -1591,9 +1587,14 @@ async function updateCD() {
     const lh  = getLocalHours(tz);
 
     const ps  = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+    const GRACE = 2/60; // 2-min grace so a just-passed prayer isn't skipped mid-minute
     let next = null, nt = null;
-    for (const n of ps) { const l = pd.loc[n]; if (l > lh) { next = n; nt = l; break; } }
-    if (!next) { next = 'Fajr'; nt = (pd.loc.Fajr || 5) + 24; }
+    for (const n of ps) {
+        const l = pd.loc[n];
+        if (l === undefined) continue;
+        if (l > lh - GRACE) { next = n; nt = l; break; }
+    }
+    if (!next) { next = 'Fajr'; nt = (pd.loc.Fajr ?? 5) + 24; }
 
     const diff = Math.max(0, nt - lh) * 3600;
     const h = Math.floor(diff / 3600), m = Math.floor(diff % 3600 / 60), s = Math.floor(diff % 60);

@@ -53,7 +53,7 @@ world-prayer-times/
 | Init/bootstrap | ~80 | Loads saved state, renders, starts intervals |
 | Visual effects | ~100 | Dot grid canvas, border glow, spotlight cards |
 
-## Bugs Already Fixed (v1.13.0)
+## Bugs Already Fixed (v1.14.0)
 
 These were identified and fixed in prior audits. **Do NOT report these again:**
 
@@ -83,6 +83,14 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 24. **Prayer at 00:00 notification** — `!pt` changed to `pt === undefined` to avoid falsy-zero skip.
 25. **Midnight refresh DST offset** — Uses `getOffsetForDate()` for target date, not current offset.
 26. **Conflict detection O(n²)** — City lookup uses Map instead of per-iteration `.find()`.
+27. **Countdown wrong next prayer** — 2-min grace period (`l > lh - GRACE`), undefined guard, `??` fallback.
+28. **NOW line misaligned** — Pure CSS calc instead of JS pixel math, matching ruler/blocks.
+29. **Card nav menu frozen** — Moved menu outside `#app` so `inert` doesn't disable it.
+30. **Prayer + class text overlap** — Stacked vertically: prayer upper lane, class bottom band (0.58rem accent).
+31. **Glassmorphism polish** — Enhanced glass with gradient, deeper blur, inset top highlight.
+32. **Ruler label readability** — Font size 0.6rem → 0.65rem.
+33. **Lighthouse a11y** — Added `role="main"` and `aria-label` to timeline region.
+34. **Border-radius consistency** — Modal/info-card standardized to 12px.
 
 ## Design Decisions (do NOT flag as issues)
 
