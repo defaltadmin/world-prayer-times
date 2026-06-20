@@ -7,7 +7,11 @@
     <meta name="description" content="Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.">
     <meta name="theme-color" content="#0a0f1e">
     <meta name="color-scheme" content="dark light">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org; img-src 'self' data: blob:; base-uri 'self'; upgrade-insecure-requests;">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Prayer Times">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org; img-src 'self' data: blob:; worker-src 'self'; manifest-src 'self'; base-uri 'self'; upgrade-insecure-requests;">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -408,6 +412,20 @@
             font-size: 0.58rem; font-weight: 600; color: var(--accent);
             padding: 0 5px; white-space: nowrap; pointer-events: none; overflow: hidden;
         }
+
+        /* ── Classes row ──────────────────────────────────── */
+        .classes-row { border-top: 2px solid var(--accent); }
+        .classes-row .class-block {
+            position: absolute; top: 6px; bottom: 6px; border-radius: 6px;
+            background: rgba(45,212,191,0.18); border: 1px solid rgba(45,212,191,0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem; font-weight: 600; color: var(--accent);
+            padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            z-index: 2; cursor: default;
+            transition: background 0.15s;
+        }
+        .classes-row .class-block:hover { background: rgba(45,212,191,0.28); }
+        .classes-row .class-label .city-name { color: var(--accent); font-weight: 700; }
 
         /* ── Selection overlay ───────────────────────────── */
         .sel-overlay {
@@ -825,7 +843,16 @@
             <a href="https://chat.whatsapp.com/LhyQf7mVW5BKwrsQHWQgZz" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><div class="info-link-text"><div class="info-link-title">Sannatayn (Men) – WhatsApp</div><div class="info-link-desc">Join the men's group chat</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
             <a href="https://chat.whatsapp.com/IFkpHOR1vzb59O9s7ZyR0E" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><div class="info-link-text"><div class="info-link-title">Tafseer (All) – WhatsApp</div><div class="info-link-desc">Men &amp; Women, 3:30–5:30 PM BST</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
             <a href="https://drive.google.com/file/d/18uQcfYNPOQDH6y3eLACfDvtrE-K5i9n8/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><div class="info-link-text"><div class="info-link-title">Timetable</div><div class="info-link-desc">View the full weekly schedule</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
-            <a href="https://docs.google.com/document/d/17unRrJvczfFRRteNn2DODEOBVtTmMwmBq4QP4IVAbdM/edit" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg><div class="info-link-text"><div class="info-link-title">Meeting Links</div><div class="info-link-desc">Zoom / Google Meet links for each class</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <div class="info-link" style="cursor:pointer;" id="meeting-links-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg><div class="info-link-text"><div class="info-link-title">Meeting Links</div><div class="info-link-desc">Join your class on Teams</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+            <div id="meeting-links-dropdown" class="hidden" style="display:flex;flex-direction:column;gap:4px;padding:4px 0 8px 24px;">
+                <a href="https://teams.microsoft.com/meet/399685477116000?p=8Oop946QAJ6k1hldIr" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Adab</span><span style="color:var(--muted);">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/344566458555626?p=0l5ODY9VrcP16iLPlz" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Aqaaid</span><span style="color:var(--muted);">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/389926319388991?p=SFAKAL79SzXfLtzZqR" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Arabic</span><span style="color:var(--muted);">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/376573361182615?p=FvZ2OpK7bVSWldKWmO" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Fiqh</span><span style="color:var(--muted);">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/385525245278270?p=hWEQMbzmDE2oHlrDPv" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Hadith</span><span style="color:var(--muted);">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/377135747219007?p=NqTd0GWjViCL33VzvA" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Seerah</span><span style="color:var(--muted);">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/369309171584275?p=9lA5Ggmd5KHtavSgwQ" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Tafseer</span><span style="color:var(--muted);">Join here →</span></a>
+            </div>
             <a href="https://docs.google.com/document/d/1G4wPSx5GS7tD57QExrB9thUjMnoY8T5JPiCtOuVlQLI/edit" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div class="info-link-text"><div class="info-link-title">Recording Links</div><div class="info-link-desc">Access past lesson recordings</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
             <div class="info-card" style="margin-top:12px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -889,8 +916,11 @@
     <footer style="text-align:center;padding:12px 16px;font-size:0.65rem;color:var(--muted);border-top:1px solid var(--border);background:var(--card);margin-top:auto;">
         Made with ❤️ by <a href="https://www.linkedin.com/in/mohammed-ahmed-siddiqui/" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:600;">Mohammed Siddiqui</a> ·
         <a href="https://mscarabia.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;">mscarabia.com</a> ·
-        <a href="#" id="footer-privacy" style="color:var(--muted);text-decoration:none;">Privacy</a> ·
+        <a href="#" id="footer-privacy" style="color:var(--accent);text-decoration:none;font-weight:600;">Privacy</a> ·
         Powered by <a href="https://aladhan.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;">Aladhan API</a>
+        <div style="margin-top:8px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:inline-block;">
+            <a href="https://www.launchgood.com/v4/campaign/keep_quran_classes_free_for_500_students" target="_blank" rel="noopener noreferrer" style="color:#10b981;text-decoration:none;font-weight:600;font-size:0.7rem;">Donate — Keep Quran Classes Free →</a>
+        </div>
     </footer>
 </div>
 
@@ -945,21 +975,21 @@
 
 /* ── Config & Data ────────────────────────────────────────────────── */
 const CITIES=[
-    {id:'london',  name:'London',   tz:'Europe/London',    lat:51.51, lng:-0.13,  method:3},
-    {id:'riyadh',  name:'Riyadh',   tz:'Asia/Riyadh',      lat:24.71, lng:46.68,  method:4},
-    {id:'mumbai',  name:'Mumbai',   tz:'Asia/Kolkata',     lat:19.08, lng:72.88,  method:1},
-    {id:'brussels',name:'Brussels', tz:'Europe/Brussels',  lat:50.85, lng:4.35,   method:3},
-    {id:'newyork', name:'New York', tz:'America/New_York', lat:40.71, lng:-74.01, method:2},
+    {id:'london',  name:'London',   nameAr:'لندن',     tz:'Europe/London',    lat:51.51, lng:-0.13,  method:3},
+    {id:'riyadh',  name:'Riyadh',   nameAr:'الرياض',   tz:'Asia/Riyadh',      lat:24.71, lng:46.68,  method:4},
+    {id:'mumbai',  name:'Mumbai',   nameAr:'مومباي',   tz:'Asia/Kolkata',     lat:19.08, lng:72.88,  method:1},
+    {id:'brussels',name:'Brussels', nameAr:'بروكسل',   tz:'Europe/Brussels',  lat:50.85, lng:4.35,   method:3},
+    {id:'newyork', name:'New York', nameAr:'نيويورك',  tz:'America/New_York', lat:40.71, lng:-74.01, method:2},
 ];
 const POOL=[...CITIES,
-    {id:'dubai',    name:'Dubai',        tz:'Asia/Dubai',        lat:25.20, lng:55.27,  method:4},
-    {id:'istanbul', name:'Istanbul',     tz:'Europe/Istanbul',   lat:41.01, lng:28.98,  method:3},
-    {id:'cairo',    name:'Cairo',        tz:'Africa/Cairo',      lat:30.04, lng:31.24,  method:3},
-    {id:'lagos',    name:'Lagos',        tz:'Africa/Lagos',      lat:6.52,  lng:3.38,   method:2},
-    {id:'jakarta',  name:'Jakarta',      tz:'Asia/Jakarta',      lat:-6.21, lng:106.85, method:3},
-    {id:'singapore',name:'Singapore',    tz:'Asia/Singapore',    lat:1.35,  lng:103.82, method:3},
-    {id:'karachi',  name:'Karachi',      tz:'Asia/Karachi',      lat:24.86, lng:67.01,  method:2},
-    {id:'kl',       name:'Kuala Lumpur', tz:'Asia/Kuala_Lumpur', lat:3.14,  lng:101.69, method:3},
+    {id:'dubai',    name:'Dubai',        nameAr:'دبي',           tz:'Asia/Dubai',        lat:25.20, lng:55.27,  method:4},
+    {id:'istanbul', name:'Istanbul',     nameAr:'إسطنبول',       tz:'Europe/Istanbul',   lat:41.01, lng:28.98,  method:3},
+    {id:'cairo',    name:'Cairo',        nameAr:'القاهرة',       tz:'Africa/Cairo',      lat:30.04, lng:31.24,  method:3},
+    {id:'lagos',    name:'Lagos',        nameAr:'لاغوس',         tz:'Africa/Lagos',      lat:6.52,  lng:3.38,   method:2},
+    {id:'jakarta',  name:'Jakarta',      nameAr:'جاكرتا',        tz:'Asia/Jakarta',      lat:-6.21, lng:106.85, method:3},
+    {id:'singapore',name:'Singapore',    nameAr:'سنغافورة',      tz:'Asia/Singapore',    lat:1.35,  lng:103.82, method:3},
+    {id:'karachi',  name:'Karachi',      nameAr:'كراتشي',        tz:'Asia/Karachi',      lat:24.86, lng:67.01,  method:2},
+    {id:'kl',       name:'Kuala Lumpur', nameAr:'كوالالمبور',    tz:'Asia/Kuala_Lumpur', lat:3.14,  lng:101.69, method:3},
 ];
 
 // Class schedule (all times in Europe/London timezone)
@@ -1006,19 +1036,34 @@ const FALLBACK_DUR = {Fajr:0.75, Dhuhr:0.5, Asr:0.75, Maghrib:0.45, Isha:1.0};
 
 /* ── State ────────────────────────────────────────────────────────── */
 const STORAGE_CITIES = 'wp_cities_v1';
-let cities = [...CITIES], cache = {}, selStart = 9, selDur = 1;
-let dragging = false, resL = false, resR = false, dragX = 0, dragSL = 0, dragSD = 0;
-let h24 = false, dark = true, userCity = null;
 let _cachedLabelW = 140;
 function getLabelW() { return _cachedLabelW; }
-let enrolled;
-try {
-    const parsed = JSON.parse(localStorage.getItem('wp_e2') || '[]');
-    enrolled = Array.isArray(parsed) ? parsed.filter(c => c && typeof c.start === 'string' && typeof c.end === 'string' && Number.isInteger(c.day)) : [];
-} catch { enrolled = []; }
-let lang = localStorage.getItem('wp_l') || 'en';
-let alarm = localStorage.getItem('wp_a') || 'ting';
 const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+
+const S = {
+    cities: [...CITIES], cache: {}, selStart: 9, selDur: 1,
+    dragging: false, resL: false, resR: false, dragX: 0, dragSL: 0, dragSD: 0,
+    h24: false, dark: true, userCity: null,
+    enrolled: (() => { try { const p = JSON.parse(localStorage.getItem('wp_e2') || '[]'); return Array.isArray(p) ? p.filter(c => c && typeof c.start === 'string' && typeof c.end === 'string' && Number.isInteger(c.day)) : []; } catch { return []; } })(),
+    lang: localStorage.getItem('wp_l') || 'en',
+    alarm: localStorage.getItem('wp_a') || 'ting',
+};
+function setState(patch, doRender = true) { Object.assign(S, patch); if (doRender) renderAll(); }
+// Backward-compat aliases
+let cities, cache, selStart, selDur, dragging, resL, resR, dragX, dragSL, dragSD;
+let h24, dark, userCity, enrolled, lang, alarm;
+function _syncAliases() {
+    cities = S.cities; cache = S.cache; selStart = S.selStart; selDur = S.selDur;
+    dragging = S.dragging; resL = S.resL; resR = S.resR; dragX = S.dragX; dragSL = S.dragSL; dragSD = S.dragSD;
+    h24 = S.h24; dark = S.dark; userCity = S.userCity;
+    enrolled = S.enrolled; lang = S.lang; alarm = S.alarm;
+}
+function _writeAliases() {
+    S.cities = cities; S.cache = cache; S.selStart = selStart; S.selDur = selDur;
+    S.dragging = dragging; S.resL = resL; S.resR = resR; S.dragX = dragX; S.dragSL = dragSL; S.dragSD = dragSD;
+    S.h24 = h24; S.dark = dark; S.userCity = userCity;
+    S.enrolled = enrolled; S.lang = lang; S.alarm = alarm;
+}
 
 /* ── Sanitise geocoded city names (XSS prevention) ───────────────── */
 function sanitizeName(s) {
@@ -1185,6 +1230,23 @@ function getLocalHours(tz) {
         return now.getUTCHours() + now.getUTCMinutes()/60 + now.getUTCSeconds()/3600;
     }
 }
+/* ── UTC conversion utilities ───────────────────────────────────── */
+function localToUTC(localH, offset) { return (((localH - offset) % 24) + 24) % 24; }
+function utcToLocal(utcH, offset) { return ((utcH + offset) % 24 + 24) % 24; }
+function getOffsetForDate(tz, year, month, day) {
+    try {
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit',
+            hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'
+        }).formatToParts(new Date(Date.UTC(year, month-1, day, 12, 0, 0)));
+        const m = Object.fromEntries(parts.map(p => [p.type, p.value]));
+        const asUTC = Date.UTC(+m.year, +m.month-1, +m.day, +m.hour, +m.minute, +m.second);
+        return Math.round(((asUTC - Date.UTC(year, month-1, day, 12, 0, 0)) / 36e5) * 100) / 100;
+    } catch { return 0; }
+}
+
+function getCityName(city) { return (lang === 'ar' && city.nameAr) ? city.nameAr : city.name; }
+function getLocale() { return lang === 'ar' ? 'ar-EG' : 'en-US'; }
 function fmtH(h) {
     if (isNaN(h) || !isFinite(h)) return '--:--';
     let total = Math.floor((((h % 24) + 24) % 24) * 60);
@@ -1244,9 +1306,7 @@ async function fetchPrayer(city) {
             const [hh, mm] = raw.split(':').map(Number);
             if (isNaN(hh)) return;
             const l = hh + mm / 60;
-            let u = l - off;
-            while (u < 0) u += 24;
-            utc[n] = u % 24;
+            utc[n] = localToUTC(l, off);
             loc[n] = l;
         });
 
@@ -1275,7 +1335,7 @@ async function fetchPrayer(city) {
         const off = getOff(city.tz);
         const fb  = { Fajr:5, Sunrise:6.5, Dhuhr:12.5, Asr:16, Maghrib:18.5, Isha:20 };
         const utc = {}, loc = {};
-        for (const k in fb) { let u = fb[k] - off; while (u < 0) u += 24; utc[k] = u % 24; loc[k] = fb[k]; }
+        for (const k in fb) { utc[k] = localToUTC(fb[k], off); loc[k] = fb[k]; }
 
         // Build fallback prayer windows too
         const pw = {};
@@ -1320,11 +1380,11 @@ async function renderRow(city) {
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'city-name';
-    nameSpan.appendChild(document.createTextNode(city.name));
+    nameSpan.appendChild(document.createTextNode(getCityName(city)));
     lbl.appendChild(nameSpan);
 
     const now = new Date();
-    const lt  = now.toLocaleTimeString('en-US', {timeZone:tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
+    const lt  = now.toLocaleTimeString(getLocale(), {timeZone:tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
     const clockSpan = document.createElement('span'); clockSpan.className = 'city-clock'; clockSpan.dataset.tz = tz; clockSpan.textContent = lt;
     lbl.appendChild(clockSpan);
 
@@ -1386,8 +1446,8 @@ async function renderRow(city) {
     enrolled.filter(cls => cls.day === londonDay).forEach(cls => {
         if (cls.utcStart === undefined) return;
         // cls.utcStart/utcEnd are now proper UTC hours from compCls
-        let ls = (cls.utcStart + pd.off + 24) % 24;
-        let le = (cls.utcEnd + pd.off + 24) % 24;
+        let ls = utcToLocal(cls.utcStart, pd.off);
+        let le = utcToLocal(cls.utcEnd, pd.off);
         const ev = document.createElement('div');
         ev.className = 'class-ev';
         ev.style.left  = pct(ls) + '%';
@@ -1402,9 +1462,56 @@ async function renderRow(city) {
     return row;
 }
 
+/* ── Render: classes row (inline timeline) ─────────────────────── */
+function renderClassesRow() {
+    if (!enrolled.length) return null;
+    const londonDay = {Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[new Intl.DateTimeFormat('en-US',{timeZone:'Europe/London',weekday:'short'}).format(new Date())];
+    const todayCls = enrolled.filter(cls => cls.day === londonDay);
+    if (!todayCls.length) return null;
+
+    const row = document.createElement('div');
+    row.className = 'city-row classes-row';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'city-label class-label';
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'city-name';
+    nameSpan.textContent = lang === 'ar' ? 'الدروس' : 'Classes';
+    lbl.appendChild(nameSpan);
+    const countSpan = document.createElement('span');
+    countSpan.className = 'city-clock';
+    countSpan.textContent = `${todayCls.length} ${lang === 'ar' ? 'اليوم' : 'today'}`;
+    lbl.appendChild(countSpan);
+    row.appendChild(lbl);
+
+    const strip = document.createElement('div');
+    strip.style.cssText = 'flex:1;position:relative;background:var(--surface);';
+
+    // Use London offset for class times (classes are defined in London time)
+    const londonOff = getOffsetForDate('Europe/London',
+        new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, new Date().getUTCDate());
+
+    todayCls.forEach(cls => {
+        if (cls.utcStart === undefined) return;
+        const ls = utcToLocal(cls.utcStart, londonOff);
+        const le = utcToLocal(cls.utcEnd, londonOff);
+        const ev = document.createElement('div');
+        ev.className = 'class-block';
+        ev.style.left = pct(ls) + '%';
+        ev.style.width = pct(le > ls ? le - ls : (24 - ls + le)) + '%';
+        ev.textContent = SUBJECTS[lang]?.[cls.subject] || cls.subject;
+        ev.title = `${cls.subject} (${cls.teacher}) ${fmtH(ls)} – ${fmtH(le)}`;
+        strip.appendChild(ev);
+    });
+
+    row.appendChild(strip);
+    return row;
+}
+
 /* ── Render: all rows ─────────────────────────────────────────────── */
 let _renderGen = 0;
 async function renderAll() {
+    _syncAliases();
     const gen = ++_renderGen;
     const c = $('#rows');
     const sc = $('#tl-scroll'), pos = sc?.scrollLeft || 0;
@@ -1421,12 +1528,16 @@ async function renderAll() {
     if (gen !== _renderGen) return;
     if (done >= total) hideLoader();
     results.forEach(r => { if (r.status === 'fulfilled' && r.value) c.appendChild(r.value); });
+    // Classes row (inline timeline)
+    const classesRow = renderClassesRow();
+    if (classesRow) c.appendChild(classesRow);
     if (sc) sc.scrollLeft = pos;
     updateOverlayH();
     updateNow();
     updateSel();
     checkConflicts();
     renderToggles();
+    _writeAliases();
 }
 
 function updateOverlayH() {
@@ -1553,13 +1664,13 @@ function checkConflicts() {
                 endU = (pd.utc[name] + (FALLBACK_DUR[name] || 0.5)) % 24;
             }
             // Convert end from UTC to local
-            let endL = (endU + pd.off + 24) % 24;
+            let endL = utcToLocal(endU, pd.off);
 
             const overlaps = endL < localH
                 ? (s < endL || e > localH)   // block wraps midnight
                 : (s < endL && e > localH);  // normal case
 
-            if (overlaps) cf.push({ city:city.name, prayer:name });
+            if (overlaps) cf.push({ city:getCityName(city), prayer:name });
         });
     }
 
@@ -1586,7 +1697,7 @@ function checkConflicts() {
 function tickClocks() {
     $$('.city-clock').forEach(el => {
         const tz = el.dataset.tz;
-        if (tz) el.textContent = new Date().toLocaleTimeString('en-US', {timeZone:tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
+        if (tz) el.textContent = new Date().toLocaleTimeString(getLocale(), {timeZone:tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
     });
     updateNow();
     updateCD();
@@ -1603,9 +1714,9 @@ function updateHeaderDate() {
     const today = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
     if (today === _lastDate) return;
     _lastDate = today;
-    const greg = new Date().toLocaleDateString('en-US', {timeZone: tz, weekday:'short', year:'numeric', month:'short', day:'numeric'});
+    const greg = new Date().toLocaleDateString(getLocale(), {timeZone: tz, weekday:'short', year:'numeric', month:'short', day:'numeric'});
     let hijri = '';
-    try { hijri = ' · ' + new Date().toLocaleDateString('en-u-ca-islamic-umalqura', {timeZone: tz, day:'numeric', month:'long', year:'numeric'}); } catch {}
+    try { hijri = ' · ' + new Date().toLocaleDateString(lang === 'ar' ? 'ar-u-ca-islamic-umalqura' : 'en-u-ca-islamic-umalqura', {timeZone: tz, day:'numeric', month:'long', year:'numeric'}); } catch {}
     const d = $('#header-date');
     if (d) d.textContent = greg + hijri;
 }
@@ -1737,17 +1848,6 @@ _cachedLabelW = parseFloat(getComputedStyle(document.documentElement).getPropert
 function getInnerW() { return _cachedInnerW || (_cachedInnerW = $('#tl-inner')?.offsetWidth || 1000); }
 
 /* ── Enrolled class schedule ─────────────────────────────────────── */
-function getOffsetForDate(tz, year, month, day) {
-    try {
-        const parts = new Intl.DateTimeFormat('en-US', {
-            timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit',
-            hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'
-        }).formatToParts(new Date(Date.UTC(year, month-1, day, 12, 0, 0)));
-        const m = Object.fromEntries(parts.map(p => [p.type, p.value]));
-        const asUTC = Date.UTC(+m.year, +m.month-1, +m.day, +m.hour, +m.minute, +m.second);
-        return Math.round(((asUTC - Date.UTC(year, month-1, day, 12, 0, 0)) / 36e5) * 100) / 100;
-    } catch { return 0; }
-}
 function compCls(cls) {
     const [h, m]    = cls.start.split(':').map(Number);
     const [eh, em]  = cls.end.split(':').map(Number);
@@ -1768,12 +1868,12 @@ function compCls(cls) {
     const classDate = new Date(Date.UTC(lp.year, lp.month - 1, lp.day + d));
     const londonOff = getOffsetForDate('Europe/London', classDate.getUTCFullYear(), classDate.getUTCMonth()+1, classDate.getUTCDate());
     // Class times are in London local time, convert to UTC
-    const utcStartH = h + m / 60 - londonOff;
-    const utcEndH = eh + em / 60 - londonOff;
-    const ts = Date.UTC(lp.year, lp.month - 1, lp.day + d, 0, 0) + utcStartH * 3600000;
+    const utcStartH = localToUTC(h + m / 60, londonOff);
+    const utcEndH = localToUTC(eh + em / 60, londonOff);
+    const ts = Date.UTC(lp.year, lp.month - 1, lp.day + d, 0, 0) + (h + m / 60 - londonOff) * 3600000;
     return {
-        utcStart: ((utcStartH % 24) + 24) % 24,
-        utcEnd: ((utcEndH % 24) + 24) % 24,
+        utcStart: utcStartH,
+        utcEnd: utcEndH,
         ts, subject:cls.subject, teacher:cls.teacher
     };
 }
@@ -1918,6 +2018,7 @@ document.addEventListener('keydown', e => {
     $('#privacy-ok').onclick  = () => { localStorage.setItem('wp_privacy_ok','1'); banner.classList.add('hidden'); };
     $('#privacy-link').onclick = e => { e.preventDefault(); openM('#m-privacy'); };
 $('#footer-privacy')?.addEventListener('click', e => { e.preventDefault(); openM('#m-privacy'); });
+$('#meeting-links-toggle')?.addEventListener('click', () => { const dd = $('#meeting-links-dropdown'); if (dd) dd.classList.toggle('hidden'); });
     // Auto-dismiss after 5 seconds
     setTimeout(() => { if (!localStorage.getItem('wp_privacy_ok')) { banner.classList.add('hidden'); } }, 5000);
 })();
@@ -2015,8 +2116,10 @@ function exportICal() {
     // Get today's date in user's timezone to avoid midnight boundary issues
     const tzParts = new Intl.DateTimeFormat('en-US', { timeZone: userTz, year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(now);
     const tzMap = Object.fromEntries(tzParts.map(p => [p.type, p.value]));
-    const meetingStart = Date.UTC(+tzMap.year, +tzMap.month-1, +tzMap.day, startH - userOff, startM);
-    const meetingEnd = Date.UTC(+tzMap.year, +tzMap.month-1, +tzMap.day, endH - userOff, endM);
+    const meetingStartH = localToUTC(startH + startM / 60, userOff);
+    const meetingEndH = localToUTC(endH + endM / 60, userOff);
+    const meetingStart = Date.UTC(+tzMap.year, +tzMap.month-1, +tzMap.day, Math.floor(meetingStartH), Math.round((meetingStartH % 1) * 60));
+    const meetingEnd = Date.UTC(+tzMap.year, +tzMap.month-1, +tzMap.day, Math.floor(meetingEndH), Math.round((meetingEndH % 1) * 60));
     lines.push(
         'BEGIN:VEVENT',
         'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z',
@@ -2121,7 +2224,7 @@ function renderPopular() {
     $('#popular-chips').innerHTML = '';
     chips.forEach(c => {
         const sp = document.createElement('span'); sp.className = 'chip'; sp.dataset.id = c.id;
-        sp.textContent = '+ ' + c.name;
+        sp.textContent = '+ ' + getCityName(c);
         sp.onclick = () => addCity(c);
         $('#popular-chips').appendChild(sp);
     });
@@ -2178,7 +2281,7 @@ $('#city-search').oninput = () => {
         try {
             const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&featuretype=city&addressdetails=1&format=json&limit=8`;
             _geoAbort = new AbortController();
-            const data = await (await fetch(url, {signal:_geoAbort.signal, headers:{'Accept-Language':'en'}})).json();
+            const data = await (await fetch(url, {signal:_geoAbort.signal, headers:{'Accept-Language': lang === 'ar' ? 'ar' : 'en'}})).json();
             const results = [], seen = new Set(local.map(c=>c.id));
             data.forEach(d => {
                 const name    = sanitizeName(d.address?.city || d.address?.town || d.address?.village || d.name || '').trim();
@@ -2211,7 +2314,7 @@ function renderSearchItems(items, sr, showCountry=false) {
         div.className = 'search-item';
         div.setAttribute('role', 'listitem');
         const nameEl = document.createElement('span');
-        nameEl.textContent = c.name;
+        nameEl.textContent = getCityName(c);
         if (c.country && showCountry) {
             const cc = document.createElement('span'); cc.className = 'city-country';
             cc.textContent = ' — ' + c.country; nameEl.appendChild(cc);
@@ -2253,7 +2356,7 @@ function requestLocation() {
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
             userCity = { id:'user', name:'You', tz, lat:pos.coords.latitude, lng:pos.coords.longitude, method:3, isUser:true };
             localStorage.setItem('wp_u', JSON.stringify({ id:userCity.id, name:userCity.name, tz:userCity.tz, lat:Math.round(userCity.lat*10)/10, lng:Math.round(userCity.lng*10)/10, method:userCity.method, isUser:userCity.isUser }));
-            if (locBtn) locBtn.style.display = 'none';
+            if (locBtn) { locBtn.style.opacity = '1'; locBtn.style.borderColor = 'var(--accent)'; locBtn.style.color = 'var(--accent)'; locBtn.title = t('locEnabled'); locBtn.setAttribute('aria-label', t('locEnabled')); }
             renderAll();
         },
         () => { if (locBtn) locBtn.style.opacity = '1'; toast(t('locationDenied')); },
@@ -2351,6 +2454,11 @@ detectUser();
 // Show location popup after detectUser has made the button visible
 if (!localStorage.getItem('wp_loc_prompted') && !localStorage.getItem('wp_u')) {
     setTimeout(() => showLocCoach(), 700);
+}
+
+// PWA manifest registration
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 function positionLocCoach() {

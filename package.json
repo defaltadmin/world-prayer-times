@@ -1,12 +1,13 @@
 {
   "name": "world-prayer-times",
-  "version": "1.17.0",
+  "version": "1.21.0",
   "private": true,
   "scripts": {
     "dev": "wrangler pages dev .",
     "deploy": "wrangler pages deploy . --project-name world-prayer-times"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "wrangler": "^3.0.0"
   }
 }

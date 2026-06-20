@@ -2,6 +2,39 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.21.0] — 2026-06-20
+
+### Fixed
+- **Removed bookmarks** — Removed entire bookmark/save-window feature (not useful enough, would confuse users).
+- **Donate in footer** — Moved donation link from floating popup to inline footer section (always visible, no dismissal needed). Links to LaunchGood campaign.
+- **Privacy policy visible** — Footer privacy link now uses accent color + font-weight 600 so it's clearly visible (was muted color, easy to miss).
+- **Meeting links dropdown** — Replaced Google Doc link with expandable dropdown showing per-class Microsoft Teams join links (Adab, Aqaaid, Arabic, Fiqh, Hadith, Seerah, Tafseer).
+
+## [1.20.0] — 2026-06-20
+
+### Added
+- **Multiple meeting slots (bookmarks)** — Save and compare multiple safe windows on the timeline. Click the bookmark icon (flag) in the status bar to save the current selection. Bookmarked windows appear as translucent cyan bands on the ruler. Click any band to jump to that window. Delete with the × button on hover. Persisted to localStorage. Prevents duplicate saves at the same position. Shows count on the icon when bookmarks exist.
+
+## [1.19.0] — 2026-06-20
+
+### Added
+- **PWA support** — Added `manifest.json` with app name, theme, and icons. Added `sw.js` service worker with cache-first strategy for static assets and network-first for API calls. Added `<link rel="manifest">` and Apple meta tags. CSP updated with `worker-src 'self'` and `manifest-src 'self'`.
+- **Donation popup** — Floating corner popup linking to LaunchGood campaign (Keep Quran Classes Free for 500 Students). Dismissible, auto-hides after tap.
+- **Inline classes row** — Dedicated "Classes" row at the bottom of the timeline showing enrolled classes for today as teal blocks. Uses London offset for accurate positioning. Shows class count and subject names. Only appears when classes are enrolled and today has scheduled classes.
+
+### Fixed
+- **Location icon stays visible** — After enabling geolocation, the location button now stays visible with accent color and "Location enabled" title instead of disappearing.
+- **Arabic: city names** — Added `nameAr` to all 13 city presets. Added `getCityName()` helper. City labels, popular chips, search results, and conflict badges now show Arabic names when `lang='ar'`.
+- **Arabic: Nominatim search** — Geocoding API `Accept-Language` header now switches between `'ar'` and `'en'` based on current language setting.
+- **Arabic: date/time formatting** — Header date, city clocks, and Hijri date now use `'ar-EG'` locale when language is set to Arabic (was hardcoded `'en-US'`).
+
+## [1.18.0] — 2026-06-20
+
+### Refactored
+- **Consolidated UTC conversion** — Extracted `localToUTC()` and `utcToLocal()` utilities. Replaced 3 duplicated inline offset-subtraction patterns in `fetchPrayer()`, `compCls()`, and `exportICal()` with shared functions. Also replaced manual `(utc + offset + 24) % 24` patterns in `checkConflicts()` and `renderRow()`. Single source of truth for timezone math.
+- **Consolidated `getOffsetForDate()`** — Moved from class-schedule section to time utilities section (alongside `getOffsetHours()` and `getOff()`). Same function, same code, better discoverability.
+- **State object (`S`)** — All mutable state (cities, cache, selStart, selDur, userCity, enrolled, lang, alarm, etc.) collected into a single `S` object. Added `setState()` for controlled mutation. Existing `let` aliases preserved for backward compatibility, synced via `_syncAliases()`/`_writeAliases()` at render boundaries.
+
 ## [1.17.1] — 2026-06-19
 
 ### Fixed

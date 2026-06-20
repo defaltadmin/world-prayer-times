@@ -1,0 +1,22 @@
+{
+  "name": "Prayer Times – Coordinate Salah Across Cities",
+  "short_name": "Prayer Times",
+  "description": "Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#091117",
+  "theme_color": "#091117",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='38' fill='%23091117'/%3E%3Ccircle cx='96' cy='67' r='24' fill='none' stroke='%232dd4bf' stroke-width='5'/%3E%3Cpath d='M96 91v-54' stroke='%232dd4bf' stroke-width='5'/%3E%3Cpath d='M96 91 l36 40 H60z' fill='%232dd4bf' opacity='0.3'/%3E%3Cpath d='M48 134 Q96 110 144 134' fill='none' stroke='%232dd4bf' stroke-width='3.5'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='102' fill='%23091117'/%3E%3Ccircle cx='256' cy='178' r='64' fill='none' stroke='%232dd4bf' stroke-width='12'/%3E%3Cpath d='M256 242v-144' stroke='%232dd4bf' stroke-width='12'/%3E%3Cpath d='M256 242 l96 108 H160z' fill='%232dd4bf' opacity='0.3'/%3E%3Cpath d='M128 358 Q256 294 384 358' fill='none' stroke='%232dd4bf' stroke-width='9'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
