@@ -2173,7 +2173,7 @@ function unlockCourse() {
     const dd = $('#meeting-links-dropdown');
     if (toggle) toggle.classList.remove('hidden');
     if (dd && !_meetingLinks) {
-        fetch(LINKS_API, { headers: { 'X-Course-Pw': COURSE_PW_CHECK } })
+        fetch(LINKS_API, { headers: { 'X-Course-Pw': val } })
             .then(r => r.json())
             .then(links => {
                 if (!Array.isArray(links)) return;
