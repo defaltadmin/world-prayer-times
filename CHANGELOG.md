@@ -2,6 +2,17 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.22.0] — 2026-06-20
+
+### Fixed
+- **CRITICAL: Removed `S`/alias dual-state system** — Reverted to plain `let` globals. The `S` object + `_syncAliases()`/`_writeAliases()` pattern introduced a silent correctness bug: when `renderAll()` is async, mutations to aliases mid-flight get overwritten by stale `S` values on the next render cycle. Plain globals were never the actual problem.
+- **`renderClassesRow()` London offset** — Fixed to use `Intl.DateTimeFormat` for London's calendar date instead of UTC date, preventing wrong DST offset around BST/GMT transitions.
+- **Meeting links toggle accessibility** — Added `role="button"`, `tabindex="0"`, `aria-expanded`, `aria-controls`, and `Enter`/`Space` keyboard handler. Added `role="group" aria-label` to the dropdown container.
+- **Removed `sweepLogo()` perpetual RAF** — Logo border-glow is now static (no animation loop). Eliminates a never-ending `requestAnimationFrame` chain.
+- **Mobile touch targets** — Added `.info-link` and `#meeting-links-toggle` to the `@media (pointer: coarse)` selector for 44px minimum touch targets.
+- **City name overflow** — Added `overflow:hidden; text-overflow:ellipsis` on mobile for long Arabic city names.
+- **Meeting links styling** — Replaced inline `style.cssText` with proper CSS classes (`.meeting-link-item`, `.meeting-link-name`, `.meeting-link-join`).
+
 ## [1.21.0] — 2026-06-20
 
 ### Fixed

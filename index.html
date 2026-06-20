@@ -427,6 +427,15 @@
         .classes-row .class-block:hover { background: rgba(45,212,191,0.28); }
         .classes-row .class-label .city-name { color: var(--accent); font-weight: 700; }
 
+        /* ── Meeting links dropdown ───────────────────────── */
+        .meeting-link-item {
+            margin: 0; padding: 8px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 10px;
+            border-radius: 6px; transition: background 0.15s;
+        }
+        .meeting-link-item:hover { background: rgba(45,212,191,0.06); }
+        .meeting-link-name { color: var(--accent); font-weight: 600; min-width: 60px; }
+        .meeting-link-join { color: var(--muted); }
+
         /* ── Selection overlay ───────────────────────────── */
         .sel-overlay {
             position: absolute; top: 0; bottom: 0; z-index: 10;
@@ -630,7 +639,7 @@
         #tl-scroll, .ruler, .tl-scroll { direction: ltr; }
         /* ── Coarse pointer touch targets ──────────────── */
         @media (pointer: coarse) {
-            .icon-btn, .btn, .chip, .modal-close, .chime-btn { min-height: 44px; min-width: 44px; }
+            .icon-btn, .btn, .chip, .modal-close, .chime-btn, .info-link, #meeting-links-toggle { min-height: 44px; min-width: 44px; }
         }
 
         /* ── Mobile ─────────────────────────────────────── */
@@ -640,7 +649,7 @@
             #fab-add { display: flex; }
             .glass { backdrop-filter: blur(12px) saturate(120%); -webkit-backdrop-filter: blur(12px) saturate(120%); }
             .city-label { padding: 6px 8px 6px 10px; }
-            .city-name { font-size: 0.78rem; }
+            .city-name { font-size: 0.78rem; overflow: hidden; text-overflow: ellipsis; }
             .city-clock { font-size: 0.68rem; }
             .city-offset { font-size: 0.5rem; }
             .header { padding: 6px 10px; }
@@ -843,15 +852,15 @@
             <a href="https://chat.whatsapp.com/LhyQf7mVW5BKwrsQHWQgZz" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><div class="info-link-text"><div class="info-link-title">Sannatayn (Men) – WhatsApp</div><div class="info-link-desc">Join the men's group chat</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
             <a href="https://chat.whatsapp.com/IFkpHOR1vzb59O9s7ZyR0E" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><div class="info-link-text"><div class="info-link-title">Tafseer (All) – WhatsApp</div><div class="info-link-desc">Men &amp; Women, 3:30–5:30 PM BST</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
             <a href="https://drive.google.com/file/d/18uQcfYNPOQDH6y3eLACfDvtrE-K5i9n8/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><div class="info-link-text"><div class="info-link-title">Timetable</div><div class="info-link-desc">View the full weekly schedule</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
-            <div class="info-link" style="cursor:pointer;" id="meeting-links-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg><div class="info-link-text"><div class="info-link-title">Meeting Links</div><div class="info-link-desc">Join your class on Teams</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
-            <div id="meeting-links-dropdown" class="hidden" style="display:flex;flex-direction:column;gap:4px;padding:4px 0 8px 24px;">
-                <a href="https://teams.microsoft.com/meet/399685477116000?p=8Oop946QAJ6k1hldIr" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Adab</span><span style="color:var(--muted);">Join here →</span></a>
-                <a href="https://teams.microsoft.com/meet/344566458555626?p=0l5ODY9VrcP16iLPlz" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Aqaaid</span><span style="color:var(--muted);">Join here →</span></a>
-                <a href="https://teams.microsoft.com/meet/389926319388991?p=SFAKAL79SzXfLtzZqR" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Arabic</span><span style="color:var(--muted);">Join here →</span></a>
-                <a href="https://teams.microsoft.com/meet/376573361182615?p=FvZ2OpK7bVSWldKWmO" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Fiqh</span><span style="color:var(--muted);">Join here →</span></a>
-                <a href="https://teams.microsoft.com/meet/385525245278270?p=hWEQMbzmDE2oHlrDPv" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Hadith</span><span style="color:var(--muted);">Join here →</span></a>
-                <a href="https://teams.microsoft.com/meet/377135747219007?p=NqTd0GWjViCL33VzvA" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Seerah</span><span style="color:var(--muted);">Join here →</span></a>
-                <a href="https://teams.microsoft.com/meet/369309171584275?p=9lA5Ggmd5KHtavSgwQ" target="_blank" rel="noopener noreferrer" class="info-link" style="margin:0;padding:6px 10px;font-size:0.72rem;"><span style="color:var(--accent);font-weight:600;min-width:60px;">Tafseer</span><span style="color:var(--muted);">Join here →</span></a>
+            <div class="info-link" style="cursor:pointer;" id="meeting-links-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="meeting-links-dropdown"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg><div class="info-link-text"><div class="info-link-title">Meeting Links</div><div class="info-link-desc">Join your class on Teams</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+            <div id="meeting-links-dropdown" class="hidden" role="group" aria-label="Class meeting links" style="display:flex;flex-direction:column;gap:2px;padding:4px 0 8px 24px;">
+                <a href="https://teams.microsoft.com/meet/399685477116000?p=8Oop946QAJ6k1hldIr" target="_blank" rel="noopener noreferrer" class="info-link meeting-link-item"><span class="meeting-link-name">Adab</span><span class="meeting-link-join">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/344566458555626?p=0l5ODY9VrcP16iLPlz" target="_blank" rel="noopener noreferrer" class="info-link meeting-link-item"><span class="meeting-link-name">Aqaaid</span><span class="meeting-link-join">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/389926319388991?p=SFAKAL79SzXfLtzZqR" target="_blank" rel="noopener noreferrer" class="info-link meeting-link-item"><span class="meeting-link-name">Arabic</span><span class="meeting-link-join">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/376573361182615?p=FvZ2OpK7bVSWldKWmO" target="_blank" rel="noopener noreferrer" class="info-link meeting-link-item"><span class="meeting-link-name">Fiqh</span><span class="meeting-link-join">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/385525245278270?p=hWEQMbzmDE2oHlrDPv" target="_blank" rel="noopener noreferrer" class="info-link meeting-link-item"><span class="meeting-link-name">Hadith</span><span class="meeting-link-join">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/377135747219007?p=NqTd0GWjViCL33VzvA" target="_blank" rel="noopener noreferrer" class="info-link meeting-link-item"><span class="meeting-link-name">Seerah</span><span class="meeting-link-join">Join here →</span></a>
+                <a href="https://teams.microsoft.com/meet/369309171584275?p=9lA5Ggmd5KHtavSgwQ" target="_blank" rel="noopener noreferrer" class="info-link meeting-link-item"><span class="meeting-link-name">Tafseer</span><span class="meeting-link-join">Join here →</span></a>
             </div>
             <a href="https://docs.google.com/document/d/1G4wPSx5GS7tD57QExrB9thUjMnoY8T5JPiCtOuVlQLI/edit" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div class="info-link-text"><div class="info-link-title">Recording Links</div><div class="info-link-desc">Access past lesson recordings</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
             <div class="info-card" style="margin-top:12px;">
@@ -1040,30 +1049,16 @@ let _cachedLabelW = 140;
 function getLabelW() { return _cachedLabelW; }
 const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
 
-const S = {
-    cities: [...CITIES], cache: {}, selStart: 9, selDur: 1,
-    dragging: false, resL: false, resR: false, dragX: 0, dragSL: 0, dragSD: 0,
-    h24: false, dark: true, userCity: null,
-    enrolled: (() => { try { const p = JSON.parse(localStorage.getItem('wp_e2') || '[]'); return Array.isArray(p) ? p.filter(c => c && typeof c.start === 'string' && typeof c.end === 'string' && Number.isInteger(c.day)) : []; } catch { return []; } })(),
-    lang: localStorage.getItem('wp_l') || 'en',
-    alarm: localStorage.getItem('wp_a') || 'ting',
-};
-function setState(patch, doRender = true) { Object.assign(S, patch); if (doRender) renderAll(); }
-// Backward-compat aliases
-let cities, cache, selStart, selDur, dragging, resL, resR, dragX, dragSL, dragSD;
-let h24, dark, userCity, enrolled, lang, alarm;
-function _syncAliases() {
-    cities = S.cities; cache = S.cache; selStart = S.selStart; selDur = S.selDur;
-    dragging = S.dragging; resL = S.resL; resR = S.resR; dragX = S.dragX; dragSL = S.dragSL; dragSD = S.dragSD;
-    h24 = S.h24; dark = S.dark; userCity = S.userCity;
-    enrolled = S.enrolled; lang = S.lang; alarm = S.alarm;
-}
-function _writeAliases() {
-    S.cities = cities; S.cache = cache; S.selStart = selStart; S.selDur = selDur;
-    S.dragging = dragging; S.resL = resL; S.resR = resR; S.dragX = dragX; S.dragSL = dragSL; S.dragSD = dragSD;
-    S.h24 = h24; S.dark = dark; S.userCity = userCity;
-    S.enrolled = enrolled; S.lang = lang; S.alarm = alarm;
-}
+let cities = [...CITIES], cache = {}, selStart = 9, selDur = 1;
+let dragging = false, resL = false, resR = false, dragX = 0, dragSL = 0, dragSD = 0;
+let h24 = false, dark = true, userCity = null;
+let enrolled;
+try {
+    const parsed = JSON.parse(localStorage.getItem('wp_e2') || '[]');
+    enrolled = Array.isArray(parsed) ? parsed.filter(c => c && typeof c.start === 'string' && typeof c.end === 'string' && Number.isInteger(c.day)) : [];
+} catch { enrolled = []; }
+let lang = localStorage.getItem('wp_l') || 'en';
+let alarm = localStorage.getItem('wp_a') || 'ting';
 
 /* ── Sanitise geocoded city names (XSS prevention) ───────────────── */
 function sanitizeName(s) {
@@ -1488,8 +1483,9 @@ function renderClassesRow() {
     strip.style.cssText = 'flex:1;position:relative;background:var(--surface);';
 
     // Use London offset for class times (classes are defined in London time)
-    const londonOff = getOffsetForDate('Europe/London',
-        new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, new Date().getUTCDate());
+    const londonParts = new Intl.DateTimeFormat('en-US', { timeZone:'Europe/London', year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(new Date());
+    const lp = Object.fromEntries(londonParts.map(p => [p.type, p.value]));
+    const londonOff = getOffsetForDate('Europe/London', +lp.year, +lp.month, +lp.day);
 
     todayCls.forEach(cls => {
         if (cls.utcStart === undefined) return;
@@ -1511,7 +1507,6 @@ function renderClassesRow() {
 /* ── Render: all rows ─────────────────────────────────────────────── */
 let _renderGen = 0;
 async function renderAll() {
-    _syncAliases();
     const gen = ++_renderGen;
     const c = $('#rows');
     const sc = $('#tl-scroll'), pos = sc?.scrollLeft || 0;
@@ -1537,7 +1532,6 @@ async function renderAll() {
     updateSel();
     checkConflicts();
     renderToggles();
-    _writeAliases();
 }
 
 function updateOverlayH() {
@@ -2018,7 +2012,8 @@ document.addEventListener('keydown', e => {
     $('#privacy-ok').onclick  = () => { localStorage.setItem('wp_privacy_ok','1'); banner.classList.add('hidden'); };
     $('#privacy-link').onclick = e => { e.preventDefault(); openM('#m-privacy'); };
 $('#footer-privacy')?.addEventListener('click', e => { e.preventDefault(); openM('#m-privacy'); });
-$('#meeting-links-toggle')?.addEventListener('click', () => { const dd = $('#meeting-links-dropdown'); if (dd) dd.classList.toggle('hidden'); });
+$('#meeting-links-toggle')?.addEventListener('click', () => { const dd = $('#meeting-links-dropdown'); const btn = $('#meeting-links-toggle'); if (dd) { const open = dd.classList.toggle('hidden'); btn?.setAttribute('aria-expanded', !open); } });
+$('#meeting-links-toggle')?.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#meeting-links-toggle')?.click(); } });
     // Auto-dismiss after 5 seconds
     setTimeout(() => { if (!localStorage.getItem('wp_privacy_ok')) { banner.classList.add('hidden'); } }, 5000);
 })();
@@ -2595,20 +2590,13 @@ function hideLocCoach() { ['loc-overlay','loc-ring','location-popup'].forEach(id
             card.style.setProperty('--edge-proximity', '0');
         });
     });
-    // Animated sweep on logo
+    // Logo glow (static, no animation loop)
     const logo = $('.logo');
     if (logo) {
         logo.classList.add('border-glow');
         logo.style.setProperty('--cone-spread', '40');
-        let angle = 0;
-        function sweepLogo() {
-            if (document.hidden) { requestAnimationFrame(sweepLogo); return; }
-            angle = (angle + 1.5) % 360;
-            logo.style.setProperty('--cursor-angle', angle + 'deg');
-            logo.style.setProperty('--edge-proximity', '30');
-            requestAnimationFrame(sweepLogo);
-        }
-        sweepLogo();
+        logo.style.setProperty('--cursor-angle', '0deg');
+        logo.style.setProperty('--edge-proximity', '30');
     }
 })();
 
