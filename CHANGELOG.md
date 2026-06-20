@@ -2,6 +2,20 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.24.0] — 2026-06-20
+
+### Fixed
+- **Meeting links obfuscated** — URLs Base64-encoded with `name|url` format, decoded only after password unlock. Not unbreakable, but raises the bar above "view source." Uses DOM APIs instead of innerHTML for injection.
+- **Class countdown rolls forward** — After today's last class passes, countdown now shows next week's class instead of "No upcoming classes."
+- **SW network-first for navigation** — Service worker now uses network-first for page loads (`request.mode === 'navigate'`), cache-first for static assets only. Returning users always get fresh HTML.
+- **iOS auto-zoom prevention** — Inputs on mobile set to `font-size: 16px !important` in `@media (max-width: 768px)` to prevent Safari auto-zoom on focus.
+- **iPhone safe area** — Added `viewport-fit=cover` to meta tag, `env(safe-area-inset-*)` padding to header and footer. Content no longer renders under notch or home indicator.
+- **Intl perf** — `updateClsCountdown()` now runs every 10s instead of every 1s (was constructing multiple `Intl.DateTimeFormat` objects per second).
+- **Android pull-to-refresh** — Added `overscroll-behavior-y: contain` on `html` to prevent pull-to-refresh during vertical drag.
+- **Theme toggle label** — Button now shows the action ("Light" when dark, "Dark" when light) instead of current state.
+- **Multi-touch drag fix** — Tracks `touch.identifier` to prevent drag jumps when a second finger touches during selection bar drag.
+- **innerHTML → DOM APIs** — Meeting links dropdown built with `createElement`/`textContent` instead of string interpolation.
+
 ## [1.23.0] — 2026-06-20
 
 ### Fixed

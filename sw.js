@@ -11,6 +11,11 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
     const url = new URL(e.request.url);
+    // Network-first for navigation (always get fresh HTML)
+    if (e.request.mode === 'navigate') {
+        e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+        return;
+    }
     // Network-first for API calls and geocoding
     if (url.hostname === 'api.aladhan.com' || url.hostname === 'nominatim.openstreetmap.org') {
         e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));

@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <title>Prayer Times – Coordinate Salah Across Cities</title>
     <meta name="description" content="Coordinate prayer times across cities worldwide. Visual timeline with conflict detection for scheduling meetings around Salah.">
     <meta name="theme-color" content="#0a0f1e">
@@ -55,7 +55,7 @@
             --safe: #059669; --danger: #dc2626;
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
+        html { scroll-behavior: smooth; overscroll-behavior-y: contain; }
         body {
             font-family: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
             background: var(--surface); color: var(--text);
@@ -637,6 +637,9 @@
         }
         /* ── RTL: force timeline LTR ────────────────────── */
         #tl-scroll, .ruler, .tl-scroll { direction: ltr; }
+        /* ── Safe area (iPhone notch/home indicator) ────── */
+        .header { padding-top: max(8px, env(safe-area-inset-top)); }
+        footer { padding-bottom: max(12px, env(safe-area-inset-bottom)); padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
         /* ── Coarse pointer touch targets ──────────────── */
         @media (pointer: coarse) {
             .icon-btn, .btn, .chip, .modal-close, .chime-btn, .info-link, #meeting-links-toggle { min-height: 44px; min-width: 44px; }
@@ -660,6 +663,8 @@
             .sel-handle { width: 44px; height: 20px; }
             .remove-btn { width: 44px; height: 44px; opacity: 0.5; }
             .prayer-block { min-width: 44px; }
+            /* Prevent iOS auto-zoom on input focus */
+            .pw-input, .search-input, #lang-sel, #alarm-sel, #alarm-vol { font-size: 16px !important; }
         }
         /* ── v1.16 overhaul additions ───────────────────────────── */
         .grid-line { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dashed rgba(136,146,160,0.10); z-index: 1; pointer-events: none; }
@@ -1016,15 +1021,17 @@ const CLASSES=[
     {day:4,start:'18:30',end:'19:30',subject:'Arabic',  teacher:'Sheikh Abdelaziz'},
 ];
 
-const MEETING_LINKS = [
-    { name: 'Adab',    url: 'https://teams.microsoft.com/meet/399685477116000?p=8Oop946QAJ6k1hldIr' },
-    { name: 'Aqaaid',  url: 'https://teams.microsoft.com/meet/344566458555626?p=0l5ODY9VrcP16iLPlz' },
-    { name: 'Arabic',  url: 'https://teams.microsoft.com/meet/389926319388991?p=SFAKAL79SzXfLtzZqR' },
-    { name: 'Fiqh',    url: 'https://teams.microsoft.com/meet/376573361182615?p=FvZ2OpK7bVSWldKWmO' },
-    { name: 'Hadith',  url: 'https://teams.microsoft.com/meet/385525245278270?p=hWEQMbzmDE2oHlrDPv' },
-    { name: 'Seerah',  url: 'https://teams.microsoft.com/meet/377135747219007?p=NqTd0GWjViCL33VzvA' },
-    { name: 'Tafseer', url: 'https://teams.microsoft.com/meet/369309171584275?p=9lA5Ggmd5KHtavSgwQ' },
+// Encoded meeting links — decoded only after password unlock (obfuscation, not security)
+const _mlEnc = [
+    'QWRhYnxodHRwczovL3RlYW1zLm1pY3Jvc29mdC5jb20vbWVldC8zOTk2ODU0NzcxMTYwMDA/cD04T29wOTQ2UUFKNmsxaExkSXI=',
+    'QXFhYWlkfGh0dHBzOi8vdGVhbXMubWljcm9zb2Z0LmNvbS9tZWV0LzM0NDU2NjQ1ODU1NTYyNj9wPTBsNU9EWUk5VnJjUDFHaUxQbHo=',
+    'QXJhYmljfGh0dHBzOi8vdGVhbXMubWljcm9zb2Z0LmNvbS9tZWV0LzM4OTkyNjMxOTM4ODk5MT9wPVNGQUtBTDc5U3pYZkx0elpxUg==',
+    'RmlxaHxodHRwczovL3RlYW1zLm1pY3Jvc29mdC5jb20vbWVldC8zNzY1NzMzNjExODI2MTU/cD1GdloyT3BLN2JWU1dsZEtXbU8=',
+    'SGFkaXRofGh0dHBzOi8vdGVhbXMubWljcm9zb2Z0LmNvbS9tZWV0LzM4NTUyNTI0NTI3ODI3MD9wPWhXRVFNbXpNRDFvSGxyRFB2',
+    'U2VlcmFofGh0dHBzOi8vdGVhbXMubWljcm9zb2Z0LmNvbS9tZWV0LzM3NzEzNTc0NzIxOTAwNz9wPk5xVGQwR1dqVmlDTDMzVnp2QQ==',
+    'VGFmc2VlcnxodHRwczovL3RlYW1zLm1pY3Jvc29mdC5jb20vbWVldC8zNjkzMDE3NzE1ODQyNzU/cDk5bEE1R2dtNEtIdGF2U2d3UQ==',
 ];
+function _decodeML() { return _mlEnc.map(e => { const p = atob(e).split('|'); return { name: p[0], url: p[1] }; }); }
 
 /*
  * Prayer window definitions: how wide each prayer block is on the timeline.
@@ -1052,7 +1059,7 @@ function getLabelW() { return _cachedLabelW; }
 const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
 
 let cities = [...CITIES], cache = {}, selStart = 9, selDur = 1;
-let dragging = false, resL = false, resR = false, dragX = 0, dragSL = 0, dragSD = 0;
+let dragging = false, resL = false, resR = false, dragX = 0, dragSL = 0, dragSD = 0, dragId = null;
 let h24 = false, dark = true, userCity = null;
 let enrolled;
 try {
@@ -1137,7 +1144,7 @@ function updateUI() {
     if (sl[2]) sl[2].textContent = t('language');
     if (sl[3]) sl[3].textContent = t('alarmSound');
     const htBtn = $('#btn-howto'); if (htBtn) htBtn.textContent = t('howToUse');
-    const themeBtn = $('#theme-btn'); if (themeBtn) themeBtn.textContent = dark ? t('dark') : t('light');
+    const themeBtn = $('#theme-btn'); if (themeBtn) themeBtn.textContent = dark ? t('light') : t('dark');
     // Help modal
     const hlpt = $('#m-help .modal-title'); if (hlpt) hlpt.textContent = t('howToUse');
     // Add city modal
@@ -1690,14 +1697,16 @@ function checkConflicts() {
 }
 
 /* ── Live clocks ──────────────────────────────────────────────────── */
+let _tickCount = 0;
 function tickClocks() {
+    _tickCount++;
     $$('.city-clock').forEach(el => {
         const tz = el.dataset.tz;
         if (tz) el.textContent = new Date().toLocaleTimeString(getLocale(), {timeZone:tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!h24});
     });
     updateNow();
     updateCD();
-    updateClsCountdown();
+    if (_tickCount % 10 === 0) updateClsCountdown(); // every 10s, not every 1s
     const tz = userCity?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
     const m  = getLocalHours(tz);
     const rnow = $('#ruler-now');
@@ -1752,13 +1761,18 @@ function startD(e, isL=false, isR=false) {
     dragging = true; resL = isL; resR = isR;
     $('#sel').classList.add('dragging');
     dragX  = e.touches ? e.touches[0].clientX : e.clientX;
+    dragId = e.touches ? e.touches[0].identifier : null;
     dragSL = selStart; dragSD = selDur;
     document.body.style.cursor = isL || isR ? 'ew-resize' : 'grabbing';
     e.preventDefault(); e.stopPropagation();
 }
 function moveD(e) {
     if (!dragging) return;
-    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    let cx;
+    if (e.touches) {
+        const t = dragId !== null ? Array.from(e.touches).find(t => t.identifier === dragId) : e.touches[0];
+        cx = t ? t.clientX : dragX;
+    } else { cx = e.clientX; }
     const dh = ((cx - dragX) / tlW()) * 24;
     if (resL) {
         let ns = dragSL + dh, ne = dragSL + dragSD;
@@ -1780,6 +1794,7 @@ function moveD(e) {
 function endD() {
     if (!dragging) return;
     dragging = resL = resR = false;
+    dragId = null;
     $('#sel').classList.remove('dragging');
     document.body.style.cursor = '';
     selStart = Math.round(selStart * 4) / 4;
@@ -1867,10 +1882,12 @@ function compCls(cls) {
     const utcStartH = localToUTC(h + m / 60, londonOff);
     const utcEndH = localToUTC(eh + em / 60, londonOff);
     const ts = Date.UTC(lp.year, lp.month - 1, lp.day + d, 0, 0) + (h + m / 60 - londonOff) * 3600000;
+    // If class already passed this week, roll to next week
+    const finalTs = ts < Date.now() - 60000 ? ts + 7 * 86400000 : ts;
     return {
         utcStart: utcStartH,
         utcEnd: utcEndH,
-        ts, subject:cls.subject, teacher:cls.teacher
+        ts: finalTs, subject:cls.subject, teacher:cls.teacher
     };
 }
 function updateEnrolled() {
@@ -2036,7 +2053,7 @@ $('#theme-btn')?.addEventListener('click', () => {
     if (window._dotGridRefreshAccent) window._dotGridRefreshAccent();
     updateUI();
 });
-$('#theme-btn') && ($('#theme-btn').textContent = dark ? t('dark') : t('light'));
+$('#theme-btn') && ($('#theme-btn').textContent = dark ? t('light') : t('dark'));
 
 const fmtBtn = $('#fmt-btn');
 if (fmtBtn) {
@@ -2159,14 +2176,20 @@ function unlockCourse() {
     sessionStorage.setItem('wp_course','1');
     $('#course-locked-view').style.display = 'none';
     $('#course-unlocked-view').classList.add('unlocked');
-    // Inject meeting links (not in initial HTML to prevent source-view access)
+    // Inject meeting links via DOM APIs (decoded from obfuscated source)
     const toggle = $('#meeting-links-toggle');
     const dd = $('#meeting-links-dropdown');
     if (toggle) toggle.classList.remove('hidden');
     if (dd && !dd.dataset.injected) {
-        dd.innerHTML = MEETING_LINKS.map(l =>
-            `<a href="${l.url}" target="_blank" rel="noopener noreferrer" class="info-link meeting-link-item"><span class="meeting-link-name">${l.name}</span><span class="meeting-link-join">Join here →</span></a>`
-        ).join('');
+        _decodeML().forEach(l => {
+            const a = document.createElement('a');
+            a.href = l.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+            a.className = 'info-link meeting-link-item';
+            const nm = document.createElement('span'); nm.className = 'meeting-link-name'; nm.textContent = l.name;
+            const jn = document.createElement('span'); jn.className = 'meeting-link-join'; jn.textContent = 'Join here →';
+            a.appendChild(nm); a.appendChild(jn);
+            dd.appendChild(a);
+        });
         dd.dataset.injected = '1';
     }
 }
