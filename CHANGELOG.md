@@ -2,6 +2,11 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.25.0] — 2026-06-21
+
+### Security
+- **Meeting links served from Cloudflare Worker** — URLs are no longer in the frontend source code at all. A Worker at `prayer-times-links.*.workers.dev/api/links` returns the links as JSON only when the correct password hash is sent via `X-Course-Pw` header. Frontend fetches on unlock, clears on lock. Source viewers see no meeting links regardless of view-source, DevTools, or console access. Requires: deploy `worker/` directory with `wrangler deploy`, then update `LINKS_API` constant in `index.html` with the Worker URL.
+
 ## [1.24.0] — 2026-06-20
 
 ### Fixed

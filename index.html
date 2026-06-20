@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Prayer Times">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org; img-src 'self' data: blob:; worker-src 'self'; manifest-src 'self'; base-uri 'self'; upgrade-insecure-requests;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org https://prayer-times-links.*.workers.dev; img-src 'self' data: blob:; worker-src 'self'; manifest-src 'self'; base-uri 'self'; upgrade-insecure-requests;">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -1021,17 +1021,9 @@ const CLASSES=[
     {day:4,start:'18:30',end:'19:30',subject:'Arabic',  teacher:'Sheikh Abdelaziz'},
 ];
 
-// Encoded meeting links — decoded only after password unlock (obfuscation, not security)
-const _mlEnc = [
-    'QWRhYnxodHRwczovL3RlYW1zLm1pY3Jvc29mdC5jb20vbWVldC8zOTk2ODU0NzcxMTYwMDA/cD04T29wOTQ2UUFKNmsxaExkSXI=',
-    'QXFhYWlkfGh0dHBzOi8vdGVhbXMubWljcm9zb2Z0LmNvbS9tZWV0LzM0NDU2NjQ1ODU1NTYyNj9wPTBsNU9EWUk5VnJjUDFHaUxQbHo=',
-    'QXJhYmljfGh0dHBzOi8vdGVhbXMubWljcm9zb2Z0LmNvbS9tZWV0LzM4OTkyNjMxOTM4ODk5MT9wPVNGQUtBTDc5U3pYZkx0elpxUg==',
-    'RmlxaHxodHRwczovL3RlYW1zLm1pY3Jvc29mdC5jb20vbWVldC8zNzY1NzMzNjExODI2MTU/cD1GdloyT3BLN2JWU1dsZEtXbU8=',
-    'SGFkaXRofGh0dHBzOi8vdGVhbXMubWljcm9zb2Z0LmNvbS9tZWV0LzM4NTUyNTI0NTI3ODI3MD9wPWhXRVFNbXpNRDFvSGxyRFB2',
-    'U2VlcmFofGh0dHBzOi8vdGVhbXMubWljcm9zb2Z0LmNvbS9tZWV0LzM3NzEzNTc0NzIxOTAwNz9wPk5xVGQwR1dqVmlDTDMzVnp2QQ==',
-    'VGFmc2VlcnxodHRwczovL3RlYW1zLm1pY3Jvc29mdC5jb20vbWVldC8zNjkzMDE3NzE1ODQyNzU/cDk5bEE1R2dtNEtIdGF2U2d3UQ==',
-];
-function _decodeML() { return _mlEnc.map(e => { const p = atob(e).split('|'); return { name: p[0], url: p[1] }; }); }
+// Meeting links — fetched from Cloudflare Worker after password unlock
+const LINKS_API = 'https://prayer-times-links.{ACCOUNT_ID}.workers.dev/api/links';
+let _meetingLinks = null;
 
 /*
  * Prayer window definitions: how wide each prayer block is on the timeline.
@@ -2176,21 +2168,27 @@ function unlockCourse() {
     sessionStorage.setItem('wp_course','1');
     $('#course-locked-view').style.display = 'none';
     $('#course-unlocked-view').classList.add('unlocked');
-    // Inject meeting links via DOM APIs (decoded from obfuscated source)
+    // Fetch meeting links from Worker API (authenticated)
     const toggle = $('#meeting-links-toggle');
     const dd = $('#meeting-links-dropdown');
     if (toggle) toggle.classList.remove('hidden');
-    if (dd && !dd.dataset.injected) {
-        _decodeML().forEach(l => {
-            const a = document.createElement('a');
-            a.href = l.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-            a.className = 'info-link meeting-link-item';
-            const nm = document.createElement('span'); nm.className = 'meeting-link-name'; nm.textContent = l.name;
-            const jn = document.createElement('span'); jn.className = 'meeting-link-join'; jn.textContent = 'Join here →';
-            a.appendChild(nm); a.appendChild(jn);
-            dd.appendChild(a);
-        });
-        dd.dataset.injected = '1';
+    if (dd && !_meetingLinks) {
+        fetch(LINKS_API, { headers: { 'X-Course-Pw': COURSE_PW_CHECK } })
+            .then(r => r.json())
+            .then(links => {
+                if (!Array.isArray(links)) return;
+                _meetingLinks = links;
+                links.forEach(l => {
+                    const a = document.createElement('a');
+                    a.href = l.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+                    a.className = 'info-link meeting-link-item';
+                    const nm = document.createElement('span'); nm.className = 'meeting-link-name'; nm.textContent = l.name;
+                    const jn = document.createElement('span'); jn.className = 'meeting-link-join'; jn.textContent = 'Join here →';
+                    a.appendChild(nm); a.appendChild(jn);
+                    dd.appendChild(a);
+                });
+            })
+            .catch(() => {});
     }
 }
 function lockCourse() {
@@ -2199,11 +2197,12 @@ function lockCourse() {
     $('#course-unlocked-view').classList.remove('unlocked');
     $('#course-pw-input').value = '';
     if ($('#course-pw-hint')) $('#course-pw-hint').textContent = '';
-    // Clear meeting links from DOM
+    // Clear meeting links from DOM and memory
     const toggle = $('#meeting-links-toggle');
     const dd = $('#meeting-links-dropdown');
     if (toggle) { toggle.classList.add('hidden'); toggle.setAttribute('aria-expanded', 'false'); }
-    if (dd) { dd.innerHTML = ''; dd.classList.add('hidden'); delete dd.dataset.injected; }
+    if (dd) { dd.innerHTML = ''; dd.classList.add('hidden'); }
+    _meetingLinks = null;
 }
 function attemptUnlock() {
     const val = $('#course-pw-input').value.trim();
