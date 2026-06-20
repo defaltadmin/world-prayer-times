@@ -1,6 +1,6 @@
 # World Prayer Times — Full Context
 
-**Version:** 1.21.0 | **Live:** https://prayer.mscarabia.com | **Stack:** Single-file vanilla JS, Aladhan API, Nominatim, Cloudflare Pages
+**Version:** 1.23.0 | **Live:** https://prayer.mscarabia.com | **Stack:** Single-file vanilla JS, Aladhan API, Nominatim, Cloudflare Pages
 
 ---
 

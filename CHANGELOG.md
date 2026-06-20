@@ -2,6 +2,11 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.23.0] — 2026-06-20
+
+### Fixed
+- **Teams meeting links behind password gate** — Meeting link URLs (containing auth tokens) are no longer in the initial HTML. They are injected into the DOM only when the course panel is unlocked via password. Cleared from DOM on lock. Prevents source-view access to class meeting links.
+
 ## [1.22.0] — 2026-06-20
 
 ### Fixed
