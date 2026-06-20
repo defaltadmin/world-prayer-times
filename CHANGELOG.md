@@ -2,6 +2,12 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.17.1] — 2026-06-19
+
+### Fixed
+- **Location coach dead click listener** — Removed `#loc-overlay` click handler (element has `pointer-events:none` so it could never fire). Clicking outside the coach card now behaves the same as clicking nowhere; only the explicit "Skip for now" / "Enable" buttons dismiss it.
+- **Orphaned `@keyframes ringPulse`** — Removed dead CSS animation (leftover from dark overlay removal in v1.17.0). No element references it anymore.
+
 ## [1.17.0] — 2026-06-19
 
 ### Privacy (GLM audit)
@@ -121,9 +127,17 @@ All notable changes to World Prayer Times are documented here.
 - **Nominatim User-Agent** — Removed dead code (browser fetch strips forbidden headers; Referer is sufficient)
 - **package.json** — Version updated to 1.12.0
 
+## [1.12.1] — 2026-06-18
+
+### Fixed
+- **Menu lock** — Escape key handler now removes `inert` from `#app` (was closing menu visually but leaving page frozen)
+- **Prayer blocks fixed 30min** — All blocks now exactly 30 minutes wide (was variable based on next prayer time)
+- **Prayer block typography** — White text (`#fff`), 0.7rem font, dark text-shadow for readability
+- **Privacy banner auto-dismiss** — Banner hides after 5 seconds automatically
+
 ### Audit Notes
-- GLM 5.2 audit: 1 critical + 4 high + 4 medium + 2 low fixes applied
-- GLM 5.2 audit: 2 findings dismissed (H1 conflict wrap mathematically correct for actual use cases, L5 Permissions-Policy not exploitable as-is)
+- Gemini visual audit: 3 fixes applied (menu lock, contrast, ruler)
+- Gemini false positive: countdown timer already uses per-city timezone via `getLocalHours(pd.tz)`
 
 ## [1.10.0] — 2026-06-16
 

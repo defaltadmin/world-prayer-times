@@ -658,7 +658,6 @@
         }
         .loc-ring { position: fixed; z-index: 201; border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 3px var(--accent); display: none; }
         .loc-ring.show { display: block; }
-        @keyframes ringPulse { 0%,100% { box-shadow: 0 0 0 4px var(--accent), 0 0 0 9999px rgba(0,0,0,0.55); } 50% { box-shadow: 0 0 0 7px var(--accent), 0 0 0 9999px rgba(0,0,0,0.55); } }
         .modal-bg, .card-nav-menu, .card-nav-overlay { transition-timing-function: cubic-bezier(0.4,0,0.2,1) !important; }
     </style>
 </head>
@@ -2353,7 +2352,7 @@ detectUser();
 if (!localStorage.getItem('wp_loc_prompted') && !localStorage.getItem('wp_u')) {
     setTimeout(() => showLocCoach(), 700);
 }
-$('#loc-overlay')?.addEventListener('click', () => { localStorage.setItem('wp_loc_prompted','1'); hideLocCoach(); });
+
 function positionLocCoach() {
     const btn = $('#btn-location'); if (!btn || btn.style.display === 'none') return;
     const r = btn.getBoundingClientRect();

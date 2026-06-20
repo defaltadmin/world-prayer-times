@@ -2,7 +2,7 @@
 
 ## What You're Reviewing
 
-A single-page prayer times web app (`index.html`, ~2600 lines, ~150KB). Pure vanilla JS, no frameworks. Deploys to Cloudflare Pages. Current version: **v1.17.0**.
+A single-page prayer times web app (`index.html`, ~2600 lines, ~150KB). Pure vanilla JS, no frameworks. Deploys to Cloudflare Pages. Current version: **v1.17.1**.
 
 ## Folder Structure
 
@@ -14,7 +14,7 @@ world-prayer-times/
 ├── robots.txt          ← Search engine crawler directives
 ├── wrangler.toml       ← Cloudflare Pages config
 ├── package.json        ← Scripts only (wrangler deploy), no runtime deps
-├── CHANGELOG.md        ← Version history (1.0.0 → 1.16.0)
+├── CHANGELOG.md        ← Version history (1.0.0 → 1.17.1)
 ├── SECURITY.md         ← Security policy
 ├── README.md           ← Project docs
 ├── PRD.md              ← Product requirements document
@@ -133,6 +133,8 @@ These were identified and fixed in prior audits. **Do NOT report these again:**
 70. **Privacy policy link** — Footer link opens privacy modal.
 71. **Volume slider** — Alarm volume control (0-100%) in settings UI.
 72. **iCal line folding** — Fixed off-by-one (72 chars, was 73).
+73. **Location coach dead click** — Removed `#loc-overlay` click handler (element has `pointer-events:none`, could never fire).
+74. **Orphaned ringPulse keyframe** — Removed unused `@keyframes ringPulse` (no element applies it after dark overlay removal).
 
 ## Design Decisions (do NOT flag as issues)
 
