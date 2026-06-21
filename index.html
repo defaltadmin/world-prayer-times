@@ -2164,32 +2164,40 @@ function loadFromURL() {
 function hashStr(s) { let h=0; for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;} return (h>>>0).toString(16).padStart(8,'0'); }
 const COURSE_PW_CHECK = '988ecb15';
 function isCourseUnlocked() { return sessionStorage.getItem('wp_course') === '1'; }
-function unlockCourse() {
+function unlockCourse(pw) {
     sessionStorage.setItem('wp_course','1');
     $('#course-locked-view').style.display = 'none';
     $('#course-unlocked-view').classList.add('unlocked');
-    // Fetch meeting links from Worker API (authenticated)
     const toggle = $('#meeting-links-toggle');
     const dd = $('#meeting-links-dropdown');
     if (toggle) toggle.classList.remove('hidden');
-    if (dd && !_meetingLinks) {
-        fetch(LINKS_API, { headers: { 'X-Course-Pw': val } })
+    // Render links from cache if available (reload/reopen), otherwise fetch
+    const cached = sessionStorage.getItem('wp_links');
+    if (cached && dd && !_meetingLinks) {
+        try { _meetingLinks = JSON.parse(cached); _renderMeetingLinks(dd); } catch {}
+    } else if (pw && dd && !_meetingLinks) {
+        fetch(LINKS_API, { headers: { 'X-Course-Pw': pw } })
             .then(r => r.json())
             .then(links => {
                 if (!Array.isArray(links)) return;
                 _meetingLinks = links;
-                links.forEach(l => {
-                    const a = document.createElement('a');
-                    a.href = l.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-                    a.className = 'info-link meeting-link-item';
-                    const nm = document.createElement('span'); nm.className = 'meeting-link-name'; nm.textContent = l.name;
-                    const jn = document.createElement('span'); jn.className = 'meeting-link-join'; jn.textContent = 'Join here →';
-                    a.appendChild(nm); a.appendChild(jn);
-                    dd.appendChild(a);
-                });
+                sessionStorage.setItem('wp_links', JSON.stringify(links));
+                _renderMeetingLinks(dd);
             })
             .catch(() => {});
     }
+}
+function _renderMeetingLinks(dd) {
+    if (!_meetingLinks) return;
+    _meetingLinks.forEach(l => {
+        const a = document.createElement('a');
+        a.href = l.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        a.className = 'info-link meeting-link-item';
+        const nm = document.createElement('span'); nm.className = 'meeting-link-name'; nm.textContent = l.name;
+        const jn = document.createElement('span'); jn.className = 'meeting-link-join'; jn.textContent = 'Join here →';
+        a.appendChild(nm); a.appendChild(jn);
+        dd.appendChild(a);
+    });
 }
 function lockCourse() {
     sessionStorage.removeItem('wp_course');
@@ -2197,17 +2205,18 @@ function lockCourse() {
     $('#course-unlocked-view').classList.remove('unlocked');
     $('#course-pw-input').value = '';
     if ($('#course-pw-hint')) $('#course-pw-hint').textContent = '';
-    // Clear meeting links from DOM and memory
+    // Clear meeting links from DOM, cache, and memory
     const toggle = $('#meeting-links-toggle');
     const dd = $('#meeting-links-dropdown');
     if (toggle) { toggle.classList.add('hidden'); toggle.setAttribute('aria-expanded', 'false'); }
     if (dd) { dd.innerHTML = ''; dd.classList.add('hidden'); }
     _meetingLinks = null;
+    sessionStorage.removeItem('wp_links');
 }
 function attemptUnlock() {
     const val = $('#course-pw-input').value.trim();
     if (hashStr(val) === COURSE_PW_CHECK) {
-        unlockCourse(); $('#course-pw-hint').textContent = '';
+        unlockCourse(val); $('#course-pw-hint').textContent = '';
     } else {
         $('#course-pw-input').classList.add('error');
         $('#course-pw-hint').textContent = t('incorrectPw');
