@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Prayer Times">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org https://prayer-times-links.*.workers.dev; img-src 'self' data: blob:; worker-src 'self'; manifest-src 'self'; base-uri 'self'; upgrade-insecure-requests;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.aladhan.com https://nominatim.openstreetmap.org https://prayer-times-links.info-mscarabia.workers.dev; img-src 'self' data: blob:; worker-src 'self'; manifest-src 'self'; base-uri 'self'; upgrade-insecure-requests;">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -1422,7 +1422,14 @@ async function renderRow(city) {
         b.setAttribute('aria-label', `${name}: ${fmtH(localH)} to ${fmtH(localH + durHours)}`);
         b.setAttribute('tabindex', '0');
         b.setAttribute('role', 'button');
-        const centerSel = () => { selStart = clamp(localH - selDur / 2, 0, 24 - selDur); updateSel(); checkConflicts(); };
+        const centerSel = () => {
+            // Convert city's local hour to user's local hour via UTC
+            const userTz = userCity?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const userOff = getOff(userTz);
+            const userLocalH = utcToLocal(localToUTC(localH, pd.off), userOff);
+            selStart = clamp(userLocalH - selDur / 2, 0, 24 - selDur);
+            updateSel(); checkConflicts();
+        };
         b.onclick = e => { e.stopPropagation(); centerSel(); };
         b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); centerSel(); } };
         strip.appendChild(b);
@@ -1873,7 +1880,8 @@ function compCls(cls) {
     // Class times are in London local time, convert to UTC
     const utcStartH = localToUTC(h + m / 60, londonOff);
     const utcEndH = localToUTC(eh + em / 60, londonOff);
-    const ts = Date.UTC(lp.year, lp.month - 1, lp.day + d, 0, 0) + (h + m / 60 - londonOff) * 3600000;
+    // Compute absolute timestamp from UTC hours (reuse utcStartH, no duplicate math)
+    const ts = Date.UTC(lp.year, lp.month - 1, lp.day + d) + utcStartH * 3600000;
     // If class already passed this week, roll to next week
     const finalTs = ts < Date.now() - 60000 ? ts + 7 * 86400000 : ts;
     return {

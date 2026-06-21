@@ -2,6 +2,16 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.25.3] — 2026-06-21
+
+### Fixed
+- **CSP Worker wildcard bug** — `prayer-times-links.*.workers.dev` didn't match the actual Worker URL (CSP wildcards must be leftmost label). Changed to full URL. Meeting links fetch was silently blocked by CSP.
+- **centerSel timezone bug** — Clicking a prayer block in a non-home city set `selStart` to that city's local hour instead of the user's local hour. Now converts through UTC.
+- **compCls timestamp dedup** — Reuses `utcStartH` instead of duplicating UTC conversion math.
+
+### Security
+- **Worker sends raw password, hashes server-side** — `COURSE_PW_CHECK` hash is no longer sent to Worker. Worker hashes the raw password and compares. Scraping the hash from source no longer works.
+
 ## [1.25.0] — 2026-06-21
 
 ### Security
