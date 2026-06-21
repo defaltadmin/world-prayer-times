@@ -1,6 +1,6 @@
 # World Prayer Times — Full Context
 
-**Version:** 1.23.0 | **Live:** https://prayer.mscarabia.com | **Stack:** Single-file vanilla JS, Aladhan API, Nominatim, Cloudflare Pages
+**Version:** 1.25.2 | **Live:** https://prayer.mscarabia.com | **Stack:** Single-file vanilla JS, Aladhan API, Nominatim, Cloudflare Pages + Worker
 
 ---
 
@@ -14,131 +14,129 @@ A prayer times coordination tool for Muslims worldwide. Users see prayer times f
 
 | File | Purpose |
 |------|---------|
-| `index.html` | THE ENTIRE APP — HTML + inline CSS (~670 lines) + inline JS (~2050 lines). ~2700 lines total. |
-| `manifest.json` | PWA manifest — app name, theme, SVG icons for installability |
-| `sw.js` | Service worker — cache-first for static assets, network-first for API calls |
-| `_headers` | Cloudflare Pages HTTP headers — CSP, HSTS, cache control |
-| `_redirects` | Cloudflare Pages redirects — SPA fallback, robots.txt exclusion |
-| `robots.txt` | Search engine crawler directives |
+| `index.html` | THE ENTIRE APP — HTML + inline CSS (~680 lines) + inline JS (~2050 lines). ~2700 lines total. |
+| `manifest.json` | PWA manifest — app name, theme, SVG icons |
+| `sw.js` | Service worker — network-first for navigation, cache-first for static assets |
+| `_headers` | Cloudflare Pages HTTP headers — CSP (includes Worker domain), HSTS |
+| `_redirects` | SPA fallback, robots.txt exclusion |
+| `robots.txt` | Crawler directives |
 | `wrangler.toml` | Cloudflare Pages config |
-| `package.json` | Scripts only (wrangler deploy), no runtime deps |
-| `CHANGELOG.md` | Complete version history |
-| `CONTEXT.md` | This file — everything Sonnet needs |
-| `PRD.md` | Product requirements document |
+| `worker/index.js` | Cloudflare Worker — serves meeting links only on correct password |
+| `worker/wrangler.toml` | Worker config |
+| `package.json` | Scripts only |
+| `CHANGELOG.md` | Version history |
+| `CONTEXT.md` | This file |
+| `PRD.md` | Product requirements |
 | `README.md` | Project docs |
 | `SECURITY.md` | Security policy |
 | `LICENSE` | MIT |
-| `.gitignore` | node_modules, .wrangler, Lighthouse JSONs |
 
 ---
 
 ## Architecture
 
-### HTML Structure
-- Loading screen with progress bar
-- Islamic pattern background (CSS SVG)
-- Dot grid canvas (interactive, mouse proximity)
-- Header (logo, title, countdown, hamburger)
-- Status bar (conflict badge, selection display, location button)
-- Legend (prayer color key)
-- Ruler (hour marks)
-- Timeline (city rows + class row + selection bar + NOW line)
-- Add City modal
-- Privacy modal
-- Course panel (slide-out)
-- Card nav menu (slide-out, outside #app for inert safety)
-- Footer (credits, privacy, donate link)
+### Security Model (Meeting Links)
 
-### CSS (~670 lines)
-- CSS variables for all colors (teal/cyan palette)
-- Glass morphism effects
-- Prayer block styles (5 colors, hover/focus)
-- Selection bar with resize handles
-- NOW line (pure CSS calc)
-- Card nav slide-out
-- Location coach-mark (transparent overlay, ring)
-- Modal system
-- Responsive (mobile FAB, touch targets ≥44px)
-- Reduced motion support
-- RTL support
+Meeting links are **not in the frontend source code**. They live in a Cloudflare Worker:
 
-### JS (~2050 lines)
+1. Student types password → `attemptUnlock()` → `unlockCourse(val)` → `fetch(Worker, {headers: {'X-Course-Pw': rawPassword}})`
+2. Worker hashes password server-side, compares against stored hash
+3. On match: returns JSON array of 7 Teams meeting URLs
+4. Frontend caches in `sessionStorage.wp_links` and renders via DOM APIs
+5. On reload: reads from cache (no re-fetch needed)
+6. On lock: clears cache + DOM + memory
 
-| Section | Lines | What |
-|---------|-------|------|
-| Constants | ~200 | City presets (13 with nameAr), class schedule (13 slots), prayer windows, i18n |
-| State (`S` object) | ~30 | All mutable state collected, `setState()` with auto-render |
-| Utilities | ~100 | `localToUTC()`, `utcToLocal()`, `getOffsetHours()`, `getOffsetForDate()`, `getLocalHours()`, `fmtH()`, `pct()`, `clamp()` |
-| API | ~80 | `fetchPrayer()` — Aladhan API, 10s timeout, caching |
-| Rendering | ~300 | `renderRow()`, `renderAll()`, `renderRuler()`, `drawGridlines()`, `renderClassesRow()`, `renderToggles()` |
-| Conflict | ~60 | `checkConflicts()` — Map-based O(n) |
-| Class schedule | ~60 | `compCls()` — London class times → UTC |
-| Geocoding | ~80 | Nominatim, 400ms debounce + 1s rate limit, dynamic Accept-Language |
-| iCal | ~60 | RFC 5545: RRULE, DTSTAMP, escaped descriptions, 72-char folding |
-| Notifications | ~40 | Browser Notification API, 5 min before prayer |
-| UI interactions | ~200 | Drag selection (15-min snap), resize, keyboard |
-| Init/bootstrap | ~80 | Loads saved state, renders, starts intervals |
-| Visual effects | ~100 | Dot grid canvas, border glow, spotlight, location coach-mark |
+**Key security properties:**
+- `COURSE_PW_CHECK` hash is in frontend source (UI gate only) — NOT sent to Worker
+- Worker accepts only raw password, hashes server-side
+- Scraping the hash from source → Worker rejects it
+- `Cache-Control: no-store` on Worker responses
+
+### JS State Model
+
+Plain `let` globals (no state object). All mutable state at module level:
+- `cities`, `cache`, `selStart`, `selDur` — core app state
+- `enrolled` — class enrollments (persisted to localStorage)
+- `lang`, `h24`, `dark`, `alarm` — user preferences
+- `userCity` — detected/saved location
+- `_meetingLinks` — fetched from Worker (memory only, cleared on lock)
+
+### Timezone Conversion
+
+Single-source-of-truth utilities:
+- `localToUTC(localH, offset)` — `(((localH - offset) % 24) + 24) % 24`
+- `utcToLocal(utcH, offset)` — `((utcH + offset) % 24 + 24) % 24`
+- `getOffsetHours(tz)` — current moment offset via `Intl.DateTimeFormat`
+- `getOffsetForDate(tz, y, m, d)` — DST-aware offset for specific date
 
 ---
 
-## Features (what's built)
+## Features
 
 ### Core
-- 24h horizontal timeline with colored prayer blocks (Fajr=cyan, Dhuhr=gold, Asr=orange, Maghrib=red, Isha=purple)
+- 24h timeline with colored prayer blocks (Fajr=cyan, Dhuhr=gold, Asr=orange, Maghrib=red, Isha=purple)
 - Fixed 30-min visual blocks (intentionally decoupled from conflict detection)
-- Real-time prayer data from Aladhan API (10s timeout, cached per city+date)
-- Multi-city: 5 presets + unlimited via Nominatim geocoding (capped at 20)
-- Selection bar: 15-min snap, drag + keyboard (arrows, brackets, Shift)
-- Conflict detection: shows which prayer, which cities, in real time
-- NOW line: pure CSS calc, continuous across ruler + timeline
+- Aladhan API (10s timeout, cached per city+date)
+- Multi-city: 5 presets + unlimited via Nominatim (capped at 20)
+- Selection bar: 15-min snap, drag + keyboard
+- Conflict detection: Map-based O(n), shows which prayer/cities
+- NOW line: pure CSS calc, continuous
 - 30-min dotted gridlines
 - Inline classes row at bottom of timeline
 
 ### Course System
-- Password-gated class timetable (13 slots/week, verified against TQG PDF)
+- Password-gated (hash-based local check + Worker API for links)
+- Class timetable (13 slots/week, verified against TQG PDF)
 - Enrolled classes overlay on timeline + dedicated classes row
-- Next class countdown
-- Quick links: WhatsApp groups, timetable PDF, per-class Teams meeting links (dropdown), recording links
+- Class countdown rolls forward to next week after today's last class
+- Per-class Teams meeting links (fetched from Worker on unlock, cached in sessionStorage)
+- WhatsApp groups, timetable PDF, recording links
 
 ### Export & Sharing
-- iCal export (RFC 5545 compliant: RRULE, DTSTAMP, escaped descriptions, 72-char line folding)
+- iCal export (RFC 5545: RRULE, DTSTAMP, escaped descriptions, 72-char folding)
 - Share link (URL with cities, time window, language)
 
 ### UX
-- Dark/light theme (CSS vars, instant toggle)
-- Full Arabic RTL support (prayer names, Hijri date, all labels, city names via `getCityName()`)
-- Glass morphism (blur, saturate, gradient, inset highlight)
-- Dot grid interactive background (canvas, mouse proximity, disabled on touch)
-- Border glow + spotlight card effects
-- Location coach-mark with ring highlight (non-blocking, transparent overlay)
-- Location button stays visible after enabling (accent color indicator)
+- Dark/light theme (CSS vars, label shows target state)
+- Full Arabic RTL (prayer names, city names via `getCityName()`, Hijri date, Nominatim Accept-Language)
+- Glass morphism, dot grid, border glow (static, no RAF loop)
+- Location coach-mark (transparent overlay, ring)
+- Location button stays visible after enabling
 - Toast notifications, privacy banner + modal
-- Card nav slide-out menu (single wiring site for all actions)
-- FAB add-city button on mobile
-- Reduced motion support
-- PWA: manifest.json + service worker (installable, cache-first)
-- Donation link in footer (LaunchGood campaign)
+- Card nav slide-out menu
+- FAB add-city on mobile
+- PWA (manifest + service worker, network-first for navigation)
+- Donation link in footer (LaunchGood)
 
 ### Accessibility
 - `role="main"` + `aria-label` on timeline
-- `aria-label` on all interactive elements
-- Keyboard: arrows, brackets, Escape, Tab
-- Focus trap on modals + card nav, focus restore on close
+- Meeting links toggle: `role="button"`, `tabindex="0"`, `aria-expanded`, keyboard handler
+- Dropdown: `role="group"`, `aria-label`
+- Focus trap on modals + card nav
 - `aria-live="polite"` on status badge
-- Touch targets ≥44px
+- Touch targets ≥44px (includes `.info-link`, `#meeting-links-toggle`)
+
+### Mobile
+- Safe area insets (iPhone notch/home indicator)
+- `viewport-fit=cover`
+- `overscroll-behavior-y: contain` (no pull-to-refresh)
+- Input font-size 16px (no iOS auto-zoom)
+- City name `text-overflow: ellipsis` for long Arabic names
+- Touch drag tracks `touch.identifier` (no multi-touch hijack)
 
 ### Performance
-- Non-render-blocking fonts (`media="print" onload`)
-- Resize debounced (150ms dot grid, 100ms selection)
-- Glass blur reduced on mobile (12px vs 24px)
-- localStorage try/catch, notification timer cleanup
+- Non-render-blocking fonts
+- Resize debounced
+- `updateClsCountdown` runs every 10s (not every 1s)
+- Glass blur reduced on mobile
 
 ### Security
-- CSP (meta + _headers, Aladhan + Nominatim + worker-src + manifest-src)
+- CSP (Aladhan + Nominatim + Worker domain, worker-src, manifest-src)
 - X-Frame-Options: DENY
-- Geocoded names sanitized (HTML, quotes, bidi)
-- Password hash pre-computed, Nominatim rate limited
+- Geocoded names sanitized
+- Password hash pre-computed (local UI gate only)
+- Nominatim rate limited
+- Meeting links served from authenticated Worker (raw password hashed server-side)
 
 ---
 
@@ -146,24 +144,23 @@ A prayer times coordination tool for Muslims worldwide. Users see prayer times f
 
 | Version | Key Changes |
 |---------|-------------|
-| **1.21.0** | Removed bookmarks, footer donate, privacy visible, meeting links dropdown (7 Teams links) |
-| **1.20.0** | Multiple meeting slot bookmarks (later removed) |
-| **1.19.0** | PWA (manifest + service worker), donation popup, location icon stays visible, Arabic city names + Nominatim + date formatting, inline classes row |
-| **1.18.0** | Code quality: consolidated UTC conversion (localToUTC/utcToLocal), state object (S + setState) |
-| **1.17.1** | Removed dead loc-overlay click handler, orphaned ringPulse keyframe |
-| **1.17.0** | Privacy: coords 1dp, CSP cleanup, privacy banner fix. iCal escaping, focus trap, Safari AbortSignal, AudioContext pre-arm, volume slider |
-| **1.16.x** | Visual overhaul: IBM Plex Sans Arabic, gridlines, 15-min snap, location spotlight, mobile FAB, palette revert |
-| **1.15.0** | Class timetable corrected, location onboarding, non-render-blocking fonts |
-| **1.14.0** | Countdown grace, NOW line CSS calc, card nav inert fix, glassmorphism |
-| **1.13.0** | Prayer block width matches conflict window, conflict O(n) |
-| **1.12.x** | CRITICAL blank page fix, class overlay day, notification timer leak |
-| **1.11.0** | iCal DTSTAMP, fetch timeout, localStorage try/catch |
+| **1.25.2** | Fixed unlockCourse scope bug: pass pw as param, cache links in sessionStorage |
+| **1.25.1** | Send raw password to Worker, hash server-side (hash no longer accepted) |
+| **1.25.0** | Meeting links served from Cloudflare Worker (real auth) |
+| **1.24.0** | GLM audit: obfuscated links, class countdown roll-forward, SW network-first nav, iOS zoom, safe area, Intl perf, pull-to-refresh, theme label, multi-touch, DOM APIs |
+| **1.23.0** | Teams meeting links behind password gate |
+| **1.22.0** | Removed S/alias dual-state bug, fixed renderClassesRow London offset, a11y, removed sweepLogo RAF |
+| **1.21.0** | Removed bookmarks, footer donate, privacy visible, meeting links dropdown |
+| **1.20.0** | Multiple meeting slots bookmarks (later removed) |
+| **1.19.0** | PWA, donation popup, location icon fix, Arabic fixes, inline classes row |
+| **1.18.0** | UTC consolidation (localToUTC/utcToLocal), state object (later removed) |
+| **1.17.x** | Privacy fixes, CSP cleanup, iCal escaping, visual polish |
 
 ---
 
 ## Audit Trail (74 fixed items)
 
-Do NOT report these again — all verified across 11 audit rounds (MiMo, Z.ai, GLM 5.2, Gemini, Sonnet):
+Do NOT report these again. Verified across 12 audit rounds (MiMo, Z.ai, GLM 5.2, Gemini, Sonnet, GLM):
 
 1–9: Loader timing, double renderAll, midnight refresh, cache busting, iCal DTSTAMP, fetch timeout, Nominatim UA, localStorage try/catch
 10–16: Blank page fix, class overlay London day, notification timer leak, null guards, AudioContext .catch(), loader error path, enrolled validation
@@ -172,25 +169,27 @@ Do NOT report these again — all verified across 11 audit rounds (MiMo, Z.ai, G
 35–41: CSP beacon, class timetable, Sheikh prefix, enrolled key, location onboarding, non-render fonts, deposit removed
 42–56: Visual overhaul (palette, font, NOW line, gridlines, 15-min snap, spotlight, mobile, progress, animations, prayer overflow, CSP clean, Friday removed, blocks 30min, scroll-to-now removed, palette reverted)
 57–74: Popup viewport clamp, FAB color, coords 1dp, CSP cleaned, privacy banner, iCal escaping, focus trap, ARIA, Safari AbortSignal, scroll sync, AudioContext unlock, prayer text horizontal, coach-mark, privacy link, volume slider, iCal fold, dead click handler, ringPulse keyframe
+75–84: S/alias dual-state removed, renderClassesRow London offset, meeting links toggle a11y, sweepLogo RAF removed, mobile touch targets, city name overflow, Teams links behind password gate, unlockCourse scope fix, raw password to Worker, Worker server-side hash
 
 ---
 
 ## Design Decisions (do NOT flag as issues)
 
-- `'unsafe-inline'` required for single-file static app on Cloudflare Pages
+- `'unsafe-inline'` required for single-file static app
 - Prayer blocks fixed 30min — intentionally decoupled from conflict detection
-- Card Nav sits OUTSIDE `#app` — so `inert` doesn't disable the menu
-- NOW line uses pure CSS calc — matches ruler/blocks exactly
-- Countdown uses 2-min grace — prevents just-passed prayer flickering
-- `pd.loc[name]` values are in `pd.tz` timezone — do NOT switch to browser timezone
+- Card Nav sits OUTSIDE `#app` — inert safety
+- NOW line uses pure CSS calc
+- Countdown uses 2-min grace
+- `pd.loc[name]` values are in `pd.tz` timezone
 - 15-min snapping is intentional
-- Gridlines drawn once — don't re-render on renderAll()
+- Gridlines drawn once
 - Palette is teal/cyan (CSS variables)
-- Font is IBM Plex Sans Arabic — native Latin + Arabic
+- Font is IBM Plex Sans Arabic
 - FAB only visible on mobile
 - Nominatim User-Agent can't be set client-side
 - 3-5 cities doesn't need virtualization
-- State object `S` with backward-compat `let` aliases synced at render boundaries
+- Meeting links: Worker auth is defense-in-depth, not substitute for Teams lobby-enabled meetings
+- `COURSE_PW_CHECK` in frontend is UI gate only — Worker hashes raw password server-side
 
 ---
 
@@ -198,49 +197,63 @@ Do NOT report these again — all verified across 11 audit rounds (MiMo, Z.ai, G
 
 | Area | Lines | Notes |
 |------|-------|-------|
-| CSS variables | 27–46 | `:root` — all colors, sizes |
-| Glass morphism | 84–93 | `.glass` with gradient, blur, inset |
+| CSS variables | 27–46 | `:root` |
+| Safe area CSS | 641–642 | `env(safe-area-inset-*)` |
+| iOS input fix | 667 | `font-size: 16px !important` |
+| Meeting links CSS | 440–450 | `.meeting-link-item` |
 | Prayer blocks | 378–401 | Fixed 30min, 5 colors |
-| Selection bar | 412–432 | 15-min snap, resize handles |
+| Selection bar | 412–432 | 15-min snap |
 | NOW line | 434–447 | Pure CSS calc |
-| Card nav | 164–211 | Slide-out, single wiring site |
-| Location coach | 646–660 | Transparent overlay, ring |
-| State (`S`) | ~1090 | All mutable state, `setState()` |
+| Card nav | 164–211 | Slide-out |
+| Location coach | 646–660 | Transparent overlay |
+| State globals | ~1050 | Plain `let`s, no S object |
 | `localToUTC()` | ~1204 | `(((localH - offset) % 24) + 24) % 24` |
-| `utcToLocal()` | ~1205 | `((utcH + offset) % 24 + 24) % 24` |
-| `getOffsetForDate()` | ~1206 | DST-aware offset for specific date |
-| `fetchPrayer()` | ~1260 | Aladhan API + cache + timeout |
-| `renderRow()` | ~1368 | City row with prayer blocks + class overlays |
-| `renderClassesRow()` | ~1497 | Inline classes row |
-| `renderAll()` | ~1536 | Renders all rows + classes + bookmarks |
+| `getOffsetForDate()` | ~1206 | DST-aware offset |
+| `fetchPrayer()` | ~1260 | Aladhan API + cache |
+| `renderRow()` | ~1368 | City row |
+| `renderClassesRow()` | ~1497 | Inline classes row (Intl-based London offset) |
+| `renderAll()` | ~1536 | Renders all rows |
 | `checkConflicts()` | ~1694 | Map-based O(n) |
-| `compCls()` | ~1810 | London class times → UTC |
-| Geocoding | ~2190 | Nominatim + debounce + rate limit |
-| `exportICal()` | ~2070 | ICS + RRULE + DTSTAMP |
-| Notifications | ~2350 | Browser Notification API |
-| Selection drag | ~2440 | Pointer events, snap, keyboard |
-| Init | ~2480 | Loads state, renders, intervals |
+| `compCls()` | ~1810 | London class times → UTC, rolls forward to next week |
+| `unlockCourse(pw)` | ~2167 | Fetches from Worker, caches in sessionStorage |
+| `_renderMeetingLinks()` | ~2195 | Builds DOM from links array |
+| Geocoding | ~2220 | Nominatim + debounce + dynamic Accept-Language |
+| `exportICal()` | ~2100 | ICS + RRULE + DTSTAMP |
+| Notifications | ~2380 | Browser Notification API |
+| Selection drag | ~1760 | Tracks touch.identifier |
 
 ---
 
 ## Deployment
 
 ```bash
-# Auto-deploys to prayer.mscarabia.com when pushed to main branch
+# Frontend — auto-deploys to prayer.mscarabia.com from main branch
 git push origin master:main
 
-# Or manual deploy
-wrangler pages deploy . --project-name world-prayer-times --branch=master
+# Worker — deploys to prayer-times-links.info-mscarabia.workers.dev
+cd worker && wrangler deploy
 ```
-
-Cloudflare Pages tracks the `main` branch for production. Push to `main` = instant deploy to `prayer.mscarabia.com`.
 
 ---
 
-## Known Limitations (by design, not bugs)
+## Worker Setup
 
-- Conflict wrap-midnight: mathematically correct
-- Nominatim compliance: 1s rate limit + debounce
-- CSP `'unsafe-inline'`: required for single-file app
-- Performance: 3-5 cities doesn't need virtualization
-- Password gate: client-side hash only (soft gate, not real security)
+```
+worker/
+├── index.js        # Worker script (password hash + meeting links)
+└── wrangler.toml   # Worker config
+```
+
+Worker URL: `https://prayer-times-links.info-mscarabia.workers.dev/api/links`
+- `GET /api/links` with `X-Course-Pw: <raw password>` → 200 + JSON (on correct hash) or 403
+- Same `hashStr()` algorithm as frontend, computed server-side
+
+---
+
+## Known Limitations
+
+- Password is shared among all students (convenience gate, not real access control)
+- CSP `'unsafe-inline'` required for single-file app
+- `unsafe-inline` weakens XSS mitigation (not actionable without build step)
+- DST midnight refresh may fire at wrong time once per year (spring forward)
+- Teams lobby-enabled meetings would be the truly secure solution (option 3)
