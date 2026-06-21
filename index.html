@@ -533,11 +533,11 @@
         .setting-control select { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; color: var(--text); }
 
         /* ── Slide panel ─────────────────────────────────── */
-        .panel-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 54; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+        .panel-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 64; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
         .panel-bg.open { opacity: 1; pointer-events: auto; }
         .panel {
             position: fixed; top: 0; right: -100%; width: 380px; max-width: 92vw;
-            height: 100vh; z-index: 55; background: var(--card);
+            height: 100vh; z-index: 65; background: var(--card);
             border-left: 1px solid var(--border);
             box-shadow: -8px 0 40px rgba(0,0,0,0.3);
             transition: right 0.3s cubic-bezier(0.22,0.61,0.36,1);
@@ -2185,14 +2185,17 @@ function unlockCourse(pw) {
         try { _meetingLinks = JSON.parse(cached); _renderMeetingLinks(dd); } catch {}
     } else if (pw && dd && !_meetingLinks) {
         fetch(LINKS_API, { headers: { 'X-Course-Pw': pw } })
-            .then(r => r.json())
+            .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
             .then(links => {
-                if (!Array.isArray(links)) return;
+                if (!Array.isArray(links) || !links.length) throw new Error('empty');
                 _meetingLinks = links;
                 sessionStorage.setItem('wp_links', JSON.stringify(links));
                 _renderMeetingLinks(dd);
             })
-            .catch(() => {});
+            .catch(() => {
+                dd.innerHTML = '<div style="padding:8px 12px;font-size:0.72rem;color:var(--danger);">Could not load meeting links. <button onclick="unlockCourse(\'' + (pw||'') + '\')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.72rem;text-decoration:underline;">Retry</button></div>';
+                dd.classList.remove('hidden');
+            });
     }
 }
 function _renderMeetingLinks(dd) {

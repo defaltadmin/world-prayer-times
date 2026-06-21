@@ -2,6 +2,12 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.25.4] — 2026-06-21
+
+### Fixed
+- **NOW line z-index over course panel** — `.now-line` z-index (60) was higher than `.panel` z-index (55), causing the red line to paint over the side panel. Bumped `.panel-bg` to z-index 64, `.panel` to z-index 65.
+- **Meeting Links silent failure** — `.catch(() => {})` swallowed fetch errors with no user feedback. Now shows "Could not load meeting links" with a Retry button if the Worker fetch fails.
+
 ## [1.25.3] — 2026-06-21
 
 ### Fixed
