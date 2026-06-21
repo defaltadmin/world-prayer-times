@@ -436,6 +436,52 @@
         .meeting-link-name { color: var(--accent); font-weight: 600; min-width: 60px; }
         .meeting-link-join { color: var(--muted); }
 
+        /* ── Meeting links accordion (redesigned) ────────── */
+        .meeting-dropdown {
+            display: flex; flex-direction: column; gap: 4px;
+            max-height: 0; opacity: 0; overflow: hidden;
+            padding: 0 0 0 24px;
+            transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease, padding 0.3s ease;
+        }
+        .meeting-dropdown.open { max-height: 600px; opacity: 1; padding: 6px 0 8px 24px; }
+        .meeting-dropdown:empty:not(.loading)::before {
+            content: 'No links available.';
+            display: block; padding: 8px 12px; font-size: 0.7rem; color: var(--muted); font-style: italic;
+        }
+        .meeting-dropdown.loading::before { content: none; }
+
+        .meeting-links-toggle .ml-chevron { transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); flex-shrink: 0; }
+        .meeting-links-toggle[aria-expanded="true"] .ml-chevron { transform: rotate(90deg); color: var(--accent); }
+
+        .meeting-link-item {
+            margin: 0; padding: 9px 12px;
+            border-radius: 10px !important;
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            transition: background 0.15s, border-color 0.15s, transform 0.15s;
+        }
+        .meeting-link-item:hover {
+            transform: translateX(3px);
+            background: rgba(45,212,191,0.06) !important;
+            border-color: rgba(45,212,191,0.4) !important;
+        }
+        .meeting-link-name { color: var(--accent); font-weight: 600; min-width: 70px; font-size: 0.78rem; }
+        .meeting-link-join { color: var(--muted); font-size: 0.68rem; margin-left: auto; }
+        .meeting-link-item:hover .meeting-link-join { color: var(--accent); }
+
+        .ml-skeleton {
+            height: 38px; border-radius: 10px; overflow: hidden; position: relative;
+            background: var(--surface); border: 1px solid var(--border);
+        }
+        .ml-skeleton::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(45,212,191,0.12), transparent);
+            transform: translateX(-100%);
+            animation: mlSkShimmer 1.4s ease-in-out infinite;
+        }
+        @keyframes mlSkShimmer { 100% { transform: translateX(100%); } }
+        @media (prefers-reduced-motion: reduce) { .ml-skeleton::after { animation: none; } }
+
         /* ── Selection overlay ───────────────────────────── */
         .sel-overlay {
             position: absolute; top: 0; bottom: 0; z-index: 10;
@@ -475,13 +521,26 @@
 
         /* ── Add city row ─────────────────────────────────── */
         .add-row {
-            display: flex; align-items: center; justify-content: center;
-            padding: 10px; border-bottom: 1px solid var(--border);
-            cursor: pointer; color: var(--muted); transition: all 0.15s;
-            background: linear-gradient(180deg, transparent, rgba(0,0,0,0.15));
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 14px; margin: 8px var(--label-w) 8px 0;
+            border: 1.5px dashed rgba(45,212,191,0.25);
+            border-radius: 14px; cursor: pointer;
+            color: var(--muted); background: linear-gradient(180deg, rgba(45,212,191,0.02), rgba(45,212,191,0));
+            transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+            font-weight: 600; font-size: 0.78rem; letter-spacing: 0.01em;
         }
-        .add-row:hover { background: rgba(56,189,248,0.03); color: var(--accent); }
-        .add-row svg { width: 16px; height: 16px; margin-right: 4px; }
+        .add-row:hover {
+            border-color: rgba(45,212,191,0.55);
+            color: var(--accent);
+            background: linear-gradient(180deg, rgba(45,212,191,0.08), rgba(45,212,191,0.02));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 18px rgba(45,212,191,0.12);
+        }
+        .add-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+        .add-row svg { width: 16px; height: 16px; stroke-width: 2.2; flex-shrink: 0; }
+        @media (pointer: coarse) { .add-row { min-height: 44px; } }
+        [data-theme="light"] .add-row { border-color: rgba(13,148,136,0.35); background: linear-gradient(180deg, rgba(13,148,136,0.03), transparent); }
+        [data-theme="light"] .add-row:hover { border-color: var(--accent); background: linear-gradient(180deg, rgba(13,148,136,0.10), rgba(13,148,136,0.03)); }
 
         /* ── Buttons ─────────────────────────────────────── */
         .btn {
@@ -597,17 +656,116 @@
         .toast { animation: toastIn 0.2s ease; }
 
         /* ── Prayer legend ───────────────────────────────── */
-        .legend { display: flex; align-items: center; gap: 12px; padding: 4px 16px; font-size: 0.6rem; color: var(--muted); border-bottom: 1px solid var(--border); overflow-x: auto; }
-        .legend-item { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
-        .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
-        .legend-dot.fajr { background: var(--prayer-fajr); }
-        .legend-dot.dhuhr { background: var(--prayer-dhuhr); }
-        .legend-dot.asr { background: var(--prayer-asr); }
-        .legend-dot.maghrib { background: var(--prayer-maghrib); }
-        .legend-dot.isha { background: var(--prayer-isha); }
-        .legend-dot.sunrise { background: rgba(251,191,36,0.7); }
-        .legend-dot.now { background: var(--danger); }
-        .legend-dot.safe { background: var(--selection); }
+        .legend {
+            display: flex; align-items: center; gap: 6px; padding: 8px 12px;
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(13,25,34,0.6), rgba(9,17,23,0.4));
+            scrollbar-width: thin;
+        }
+        .legend::-webkit-scrollbar { height: 3px; }
+        .legend::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .legend-item {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 10px; border-radius: 8px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.04);
+            white-space: nowrap; flex-shrink: 0;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .legend-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
+        .legend-item span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem; font-weight: 500; letter-spacing: 0.04em;
+            text-transform: uppercase; color: var(--text);
+        }
+        .legend-dot {
+            width: 9px; height: 9px; border-radius: 2.5px; flex-shrink: 0;
+            box-shadow: 0 0 6px currentColor;
+        }
+        .legend-dot.fajr    { background: var(--prayer-fajr);    color: var(--prayer-fajr); }
+        .legend-dot.dhuhr   { background: var(--prayer-dhuhr);   color: var(--prayer-dhuhr); }
+        .legend-dot.asr     { background: var(--prayer-asr);     color: var(--prayer-asr); }
+        .legend-dot.maghrib { background: var(--prayer-maghrib); color: var(--prayer-maghrib); }
+        .legend-dot.isha    { background: var(--prayer-isha);    color: var(--prayer-isha); }
+        .legend-dot.sunrise { background: rgba(251,191,36,0.85); color: rgba(251,191,36,0.85); }
+        .legend-dot.now     { background: var(--danger);    color: var(--danger);    animation: legendPulse 2s ease-in-out infinite; }
+        .legend-dot.safe    { background: var(--selection); color: var(--selection); }
+        @keyframes legendPulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+        [data-theme="light"] .legend { background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(240,244,248,0.5)); }
+        [data-theme="light"] .legend-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.05); }
+        [data-theme="light"] .legend-item:hover { background: rgba(0,0,0,0.04); }
+        [data-theme="light"] .legend-item span { color: var(--text); }
+        @media (prefers-reduced-motion: reduce) { .legend-dot.now { animation: none; } }
+
+        /* ── Footer (redesigned) ─────────────────────────── */
+        .site-footer {
+            padding: 14px 16px max(14px, env(safe-area-inset-bottom));
+            padding-left: max(16px, env(safe-area-inset-left));
+            padding-right: max(16px, env(safe-area-inset-right));
+            background: linear-gradient(180deg, var(--card), var(--surface));
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .footer-meta {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+            gap: 6px 8px;
+            font-size: 0.68rem; color: var(--muted); line-height: 1.5;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.01em;
+        }
+        .footer-credit { white-space: nowrap; }
+        .footer-link { color: var(--accent); text-decoration: none; transition: opacity 0.15s; }
+        .footer-link:hover { opacity: 0.75; text-decoration: underline; text-underline-offset: 2px; }
+        .footer-link--strong { font-weight: 600; }
+        .footer-dot { color: var(--border); user-select: none; }
+        .footer-heart { color: var(--danger); display: inline-block; animation: heartBeat 2.4s ease-in-out infinite; }
+        .footer-powered { white-space: nowrap; }
+        @keyframes heartBeat { 0%,100%{transform:scale(1)} 10%{transform:scale(1.18)} 20%{transform:scale(1)} 30%{transform:scale(1.12)} 40%{transform:scale(1)} }
+
+        /* Donate — full-width shimmer bar */
+        .donate-bar {
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 12px 18px; border-radius: 14px;
+            text-decoration: none;
+            background: linear-gradient(135deg, rgba(16,185,129,0.18), rgba(45,212,191,0.12) 50%, rgba(56,189,248,0.18));
+            border: 1px solid rgba(45,212,191,0.35);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
+            transition: transform 0.2s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s, border-color 0.2s;
+        }
+        .donate-bar:hover {
+            transform: translateY(-2px);
+            border-color: rgba(45,212,191,0.6);
+            box-shadow: 0 8px 24px rgba(45,212,191,0.22), inset 0 1px 0 rgba(255,255,255,0.12);
+        }
+        .donate-bar:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+        .donate-bar-bg {
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.18) 50%, transparent 75%);
+            background-size: 220% 100%;
+            animation: donateShimmer 3.2s linear infinite;
+        }
+        @keyframes donateShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        .donate-bar-icon { width: 18px; height: 18px; color: #10b981; flex-shrink: 0; filter: drop-shadow(0 0 4px rgba(16,185,129,0.4)); }
+        .donate-bar-text {
+            font-size: 0.82rem; font-weight: 700; letter-spacing: 0.02em;
+            background: linear-gradient(90deg, #10b981, #2dd4bf);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .donate-bar-arrow { color: #2dd4bf; font-weight: 700; font-size: 0.9rem; transition: transform 0.2s; }
+        .donate-bar:hover .donate-bar-arrow { transform: translateX(3px); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .donate-bar-bg { animation: none; display: none; }
+            .footer-heart { animation: none; }
+        }
+        [data-theme="light"] .donate-bar { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        @media (max-width: 520px) {
+            .footer-meta { font-size: 0.62rem; gap: 4px 6px; }
+            .donate-bar-text { font-size: 0.74rem; }
+        }
 
         /* ── Privacy banner ──────────────────────────────── */
         .privacy-banner {
@@ -639,7 +797,6 @@
         #tl-scroll, .ruler, .tl-scroll { direction: ltr; }
         /* ── Safe area (iPhone notch/home indicator) ────── */
         .header { padding-top: max(8px, env(safe-area-inset-top)); }
-        footer { padding-bottom: max(12px, env(safe-area-inset-bottom)); padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
         /* ── Coarse pointer touch targets ──────────────── */
         @media (pointer: coarse) {
             .icon-btn, .btn, .chip, .modal-close, .chime-btn, .info-link, #meeting-links-toggle { min-height: 44px; min-width: 44px; }
@@ -765,7 +922,7 @@
     <div class="flex-1 tl-scroll" id="tl-scroll" role="main" aria-label="Prayer times timeline">
         <div style="position:relative;min-width:calc(var(--tl-min) + var(--label-w));" id="tl-inner">
             <div id="rows"></div>
-            <div class="add-row" id="add-row" style="margin-left:var(--label-w);">
+            <div class="add-row" id="add-row" role="button" tabindex="0" aria-label="Add City">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add City
             </div>
@@ -857,8 +1014,15 @@
             <a href="https://chat.whatsapp.com/LhyQf7mVW5BKwrsQHWQgZz" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><div class="info-link-text"><div class="info-link-title">Sannatayn (Men) – WhatsApp</div><div class="info-link-desc">Join the men's group chat</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
             <a href="https://chat.whatsapp.com/IFkpHOR1vzb59O9s7ZyR0E" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><div class="info-link-text"><div class="info-link-title">Tafseer (All) – WhatsApp</div><div class="info-link-desc">Men &amp; Women, 3:30–5:30 PM BST</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
             <a href="https://drive.google.com/file/d/18uQcfYNPOQDH6y3eLACfDvtrE-K5i9n8/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><div class="info-link-text"><div class="info-link-title">Timetable</div><div class="info-link-desc">View the full weekly schedule</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
-            <div class="info-link hidden" style="cursor:pointer;" id="meeting-links-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="meeting-links-dropdown"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg><div class="info-link-text"><div class="info-link-title">Meeting Links</div><div class="info-link-desc">Join your class on Teams</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
-            <div id="meeting-links-dropdown" class="hidden" role="group" aria-label="Class meeting links" style="display:flex;flex-direction:column;gap:2px;padding:4px 0 8px 24px;"></div>
+            <div class="info-link meeting-links-toggle" id="meeting-links-toggle" style="cursor:pointer;" role="button" tabindex="0" aria-expanded="false" aria-controls="meeting-links-dropdown">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg>
+                <div class="info-link-text">
+                    <div class="info-link-title">Meeting Links</div>
+                    <div class="info-link-desc">Zoom / Google Meet links for each class</div>
+                </div>
+                <svg class="ml-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div id="meeting-links-dropdown" class="meeting-dropdown" role="group" aria-label="Class meeting links"></div>
             <a href="https://docs.google.com/document/d/1G4wPSx5GS7tD57QExrB9thUjMnoY8T5JPiCtOuVlQLI/edit" target="_blank" rel="noopener noreferrer" class="info-link"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div class="info-link-text"><div class="info-link-title">Recording Links</div><div class="info-link-desc">Access past lesson recordings</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
             <div class="info-card" style="margin-top:12px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -919,14 +1083,27 @@
     </div>
 
     <!-- ══════════════ FOOTER ══════════════ -->
-    <footer style="text-align:center;padding:12px 16px;font-size:0.65rem;color:var(--muted);border-top:1px solid var(--border);background:var(--card);margin-top:auto;">
-        Made with ❤️ by <a href="https://www.linkedin.com/in/mohammed-ahmed-siddiqui/" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:600;">Mohammed Siddiqui</a> ·
-        <a href="https://mscarabia.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;">mscarabia.com</a> ·
-        <a href="#" id="footer-privacy" style="color:var(--accent);text-decoration:none;font-weight:600;">Privacy</a> ·
-        Powered by <a href="https://aladhan.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;">Aladhan API</a>
-        <div style="margin-top:8px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:inline-block;">
-            <a href="https://www.launchgood.com/v4/campaign/keep_quran_classes_free_for_500_students" target="_blank" rel="noopener noreferrer" style="color:#10b981;text-decoration:none;font-weight:600;font-size:0.7rem;">Donate — Keep Quran Classes Free →</a>
+    <footer class="site-footer">
+        <div class="footer-meta">
+            <span class="footer-credit">Made with <span class="footer-heart" aria-hidden="true">❤</span> by
+                <a href="https://www.linkedin.com/in/mohammed-ahmed-siddiqui/" target="_blank" rel="noopener noreferrer" class="footer-link">Mohammed Siddiqui</a>
+            </span>
+            <span class="footer-dot" aria-hidden="true">·</span>
+            <a href="https://mscarabia.com" target="_blank" rel="noopener noreferrer" class="footer-link">mscarabia.com</a>
+            <span class="footer-dot" aria-hidden="true">·</span>
+            <a href="#" id="footer-privacy" class="footer-link footer-link--strong">Privacy</a>
+            <span class="footer-dot" aria-hidden="true">·</span>
+            <span class="footer-powered">Powered by <a href="https://aladhan.com" target="_blank" rel="noopener noreferrer" class="footer-link">Aladhan API</a></span>
         </div>
+        <a href="https://www.launchgood.com/v4/campaign/keep_quran_classes_free_for_500_students"
+           target="_blank" rel="noopener noreferrer" class="donate-bar" aria-label="Donate — Keep Quran Classes Free">
+            <span class="donate-bar-bg" aria-hidden="true"></span>
+            <svg class="donate-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <span class="donate-bar-text">Keep Quran Classes Free</span>
+            <span class="donate-bar-arrow" aria-hidden="true">→</span>
+        </a>
     </footer>
 </div>
 
@@ -2031,8 +2208,16 @@ document.addEventListener('keydown', e => {
     $('#privacy-ok').onclick  = () => { localStorage.setItem('wp_privacy_ok','1'); banner.classList.add('hidden'); };
     $('#privacy-link').onclick = e => { e.preventDefault(); openM('#m-privacy'); };
 $('#footer-privacy')?.addEventListener('click', e => { e.preventDefault(); openM('#m-privacy'); });
-$('#meeting-links-toggle')?.addEventListener('click', () => { const dd = $('#meeting-links-dropdown'); const btn = $('#meeting-links-toggle'); if (dd) { const open = dd.classList.toggle('hidden'); btn?.setAttribute('aria-expanded', !open); } });
-$('#meeting-links-toggle')?.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#meeting-links-toggle')?.click(); } });
+function toggleMeetingLinks(force) {
+    const dd = $('#meeting-links-dropdown');
+    const btn = $('#meeting-links-toggle');
+    if (!dd || !btn) return;
+    const willOpen = typeof force === 'boolean' ? force : !dd.classList.contains('open');
+    dd.classList.toggle('open', willOpen);
+    btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+}
+$('#meeting-links-toggle')?.addEventListener('click', () => toggleMeetingLinks());
+$('#meeting-links-toggle')?.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMeetingLinks(); } });
     // Auto-dismiss after 5 seconds
     setTimeout(() => { if (!localStorage.getItem('wp_privacy_ok')) { banner.classList.add('hidden'); } }, 5000);
 })();
@@ -2179,33 +2364,56 @@ function unlockCourse(pw) {
     const toggle = $('#meeting-links-toggle');
     const dd = $('#meeting-links-dropdown');
     if (toggle) toggle.classList.remove('hidden');
-    // Render links from cache if available (reload/reopen), otherwise fetch
+
+    function showSkeleton() {
+        if (!dd) return;
+        dd.classList.add('loading');
+        dd.innerHTML = Array.from({length: 5}, () => '<div class="ml-skeleton"></div>').join('');
+        dd.classList.add('open');
+        toggle?.setAttribute('aria-expanded', 'true');
+    }
+
     const cached = sessionStorage.getItem('wp_links');
     if (cached && dd && !_meetingLinks) {
-        try { _meetingLinks = JSON.parse(cached); _renderMeetingLinks(dd); } catch {}
+        try {
+            _meetingLinks = JSON.parse(cached);
+            dd.classList.remove('loading');
+            _renderMeetingLinks(dd);
+            toggleMeetingLinks(true);
+        } catch { showSkeleton(); }
     } else if (pw && dd && !_meetingLinks) {
+        showSkeleton();
         fetch(LINKS_API, { headers: { 'X-Course-Pw': pw } })
             .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
             .then(links => {
                 if (!Array.isArray(links) || !links.length) throw new Error('empty');
                 _meetingLinks = links;
                 sessionStorage.setItem('wp_links', JSON.stringify(links));
+                dd.classList.remove('loading');
                 _renderMeetingLinks(dd);
+                toggleMeetingLinks(true);
             })
             .catch(() => {
-                dd.innerHTML = '<div style="padding:8px 12px;font-size:0.72rem;color:var(--danger);">Could not load meeting links. <button onclick="unlockCourse(\'' + (pw||'') + '\')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.72rem;text-decoration:underline;">Retry</button></div>';
-                dd.classList.remove('hidden');
+                dd.classList.remove('loading');
+                dd.innerHTML = '<div style="padding:10px 12px;font-size:0.72rem;color:var(--danger);display:flex;align-items:center;gap:8px;border-radius:8px;">'
+                    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+                    + '<span>Could not load meeting links.</span>'
+                    + '<button onclick="unlockCourse(\'' + (pw||'') + '\')" style="margin-left:auto;background:none;border:1px solid var(--danger);color:var(--danger);cursor:pointer;font-size:0.68rem;padding:3px 10px;border-radius:6px;font-weight:600;">Retry</button>'
+                    + '</div>';
+                dd.classList.add('open');
+                toggle?.setAttribute('aria-expanded', 'true');
             });
     }
 }
 function _renderMeetingLinks(dd) {
     if (!_meetingLinks) return;
+    dd.innerHTML = '';
     _meetingLinks.forEach(l => {
         const a = document.createElement('a');
         a.href = l.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
         a.className = 'info-link meeting-link-item';
         const nm = document.createElement('span'); nm.className = 'meeting-link-name'; nm.textContent = l.name;
-        const jn = document.createElement('span'); jn.className = 'meeting-link-join'; jn.textContent = 'Join here →';
+        const jn = document.createElement('span'); jn.className = 'meeting-link-join'; jn.textContent = 'Join →';
         a.appendChild(nm); a.appendChild(jn);
         dd.appendChild(a);
     });
@@ -2216,11 +2424,10 @@ function lockCourse() {
     $('#course-unlocked-view').classList.remove('unlocked');
     $('#course-pw-input').value = '';
     if ($('#course-pw-hint')) $('#course-pw-hint').textContent = '';
-    // Clear meeting links from DOM, cache, and memory
     const toggle = $('#meeting-links-toggle');
     const dd = $('#meeting-links-dropdown');
     if (toggle) { toggle.classList.add('hidden'); toggle.setAttribute('aria-expanded', 'false'); }
-    if (dd) { dd.innerHTML = ''; dd.classList.add('hidden'); }
+    if (dd) { dd.innerHTML = ''; dd.classList.remove('open','loading'); }
     _meetingLinks = null;
     sessionStorage.removeItem('wp_links');
 }

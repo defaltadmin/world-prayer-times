@@ -2,6 +2,18 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.26.0] — 2026-06-21
+
+### Redesigned
+- **Add City button** — Dashed teal border, hover lift + glow, focus-visible outline, light theme overrides. Replaced inline margin with CSS margin.
+- **Footer** — Full redesign: structured meta row (JetBrains Mono, heart animation, dot separators), full-width donate shimmer bar (gradient + animated sheen, heart icon, gradient text, arrow slide on hover). Safe-area padding preserved. Reduced-motion + light-theme + mobile overrides included.
+- **Legend** — Chip-style items with JetBrains Mono uppercase labels, glowing dots (box-shadow), NOW dot pulse animation, hover states, light theme overrides, reduced-motion guard.
+- **Meeting Links accordion** — Chevron rotates 90° when expanded, loading skeleton (5 shimmer bars) while fetching, auto-opens on success, `aria-expanded` correctly toggles (was inverted), "No links available" empty state, retry button with icon. Fixed `hidden` class removed from initial HTML.
+
+### Fixed
+- **aria-expanded inversion** — Meeting Links toggle now correctly sets `"true"` when open, `"false"` when closed.
+- **Orphaned footer CSS removed** — Tag-level `footer` safe-area rule deleted (`.site-footer` now owns it).
+
 ## [1.25.4] — 2026-06-21
 
 ### Fixed
