@@ -232,6 +232,28 @@ Do NOT report these again. Verified across 12+ audit rounds:
 
 ---
 
+## Known Issue (needs investigation)
+
+### Backgrounds not rendering in browser
+The dot grid canvas and animated gradient background are NOT visible on the live site, despite:
+- HTML elements present (`#dot-grid` canvas, `body::before` pseudo-element)
+- CSS rules present (`opacity: 0.4` on canvas, gradient with 3% opacity)
+- JS init functions present (`initDotGrid` IIFE at line 2549, invoked with `resize()` + `requestAnimationFrame(draw)`)
+- Playwright headless check confirms: canvas exists (1280x720), `display: block`, `opacity: 0.4`, `reducedMotion: false`, gradient background computed correctly
+- No JS errors detected in source code
+- `prefers-reduced-motion` is NOT enabled
+- Tested in Chrome incognito — still invisible
+
+The effects were reportedly working in earlier versions. Something broke them but the code appears intact. Possible causes to investigate:
+1. CSS layer ordering — `body::before` has `z-index: -1`, maybe hidden behind `body` background
+2. Canvas rendering — `#dot-grid` at `z-index: 0` but `#app` at `z-index: 1` might cover it completely
+3. Canvas draw loop — the `draw()` function checks `_dotsDirty` and `allRest` flags, might never render if dots never move
+4. Missing CSS — check if the canvas or pseudo-element is hidden by a rule not found by grep
+
+The backgrounds are cosmetic but important for the "premium" feel. This is the #1 priority fix.
+
+---
+
 ## Deployment
 
 ```bash
