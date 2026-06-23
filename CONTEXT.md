@@ -1,6 +1,6 @@
 # World Prayer Times — Full Context
 
-**Version:** 1.25.3 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
+**Version:** 1.26.1 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
 
 **Stack:** Single-file vanilla JS, Aladhan API, Nominatim, Cloudflare Pages + Worker
 
@@ -182,7 +182,10 @@ All timezone math uses these utilities. No inline offset subtraction remains.
 
 | Version | Key Changes |
 |---------|-------------|
-| **1.25.3** | CSP Worker URL fix (wildcard→full), centerSel timezone bug, compCls dedup, Worker server-side hash |
+| **1.26.1** | Background fix: `--surface` moved to `html`, `body` transparent — dot grid + gradient now render |
+| **1.26.0** | Redesign: Add City polish, footer shimmer bar, legend chips, meeting links accordion with skeleton/chevron/aria |
+| **1.25.4** | Panel z-index fix (NOW line behind panel), meeting links error fallback with retry |
+| **1.25.3** | CSP Worker URL fix, centerSel timezone bug, compCls dedup, Worker server-side hash |
 | **1.25.2** | unlockCourse scope bug fix (pass pw as param, sessionStorage cache) |
 | **1.25.1** | Send raw password to Worker, hash server-side |
 | **1.25.0** | Meeting links served from Cloudflare Worker |
@@ -232,25 +235,11 @@ Do NOT report these again. Verified across 12+ audit rounds:
 
 ---
 
-## Known Issue (needs investigation)
+## Known Issue (fixed)
 
-### Backgrounds not rendering in browser
-The dot grid canvas and animated gradient background are NOT visible on the live site, despite:
-- HTML elements present (`#dot-grid` canvas, `body::before` pseudo-element)
-- CSS rules present (`opacity: 0.4` on canvas, gradient with 3% opacity)
-- JS init functions present (`initDotGrid` IIFE at line 2549, invoked with `resize()` + `requestAnimationFrame(draw)`)
-- Playwright headless check confirms: canvas exists (1280x720), `display: block`, `opacity: 0.4`, `reducedMotion: false`, gradient background computed correctly
-- No JS errors detected in source code
-- `prefers-reduced-motion` is NOT enabled
-- Tested in Chrome incognito — still invisible
-
-The effects were reportedly working in earlier versions. Something broke them but the code appears intact. Possible causes to investigate:
-1. CSS layer ordering — `body::before` has `z-index: -1`, maybe hidden behind `body` background
-2. Canvas rendering — `#dot-grid` at `z-index: 0` but `#app` at `z-index: 1` might cover it completely
-3. Canvas draw loop — the `draw()` function checks `_dotsDirty` and `allRest` flags, might never render if dots never move
-4. Missing CSS — check if the canvas or pseudo-element is hidden by a rule not found by grep
-
-The backgrounds are cosmetic but important for the "premium" feel. This is the #1 priority fix.
+### Backgrounds not rendering — FIXED in v1.26.1
+Root cause: `body { background: var(--surface) }` was opaque, painting over the fixed canvas (`#dot-grid`, z-index 0) and `body::before` gradient (z-index -1). z-index never mattered — the solid color was always on top.
+Fix: Moved `--surface` to `html`, set `body { background: transparent }`. Both backgrounds now render correctly.
 
 ---
 
