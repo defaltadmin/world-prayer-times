@@ -724,44 +724,32 @@
         .footer-powered { white-space: nowrap; }
         @keyframes heartBeat { 0%,100%{transform:scale(1)} 10%{transform:scale(1.18)} 20%{transform:scale(1)} 30%{transform:scale(1.12)} 40%{transform:scale(1)} }
 
-        /* Donate — full-width shimmer bar */
+        /* Donate — subtle bar */
         .donate-bar {
-            position: relative; overflow: hidden;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            padding: 12px 18px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 8px 14px; border-radius: 8px;
             text-decoration: none;
-            background: linear-gradient(135deg, rgba(16,185,129,0.18), rgba(45,212,191,0.12) 50%, rgba(56,189,248,0.18));
-            border: 1px solid rgba(45,212,191,0.35);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
-            transition: transform 0.2s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s, border-color 0.2s;
+            background: rgba(45,212,191,0.06);
+            border: 1px solid rgba(45,212,191,0.15);
+            transition: background 0.2s, border-color 0.2s;
         }
         .donate-bar:hover {
-            transform: translateY(-2px);
-            border-color: rgba(45,212,191,0.6);
-            box-shadow: 0 8px 24px rgba(45,212,191,0.22), inset 0 1px 0 rgba(255,255,255,0.12);
+            background: rgba(45,212,191,0.1);
+            border-color: rgba(45,212,191,0.3);
         }
         .donate-bar:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-        .donate-bar-bg {
-            position: absolute; inset: 0; pointer-events: none;
-            background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.18) 50%, transparent 75%);
-            background-size: 220% 100%;
-            animation: donateShimmer 3.2s linear infinite;
-        }
-        @keyframes donateShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-        .donate-bar-icon { width: 18px; height: 18px; color: #10b981; flex-shrink: 0; filter: drop-shadow(0 0 4px rgba(16,185,129,0.4)); }
+        .donate-bar-icon { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; opacity: 0.7; }
         .donate-bar-text {
-            font-size: 0.82rem; font-weight: 700; letter-spacing: 0.02em;
-            background: linear-gradient(90deg, #10b981, #2dd4bf);
-            -webkit-background-clip: text; background-clip: text; color: transparent;
+            font-size: 0.7rem; font-weight: 500; letter-spacing: 0.01em;
+            color: var(--muted);
         }
-        .donate-bar-arrow { color: #2dd4bf; font-weight: 700; font-size: 0.9rem; transition: transform 0.2s; }
-        .donate-bar:hover .donate-bar-arrow { transform: translateX(3px); }
+        .donate-bar:hover .donate-bar-text { color: var(--accent); }
 
         @media (prefers-reduced-motion: reduce) {
-            .donate-bar-bg { animation: none; display: none; }
             .footer-heart { animation: none; }
         }
-        [data-theme="light"] .donate-bar { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        [data-theme="light"] .donate-bar { background: rgba(13,148,136,0.06); border-color: rgba(13,148,136,0.15); }
+        [data-theme="light"] .donate-bar:hover { background: rgba(13,148,136,0.1); }
         @media (max-width: 520px) {
             .footer-meta { font-size: 0.62rem; gap: 4px 6px; }
             .donate-bar-text { font-size: 0.74rem; }
@@ -1097,12 +1085,10 @@
         </div>
         <a href="https://www.launchgood.com/v4/campaign/keep_quran_classes_free_for_500_students"
            target="_blank" rel="noopener noreferrer" class="donate-bar" aria-label="Donate — Keep Quran Classes Free">
-            <span class="donate-bar-bg" aria-hidden="true"></span>
             <svg class="donate-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
             <span class="donate-bar-text">Keep Quran Classes Free</span>
-            <span class="donate-bar-arrow" aria-hidden="true">→</span>
         </a>
     </footer>
 </div>
