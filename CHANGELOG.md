@@ -2,6 +2,11 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.26.1] — 2026-06-23
+
+### Fixed
+- **Backgrounds invisible (dot grid + gradient)** — Root cause: `body { background: var(--surface) }` was opaque, painting over the fixed canvas (`#dot-grid`, z-index 0) and `body::before` gradient (z-index -1). Moved `--surface` to `html`, set `body { background: transparent }`. Both backgrounds now render correctly.
+
 ## [1.26.0] — 2026-06-21
 
 ### Redesigned
