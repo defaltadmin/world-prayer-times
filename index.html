@@ -38,7 +38,7 @@
     <style>
         :root {
             --label-w: 140px;
-            --tl-min: min(1400px, 80vw);
+            --tl-min: max(1000px, min(1400px, 80vw));
             --surface: #091117;
             --card: #0d1922;
             --border: #1a2a36;
@@ -81,7 +81,7 @@
         body {
             font-family: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
             background: transparent; color: var(--text);
-            min-height: 100vh; overflow-x: hidden;
+            min-height: 100vh; min-height: 100dvh; overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             transition: color 0.3s ease;
         }
@@ -99,10 +99,15 @@
         .loader-text { font-size: 0.85rem; color: var(--muted); }
 
         /* ── Loader crescent ──────────────────────────────── */
-        .loader-crescent { animation: crescentPulse 2s ease-in-out infinite; }
+        .loader-crescent { animation: crescentPulse 2s ease-in-out infinite, crescentSpin 4s linear infinite; }
         @keyframes crescentPulse {
-            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
-            50% { transform: scale(1.05) rotate(15deg); opacity: 1; }
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+        @keyframes crescentSpin {
+            0% { filter: drop-shadow(0 0 4px rgba(45,212,191,0.3)); }
+            50% { filter: drop-shadow(0 0 12px rgba(45,212,191,0.6)); }
+            100% { filter: drop-shadow(0 0 4px rgba(45,212,191,0.3)); }
         }
 
         /* ── Skeleton rows ─────────────────────────────── */
@@ -136,12 +141,14 @@
         /* ── Hero Countdown ──────────────────────────────── */
         .hero-countdown {
             display: flex; flex-direction: column; align-items: center; gap: 4px;
-            padding: 16px 12px 12px; border-bottom: 1px solid var(--border);
+            padding: 16px 12px 12px; min-height: 92px; justify-content: center;
+            border-bottom: 1px solid var(--border);
             background: linear-gradient(180deg, rgba(45,212,191,0.04), transparent);
         }
+        .hero-countdown:empty { min-height: 0; padding: 0; border: none; }
         .hero-prayer-name {
-            font-size: var(--fs-sm); font-weight: 600; color: var(--accent);
-            text-transform: uppercase; letter-spacing: 0.1em;
+            font-size: var(--fs-lg); font-weight: 700; color: var(--accent);
+            text-transform: uppercase; letter-spacing: 0.06em;
         }
         .hero-time {
             font-family: 'JetBrains Mono', monospace;
@@ -149,8 +156,13 @@
             line-height: 1.1; letter-spacing: -0.02em;
         }
         .hero-city {
-            font-size: var(--fs-xs); color: var(--muted);
+            font-size: var(--fs-sm); color: var(--muted);
         }
+        .hero-hint {
+            font-size: var(--fs-sm); color: var(--muted); cursor: pointer;
+            transition: color 0.2s;
+        }
+        .hero-hint:hover { color: var(--accent); }
         @media (max-width: 640px) {
             .hero-countdown { padding: 12px 8px 8px; }
             .hero-time { font-size: 1.75rem; }
@@ -390,7 +402,7 @@
         .status-time { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; flex-shrink: 0; }
 
         /* ── Timeline ────────────────────────────────────── */
-        .tl-scroll { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
+        .tl-scroll { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; flex: 1; }
         .tl-scroll::-webkit-scrollbar { height: 4px; }
         .tl-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
@@ -414,8 +426,10 @@
             display: flex; align-items: stretch; min-height: 58px;
             border-bottom: 1px solid var(--border); background: var(--card);
             animation: cityRowIn 0.3s ease-out;
+            transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.3s ease;
         }
         @keyframes cityRowIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .city-row.removing { opacity: 0; transform: translateX(-20px); max-height: 0; min-height: 0; overflow: hidden; }
         .city-row:hover { background: rgba(255,255,255,0.03); }
         [data-theme="light"] .city-row:hover { background: rgba(0,0,0,0.02); }
         .city-label {
@@ -463,8 +477,8 @@
         [data-theme="light"] .prayer-block.fajr    { background: rgba(6,182,212,0.75); color: #0f2940; }
         [data-theme="light"] .prayer-block.dhuhr   { background: rgba(251,191,36,0.75); color: #0f2940; }
         [data-theme="light"] .prayer-block.asr     { background: rgba(251,146,60,0.75); color: #0f2940; }
-        [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.7); color: #fff; }
-        [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.7); color: #fff; }
+        [data-theme="light"] .prayer-block.maghrib { background: rgba(248,113,113,0.85); color: #0f2940; }
+        [data-theme="light"] .prayer-block.isha    { background: rgba(167,139,250,0.85); color: #0f2940; }
 
         /* ── Class event overlays ────────────────────────── */
         .class-ev {
@@ -941,7 +955,7 @@
 <div id="bg-pattern"></div>
 <canvas id="dot-grid" aria-hidden="true"></canvas>
 
-<div id="app" style="position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;">
+<div id="app" style="position:relative;z-index:1;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;">
 
     <button id="fab-add" title="Add city" aria-label="Add city"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 
@@ -984,6 +998,9 @@
         <div class="hero-prayer-name" id="hero-prayer-name"></div>
         <div class="hero-time" id="hero-time"></div>
         <div class="hero-city" id="hero-city"></div>
+        <div class="hero-hint" id="hero-hint" style="display:none;" onclick="$('#btn-location')?.click()">
+            Tap the location button for your countdown →
+        </div>
     </div>
 
     <!-- ══════════════ LEGEND ══════════════ -->
@@ -1368,6 +1385,11 @@ const PRAYER_NAMES = {
     en: {Fajr:'Fajr',Dhuhr:'Dhuhr',Asr:'Asr',Maghrib:'Maghrib',Isha:'Isha'},
     ar: {Fajr:'فجر',Dhuhr:'ظهر',Asr:'عصر',Maghrib:'مغرب',Isha:'عشاء'},
 };
+// Short codes for narrow prayer blocks (fit in 28px)
+const PRAYER_SHORT = {
+    en: {Fajr:'F',Dhuhr:'D',Asr:'A',Maghrib:'M',Isha:'I'},
+    ar: {Fajr:'ف',Dhuhr:'ظ',Asr:'ع',Maghrib:'م',Isha:'ش'},
+};
 const SUBJECTS = {
     en: {Fiqh:'Fiqh',Tafseer:'Tafseer',Seerah:'Seerah',Adab:'Adab',Arabic:'Arabic',Hadith:'Hadith',Aqaaid:'Aqaaid'},
     ar: {Fiqh:'فقه',Tafseer:'تفسير',Seerah:'سيرة',Adab:'أدب',Arabic:'عربي',Hadith:'حديث',Aqaaid:'عقائد'},
@@ -1687,7 +1709,7 @@ async function renderRow(city) {
         b.style.left  = pct(localH) + '%';
         const maxWidthPct = 100 - pct(localH);
         b.style.width = Math.min(pct(Math.max(durHours, 0.15)), maxWidthPct) + '%';
-        b.textContent = PRAYER_NAMES[lang]?.[name] || name;
+        b.textContent = PRAYER_SHORT[lang]?.[name] || name.charAt(0);
         // Enhanced tooltip with prayer window info
         const winEnd = pd.pw?.[name];
         const winEndLocal = winEnd !== undefined ? utcToLocal(winEnd, pd.off) : localH + durHours;
@@ -2023,10 +2045,19 @@ function updateHeaderDate() {
 
 /* ── Countdown to next prayer ────────────────────────────────────── */
 async function updateCD() {
-    if (!userCity) return;
-    const pd  = await fetchPrayer(userCity);
+    const heroName = $('#hero-prayer-name');
+    const heroTime = $('#hero-time');
+    const heroCity = $('#hero-city');
+    const heroHint = $('#hero-hint');
+
+    // Fallback: use first city if no userCity set
+    const city = userCity || cities[0];
+    if (!city) { if (heroHint) heroHint.style.display = ''; return; }
+    if (heroHint) heroHint.style.display = 'none';
+
+    const pd  = await fetchPrayer(city);
     // Always use API timezone for accurate local time
-    const tz  = pd.tz || userCity.tz;
+    const tz  = pd.tz || city.tz;
     const lh  = getLocalHours(tz);
 
     const ps  = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
@@ -2045,12 +2076,9 @@ async function updateCD() {
     if (cdTxt) cdTxt.textContent = `${t('next')} ${PRAYER_NAMES[lang]?.[next]||next} ${h}h ${m}m ${s}s`;
 
     // Hero countdown
-    const heroName = $('#hero-prayer-name');
-    const heroTime = $('#hero-time');
-    const heroCity = $('#hero-city');
     if (heroName) heroName.textContent = PRAYER_NAMES[lang]?.[next] || next;
     if (heroTime) heroTime.textContent = `${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
-    if (heroCity) heroCity.textContent = userCity?.name || '';
+    if (heroCity) heroCity.textContent = city?.name || '';
 }
 
 /* ── Drag & resize ────────────────────────────────────────────────── */
@@ -2722,8 +2750,17 @@ function renderSearchItems(items, sr, showCountry=false) {
 $('#rows').onclick = e => {
     const b = e.target.closest('.remove-btn');
     if (b && cities.length > 1) {
-        cities = cities.filter(c => c.id !== b.dataset.id);
-        saveCities(); cache = {}; renderAll();
+        const row = b.closest('.city-row');
+        if (row) {
+            row.classList.add('removing');
+            setTimeout(() => {
+                cities = cities.filter(c => c.id !== b.dataset.id);
+                saveCities(); cache = {}; renderAll();
+            }, 250);
+        } else {
+            cities = cities.filter(c => c.id !== b.dataset.id);
+            saveCities(); cache = {}; renderAll();
+        }
     }
 };
 
@@ -2813,7 +2850,8 @@ function hideLoader() {
         setTimeout(() => l.remove(), 600);
     }
 }
-setTimeout(hideLoader, 1500);
+// Safety: hide loader after 2s even if renderAll didn't (shouldn't happen)
+setTimeout(hideLoader, 2000);
 window.addEventListener('error', () => { hideLoader(); });
 
 // Render right away (no waiting for geolocation)
