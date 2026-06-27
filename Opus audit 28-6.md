@@ -206,11 +206,20 @@ The footer (line 1077) is actually one of the better-resolved areas (donate bar,
 - [x] 3.10 — Emoji → SVG book icon in help modal
 
 ### Phase 4: Responsive — DONE
-- [x] 4.1 — PC timeline width (`min(1400px, 80vw)`)
+- [x] 4.1 — PC timeline width (`max(1000px, min(1400px, 80vw))`)
 - [x] 4.2 — Tablet breakpoint (769-1024px, `--label-w: 120px`)
 - [x] 4.3 — FAB safe-area (`bottom: max(16px, env(safe-area-inset-bottom))`)
 - [x] 4.4 — Landscape: collapse legend on `max-height: 480px`
 - [x] 4.5 — `renderToken` guard already existed (`_renderGen`)
+
+### Round 2 — DONE
+- [x] R2-1 — Hero countdown never empty (fallback to `cities[0]` + min-height:92px + hint text)
+- [x] R2-2 — Timeline flex-grow fills viewport void
+- [x] R2-4 — Prayer-block short codes (F/D/A/M/I) instead of clipped full names
+- [x] R2-5 — tl-min floor: `max(1000px, min(1400px, 80vw))`
+- [x] R2-6 — Light-theme Maghrib/Isha: dark text + 0.85 opacity
+- [x] R2-7 — `100dvh` with `100vh` fallback
+- [x] R2-9 — Loader safety timeout 2s (renderAll hides on completion)
 
 ---
 

@@ -1,6 +1,6 @@
 # World Prayer Times — Full Context
 
-**Version:** 1.27.0 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
+**Version:** 1.27.1 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
 
 **Stack:** Single-file vanilla JS, Aladhan API, Nominatim, Cloudflare Pages + Worker
 
@@ -182,6 +182,7 @@ All timezone math uses these utilities. No inline offset subtraction remains.
 
 | Version | Key Changes |
 |---------|-------------|
+| **1.27.1** | Round 2: hero never-empty, prayer short codes, tl-min floor, light contrast, 100dvh, loader timing |
 | **1.27.0** | Opus audit Phase 1-4: brand color unified (teal), hero countdown, prayer contrast 0.85, haptics, type scale tokens, theme transition, responsive (tablet/landscape/FAB safe-area), og:image, apple-touch-icon |
 | **1.26.1** | Background fix: `--surface` moved to `html`, `body` transparent — dot grid + gradient now render |
 | **1.26.0** | Redesign: Add City polish, footer shimmer bar, legend chips, meeting links accordion with skeleton/chevron/aria |
