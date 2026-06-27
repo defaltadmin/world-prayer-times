@@ -98,6 +98,19 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .loader-text { font-size: 0.85rem; color: var(--muted); }
 
+        /* ── Loader crescent ──────────────────────────────── */
+        .loader-crescent { animation: crescentPulse 2s ease-in-out infinite; }
+        @keyframes crescentPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+            50% { transform: scale(1.05) rotate(15deg); opacity: 1; }
+        }
+
+        /* ── Skeleton rows ─────────────────────────────── */
+        .skeleton-row { pointer-events: none; }
+        .skeleton-row .city-label { min-width: var(--label-w); }
+        @keyframes skShimmer { 0% { opacity: 0.3; } 50% { opacity: 0.6; } 100% { opacity: 0.3; } }
+        .skeleton-row div { animation: skShimmer 1.5s ease-in-out infinite; }
+
         /* ── Islamic pattern background (CSS SVG, no canvas) ──── */
         #bg-pattern {
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -179,7 +192,8 @@
 
         /* NOW line pulse */
         @keyframes nowPulse { 0%,100% { box-shadow: 0 0 10px var(--danger); } 50% { box-shadow: 0 0 20px var(--danger), 0 0 40px rgba(248,113,113,0.3); } }
-        .now-line { animation: nowPulse 3s ease-in-out infinite; }
+        .now-line { animation: nowPulse 3s ease-in-out infinite; animation-play-state: running; }
+        .now-line.paused { animation-play-state: paused; }
 
         /* Chip hover */
         .chip { transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); }
@@ -399,7 +413,9 @@
         .city-row {
             display: flex; align-items: stretch; min-height: 58px;
             border-bottom: 1px solid var(--border); background: var(--card);
+            animation: cityRowIn 0.3s ease-out;
         }
+        @keyframes cityRowIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
         .city-row:hover { background: rgba(255,255,255,0.03); }
         [data-theme="light"] .city-row:hover { background: rgba(0,0,0,0.02); }
         .city-label {
@@ -431,7 +447,7 @@
             position: absolute; top: 4px; bottom: 18px; border-radius: 3px;
             display: flex; align-items: center; justify-content: center;
             font-weight: 700; font-size: clamp(0.5rem, 1.2vw, 0.7rem); letter-spacing: 0.04em;
-            cursor: pointer; z-index: 2; overflow: hidden; text-overflow: ellipsis; min-width: 22px;
+            cursor: pointer; z-index: 2; overflow: hidden; text-overflow: ellipsis; min-width: 28px;
             writing-mode: horizontal-tb; text-orientation: mixed;
             text-transform: uppercase; border-left: 3px solid;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
@@ -621,6 +637,8 @@
             backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: all 0.2s;
         }
         .modal-bg.open { opacity: 1; visibility: visible; }
+        .modal-bg.closing { opacity: 0; }
+        .modal-bg.closing .modal { transform: scale(0.95); }
         .modal {
             background: var(--card); border: 1px solid var(--border); border-radius: 12px;
             padding: 20px; max-width: 420px; width: 92%; max-height: 85vh; overflow-y: auto;
@@ -827,6 +845,9 @@
             #bg-pattern { display: none; }
             #dot-grid { display: none; }
             body::before { animation: none !important; }
+            /* Keep functional animations (loader communicates state) */
+            .loader-crescent { animation: crescentPulse 2s ease-in-out infinite !important; }
+            .ml-skeleton::after { animation: mlSkShimmer 1.5s ease-in-out infinite !important; }
         }
         /* ── RTL: force timeline LTR ────────────────────── */
         #tl-scroll, .ruler, .tl-scroll { direction: ltr; }
@@ -903,7 +924,15 @@
 <noscript><p style="text-align:center;padding:40px;font-family:sans-serif;color:#d0dce6;background:#091117;">This app requires JavaScript to display prayer times.</p></noscript>
 <!-- Loading screen -->
 <div id="loader">
-    <div class="loader-spinner"></div>
+    <svg class="loader-crescent" width="48" height="48" viewBox="0 0 48 48">
+        <defs>
+            <mask id="crescent-mask">
+                <circle cx="24" cy="24" r="20" fill="white"/>
+                <circle cx="30" cy="20" r="16" fill="black"/>
+            </mask>
+        </defs>
+        <circle cx="24" cy="24" r="20" fill="var(--accent)" mask="url(#crescent-mask)" opacity="0.9"/>
+    </svg>
     <div class="loader-text" id="loader-text">Loading prayer times…</div>
     <div class="loader-bar-wrap"><div class="loader-bar" id="loader-bar"></div></div>
 </div>
@@ -1659,7 +1688,10 @@ async function renderRow(city) {
         const maxWidthPct = 100 - pct(localH);
         b.style.width = Math.min(pct(Math.max(durHours, 0.15)), maxWidthPct) + '%';
         b.textContent = PRAYER_NAMES[lang]?.[name] || name;
-        b.title = `${name}: ${fmtH(localH)} – ${fmtH(localH + durHours)}`;
+        // Enhanced tooltip with prayer window info
+        const winEnd = pd.pw?.[name];
+        const winEndLocal = winEnd !== undefined ? utcToLocal(winEnd, pd.off) : localH + durHours;
+        b.title = `${PRAYER_NAMES[lang]?.[name] || name}: ${fmtH(localH)} – ${fmtH(winEndLocal)}`;
         b.setAttribute('aria-label', `${name}: ${fmtH(localH)} to ${fmtH(localH + durHours)}`);
         b.setAttribute('tabindex', '0');
         b.setAttribute('role', 'button');
@@ -1760,7 +1792,16 @@ async function renderAll() {
     const gen = ++_renderGen;
     const c = $('#rows');
     const sc = $('#tl-scroll'), pos = sc?.scrollLeft || 0;
+
+    // Show skeleton rows while loading
+    const skeletonCount = Math.min(cities.length || 1, 5);
     c.innerHTML = '';
+    for (let i = 0; i < skeletonCount; i++) {
+        const sk = document.createElement('div');
+        sk.className = 'city-row skeleton-row';
+        sk.innerHTML = '<div class="city-label"><span class="city-name" style="background:var(--border);border-radius:4px;width:60px;height:12px;display:inline-block;"></span></div><div style="flex:1;position:relative;"><div style="position:absolute;left:10%;width:15%;height:60%;top:15%;background:var(--border);border-radius:3px;opacity:0.3;"></div><div style="position:left:30%;width:12%;height:60%;top:15%;background:var(--border);border-radius:3px;opacity:0.2;"></div></div>';
+        c.appendChild(sk);
+    }
     const all = [...cities];
     const total = all.length || 1; let done = 0;
     const updLoad = () => {
@@ -2269,7 +2310,10 @@ function trapFocus(modalEl) {
 }
 function openM(id)  { _lastFocus = document.activeElement; $(id).classList.add('open'); const first = $(id).querySelector('button,input,[tabindex]'); if (first) setTimeout(() => first.focus(), 50); }
 function closeM(id) {
-    $(id).classList.remove('open');
+    const el = $(id);
+    el.classList.add('closing');
+    el.classList.remove('open');
+    setTimeout(() => { el.classList.remove('closing'); }, 300);
     if (id === '#m-addcity') { const s = $('#city-search'); if (s) s.value = ''; const sr = $('#search-results'); if (sr) sr.innerHTML = ''; }
     if (_lastFocus && _lastFocus.focus) { _lastFocus.focus(); _lastFocus = null; }
 }
@@ -2782,6 +2826,12 @@ updateUI();
 updateHeaderDate();
 setInterval(tickClocks, 1000);
 setTimeout(() => { if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); }, 2000);
+
+// Pause NOW-line pulse when not visible (battery optimization)
+const _nowLine = $('#now-line');
+if (_nowLine && 'IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => { _nowLine.classList.toggle('paused', !e.isIntersecting); }, { threshold: 0 }).observe(_nowLine);
+}
 
 // Refresh at local midnight instead of every 30 min
 function scheduleMidnightRefresh() {
