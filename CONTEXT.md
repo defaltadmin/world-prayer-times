@@ -1,6 +1,6 @@
 # World Prayer Times — Full Context
 
-**Version:** 1.26.1 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
+**Version:** 1.27.0 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
 
 **Stack:** Single-file vanilla JS, Aladhan API, Nominatim, Cloudflare Pages + Worker
 
@@ -182,6 +182,7 @@ All timezone math uses these utilities. No inline offset subtraction remains.
 
 | Version | Key Changes |
 |---------|-------------|
+| **1.27.0** | Opus audit Phase 1-4: brand color unified (teal), hero countdown, prayer contrast 0.85, haptics, type scale tokens, theme transition, responsive (tablet/landscape/FAB safe-area), og:image, apple-touch-icon |
 | **1.26.1** | Background fix: `--surface` moved to `html`, `body` transparent — dot grid + gradient now render |
 | **1.26.0** | Redesign: Add City polish, footer shimmer bar, legend chips, meeting links accordion with skeleton/chevron/aria |
 | **1.25.4** | Panel z-index fix (NOW line behind panel), meeting links error fallback with retry |
@@ -199,7 +200,7 @@ All timezone math uses these utilities. No inline offset subtraction remains.
 
 ---
 
-## Audit Trail (84 fixed items)
+## Audit Trail (102 fixed items)
 
 Do NOT report these again. Verified across 12+ audit rounds:
 
@@ -211,6 +212,9 @@ Do NOT report these again. Verified across 12+ audit rounds:
 42–56: Visual overhaul (palette, font, NOW line, gridlines, 15-min snap, spotlight, mobile, progress, animations, prayer overflow, CSP clean, Friday removed, blocks 30min, scroll-to-now removed, palette reverted)
 57–74: Popup viewport clamp, FAB color, coords 1dp, CSP cleaned, privacy banner, iCal escaping, focus trap, ARIA, Safari AbortSignal, scroll sync, AudioContext unlock, prayer text horizontal, coach-mark, privacy link, volume slider, iCal fold, dead click handler, ringPulse keyframe
 75–84: S/alias dual-state removed, renderClassesRow London offset, meeting links toggle a11y, sweepLogo RAF removed, mobile touch targets, city name overflow, Teams links behind password gate, unlockCourse scope fix, raw password to Worker, Worker server-side hash, CSP Worker URL fix, centerSel timezone fix, compCls timestamp dedup
+85–90 (Opus v1.27.0): Brand color unified (teal), duplicate prayer-block CSS removed, theme-color synced, API fallback toast, dot-grid RAF loop stop, og:image meta tags
+91–96 (Opus v1.27.0): Type scale tokens, hero countdown, prayer contrast 0.85, haptics (vibrate), focus-visible FAB+meeting-links, theme transition
+97–102 (Opus v1.27.0): backdrop-filter 16px, apple-touch-icon, emoji→SVG, tablet breakpoint, FAB safe-area, landscape legend collapse
 
 ---
 
@@ -246,14 +250,14 @@ Fix: Moved `--surface` to `html`, set `body { background: transparent }`. Both b
 ## Deployment
 
 ```bash
-# Frontend — auto-deploys to prayer.mscarabia.com from main branch
-git push origin master:main
+# Frontend — auto-deploys to prayer.mscarabia.com on push to main
+git push origin main
 
 # Worker — deploys to prayer-times-links.info-mscarabia.workers.dev
 cd worker && wrangler deploy
 ```
 
-**Single branch model:** `origin/main` is the only remote branch. Default branch on GitHub is `main`. Cloudflare Pages tracks `main` for production.
+**Single branch:** `main` — push to deploy.
 
 ---
 
