@@ -145,6 +145,7 @@
             border-bottom: 1px solid var(--border);
             background: linear-gradient(180deg, rgba(45,212,191,0.04), transparent);
         }
+        .hero-countdown { transition: min-height 0.25s ease, padding 0.25s ease; }
         .hero-countdown:empty { min-height: 0; padding: 0; border: none; }
         .hero-prayer-name {
             font-size: var(--fs-lg); font-weight: 700; color: var(--accent);
@@ -154,6 +155,7 @@
             font-family: 'JetBrains Mono', monospace;
             font-size: var(--fs-hero); font-weight: 700; color: var(--heading);
             line-height: 1.1; letter-spacing: -0.02em;
+            font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
         }
         .hero-city {
             font-size: var(--fs-sm); color: var(--muted);
@@ -430,6 +432,11 @@
         }
         @keyframes cityRowIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
         .city-row.removing { opacity: 0; transform: translateX(-20px); max-height: 0; min-height: 0; overflow: hidden; }
+        .city-row:nth-child(2) { animation-delay: 0.03s; }
+        .city-row:nth-child(3) { animation-delay: 0.06s; }
+        .city-row:nth-child(4) { animation-delay: 0.09s; }
+        .city-row:nth-child(5) { animation-delay: 0.12s; }
+        .city-row:nth-child(n+6) { animation-delay: 0.15s; }
         .city-row:hover { background: rgba(255,255,255,0.03); }
         [data-theme="light"] .city-row:hover { background: rgba(0,0,0,0.02); }
         .city-label {
@@ -461,7 +468,7 @@
             position: absolute; top: 4px; bottom: 18px; border-radius: 3px;
             display: flex; align-items: center; justify-content: center;
             font-weight: 700; font-size: clamp(0.5rem, 1.2vw, 0.7rem); letter-spacing: 0.04em;
-            cursor: pointer; z-index: 2; overflow: hidden; text-overflow: ellipsis; min-width: 28px;
+            cursor: pointer; z-index: 2; overflow: hidden; min-width: 28px; white-space: nowrap;
             writing-mode: horizontal-tb; text-orientation: mixed;
             text-transform: uppercase; border-left: 3px solid;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
@@ -859,9 +866,12 @@
             #bg-pattern { display: none; }
             #dot-grid { display: none; }
             body::before { animation: none !important; }
-            /* Keep functional animations (loader communicates state) */
+            #app, .city-row { animation: none !important; }
+            .hero-countdown { transition: none !important; }
+            /* Keep functional animations (loader + skeletons communicate state) */
             .loader-crescent { animation: crescentPulse 2s ease-in-out infinite !important; }
             .ml-skeleton::after { animation: mlSkShimmer 1.5s ease-in-out infinite !important; }
+            .skeleton-row div { animation: skShimmer 1.5s ease-in-out infinite !important; }
         }
         /* ── RTL: force timeline LTR ────────────────────── */
         #tl-scroll, .ruler, .tl-scroll { direction: ltr; }

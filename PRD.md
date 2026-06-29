@@ -5,57 +5,57 @@
 A single-page prayer times coordination tool for Muslims worldwide. Users can see prayer times for multiple cities on a 24-hour visual timeline, find safe meeting windows that don't conflict with Salah, manage a class schedule, and export to calendar.
 
 **Live:** https://prayer.mscarabia.com
-**Version:** 1.15.0
-**Stack:** Vanilla HTML/CSS/JS (single file, ~2300 lines), Aladhan API, Nominatim geocoding, Cloudflare Pages
+**Version:** 1.17.1
+**Stack:** Vanilla HTML/CSS/JS (single file, ~2560 lines), Aladhan API, Nominatim geocoding, Cloudflare Pages
 
 ## Core Features
 
 ### 1. Prayer Times Timeline
 - 24-hour horizontal timeline with stacked city rows
 - Colored blocks for each prayer (Fajr=cyan, Dhuhr=gold, Asr=orange, Maghrib=red, Isha=purple)
-- Fixed 30-minute visual blocks per prayer
+- Fixed 30-minute visual blocks per prayer (intentionally decoupled from conflict detection windows)
 - Sunrise marker (yellow vertical line)
-- Red NOW line showing current time across all rows
+- Red NOW line showing current time across all rows (pure CSS calc, continuous across ruler + timeline)
 - Ruler with hour labels above the timeline
+- 30-minute dotted gridlines for drag reference
 
 ### 2. Multi-City Support
 - 5 preset cities (London, Riyadh, Mumbai, Brussels, New York)
 - 8 additional cities in the pool (Dubai, Istanbul, Cairo, Lagos, Jakarta, Singapore, Karachi, KL)
-- Add any city worldwide via Nominatim geocoding search
+- Add any city worldwide via Nominatim geocoding search (400ms debounce + 1s rate limit)
 - Custom cities saved to localStorage (capped at 20)
 - Each city shows: name, live clock, UTC offset
 - Remove cities (minimum 1 required)
 
 ### 3. Conflict Detection
-- Draggable cyan selection bar on the timeline
+- Draggable cyan selection bar on the timeline (15-minute snapping)
 - Resize handles on left/right edges
-- Keyboard controls (Arrow keys to move, [ ] to resize, Shift for 1h step)
+- Keyboard controls (Arrow keys step 0.25h, [ ] resize, Shift+Arrow step 1h)
 - Status badge: green "Safe Window" or red "Conflict: [prayer] ([city])"
-- Conflict uses full prayer windows (pw), not just the 30-min visual blocks
+- Conflict uses full prayer windows (pw) from API, not just the 30-min visual blocks
 - Deduplicates conflicts, shows max 3 with overflow count
 
 ### 4. Course Panel (Sannatayn & Tafseer)
 - Password-gated access (hash-based, stored in sessionStorage)
-- Class schedule with 13 slots across the week
-- Enrolled classes shown as bottom-band overlays on timeline
+- Class schedule with 13 slots across the week (verified against TQG PDF)
+- Enrolled classes shown as bottom-band overlays on timeline (filtered by London day-of-week)
 - Class timetable with checkbox toggles per class
 - Next class countdown
 - Quick links: WhatsApp groups, timetable, meeting links, recording links
-- Attendance and deposit info cards
 
 ### 5. iCal Export
 - Exports enrolled class events as weekly recurring (.ics)
 - Exports selected safe meeting window
-- RFC 5545 compliant: RRULE, DTSTAMP, escaped descriptions, line folding at 73 chars
+- RFC 5545 compliant: RRULE, DTSTAMP, escaped descriptions/summaries, line folding at 72 chars
 
 ### 6. Notifications
 - Browser Notification API, 5 minutes before each prayer
 - Bell icon toggle in card nav menu
 - iOS warning toast (tab must stay open)
-- Timer tracking with cleanup on disable
+- Timer tracking (`_notifTimers[]`) with cleanup on disable
 
 ### 7. Dark/Light Theme
-- CSS custom properties for all colors
+- CSS custom properties for all colors (teal/cyan palette)
 - Toggle persists to localStorage
 - Updates `<meta name="color-scheme">` for browser UI
 - Glass morphism effects (blur, saturate, gradient overlay, inset highlight)
@@ -68,29 +68,39 @@ A single-page prayer times coordination tool for Muslims worldwide. Users can se
 - Hijri date in header
 
 ### 9. Location Detection
-- Dismissible floating popup prompts new users for geolocation
-- "Enable" triggers browser permission, "Not now" dismisses
+- Non-blocking coach-mark overlay prompts new users (no dark overlay, soft suggestion)
+- "Enable" triggers browser permission, "Skip for now" dismisses
 - Choice remembered via `wp_loc_prompted` in localStorage
 - Fallback: browser timezone with London coordinates
 - Header location button as persistent fallback
-- Coordinates rounded to 3 decimal places, stored locally only
+- Coordinates rounded to 1 decimal place (~11km), stored locally only
 
 ### 10. Privacy
 - No data collection, no analytics, no cookies
-- Dismissible privacy banner on first visit
+- Dismissible privacy banner on first visit (auto-hide does NOT fake consent)
 - Full privacy modal with details
 - localStorage only for preferences (cities, theme, language, enrolled)
+
+### 11. Accessibility
+- `role="main"` and `aria-label` on timeline region
+- `aria-label` on all interactive elements (prayer blocks, resize handles, buttons)
+- Keyboard navigation (arrow keys, Tab, Escape, [/] resize)
+- Focus trap on all modals and card nav menu
+- Focus restore on modal close
+- `aria-live="polite"` on status badge
+- Touch targets ≥44px on coarse pointer devices
+- `prefers-reduced-motion` respected (animations disabled)
 
 ## Technical Details
 
 ### API Integration
 - **Aladhan API** (`api.aladhan.com/v1/timings/`) — prayer times by coordinates
-  - 10-second timeout via AbortSignal
+  - 10-second timeout via `AbortSignal.timeout()` (Safari feature-detected)
   - Cached per city+date+method key
   - Fallback estimated times on error
 - **Nominatim** (`nominatim.openstreetmap.org/search`) — city geocoding
   - 400ms debounce + 1s rate limit between requests
-  - AbortController cancels stale requests
+  - `AbortController` cancels stale requests
   - Results sanitized (HTML tags, bidi chars stripped)
 
 ### Data Storage (localStorage)
@@ -109,24 +119,25 @@ A single-page prayer times coordination tool for Muslims worldwide. Users can se
 | `wp_loc_prompted` | Location prompt shown |
 
 ### Security
-- CSP via meta tag + Cloudflare _headers (script-src, connect-src whitelists)
+- CSP via meta tag + Cloudflare _headers (Aladhan + Nominatim only)
 - X-Frame-Options: DENY
 - Geocoded names sanitized (HTML, quotes, bidi chars stripped)
 - Password hash pre-computed (never plaintext in source)
 - Rate limiting on Nominatim (1 req/sec)
+- AudioContext pre-armed on first user interaction (pointerdown/keydown)
 
 ### Performance
 - Non-render-blocking fonts (media="print" onload swap)
-- RAF idle skip (document.hidden check)
 - Dot grid canvas with dirty flag optimization
 - Resize debounced (150ms for dot grid, 100ms for selection)
 - Glass blur reduced on mobile (12px vs 24px)
+- Touch effects disabled on coarse pointer devices
 
 ## Known Constraints
 - Single-file architecture (no build step, no npm runtime deps)
 - Cloudflare Pages deployment (static hosting only)
-- Arabic font (Amiri) lazy-loaded only when course panel opens
-- CSP requires `'unsafe-inline'` for inline scripts/styles
+- CSP requires `'unsafe-inline'` for inline scripts/styles (nonces not practical on CF Pages)
+- 3-5 cities doesn't warrant virtualization
 
 ## Testing Focus Areas
 
@@ -149,19 +160,22 @@ A single-page prayer times coordination tool for Muslims worldwide. Users can se
 - Custom cities cap (20 max, oldest removed)
 - localStorage quota exceeded
 - Geolocation denied → fallback to browser timezone
+- Safari (AbortSignal.timeout feature detection)
 
 ### Mobile
 - Touch targets ≥44px
 - Horizontal scroll timeline
 - Card nav slide-out menu
-- Glass blur reduced
+- Glass blur reduced (12px)
 - Selection bar drag via touch events
+- FAB add-city button (fixed bottom-right)
+- Location coach-mark as bottom-sheet
 
 ### Accessibility
 - role="main" on timeline region
 - aria-label on all interactive elements
 - Keyboard navigation (arrow keys, Tab, Escape)
-- Focus trap on modals
+- Focus trap on modals and card nav
 - Focus restore on modal close
 - aria-live on status badge
 - Screen reader text via aria-label on prayer blocks
