@@ -1,6 +1,6 @@
 # World Prayer Times — Full Context
 
-**Version:** 1.27.1 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
+**Version:** 1.27.2 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
 
 **Stack:** Single-file vanilla JS, Aladhan API, Nominatim, Cloudflare Pages + Worker
 
@@ -37,10 +37,6 @@ world-prayer-times/
 ├── worker/                  Cloudflare Worker (separate deployment)
 │   ├── index.js             Worker script — password hash + meeting links API
 │   └── wrangler.toml        Worker config (name: prayer-times-links)
-│
-├── demo/                    Tutorial/demo assets
-│   ├── record.js            Playwright video recorder script
-│   └── prayer-times-demo.webm  Product demo video (~3MB)
 │
 ├── package.json             Scripts only (wrangler deploy), no runtime deps
 ├── CHANGELOG.md             Version history (1.0.0 → 1.25.3)
@@ -182,6 +178,7 @@ All timezone math uses these utilities. No inline offset subtraction remains.
 
 | Version | Key Changes |
 |---------|-------------|
+| **1.27.2** | Folder cleanup: consolidate to single index.html, CLS fix (hero space reservation), tabular-nums countdown, staggered row entrance, reduced-motion hardening, prayer label no-wrap |
 | **1.27.1** | Round 2: hero never-empty, prayer short codes, tl-min floor, light contrast, 100dvh, loader timing |
 | **1.27.0** | Opus audit Phase 1-4: brand color unified (teal), hero countdown, prayer contrast 0.85, haptics, type scale tokens, theme transition, responsive (tablet/landscape/FAB safe-area), og:image, apple-touch-icon |
 | **1.26.1** | Background fix: `--surface` moved to `html`, `body` transparent — dot grid + gradient now render |
@@ -216,6 +213,7 @@ Do NOT report these again. Verified across 12+ audit rounds:
 85–90 (Opus v1.27.0): Brand color unified (teal), duplicate prayer-block CSS removed, theme-color synced, API fallback toast, dot-grid RAF loop stop, og:image meta tags
 91–96 (Opus v1.27.0): Type scale tokens, hero countdown, prayer contrast 0.85, haptics (vibrate), focus-visible FAB+meeting-links, theme transition
 97–102 (Opus v1.27.0): backdrop-filter 16px, apple-touch-icon, emoji→SVG, tablet breakpoint, FAB safe-area, landscape legend collapse
+103–107 (Opus v1.27.2): CLS fix (hero height reservation), tabular-nums countdown, staggered row entrance animation, reduced-motion decorative neutralization, prayer label no-wrap lock
 
 ---
 
