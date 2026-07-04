@@ -1139,7 +1139,7 @@
                     <div><label class="fl" for="task-duration" style="display:block;font-size:0.72rem;color:var(--muted);margin-bottom:4px;">Duration</label><select id="task-duration" class="fs" style="width:100%;"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option></select></div>
                 </div>
                 <div><label class="fl" style="display:block;font-size:0.72rem;color:var(--muted);margin-bottom:4px;">Color</label><div id="task-colors" style="display:flex;gap:8px;"></div></div>
-                <div><label class="fl" for="task-recurrence" style="display:block;font-size:0.72rem;color:var(--muted);margin-bottom:4px;">Repeat</label><select id="task-recurrence" class="fs" style="width:100%;"><option value="none">Once</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></div>
+                <div><label class="fl" for="task-recurrence" style="display:block;font-size:0.72rem;color:var(--muted);margin-bottom:4px;">Repeat</label><select id="task-recurrence" class="fs" style="width:100%;"><option value="daily">Every day</option><option value="weekly">Every week</option><option value="none">Just today</option></select><p id="recur-hint" style="font-size:var(--fs-xs);color:var(--danger);min-height:1em;margin-top:4px;"></p></div>
                 <div id="task-days-wrap" style="display:none;"><label class="fl" style="display:block;font-size:0.72rem;color:var(--muted);margin-bottom:4px;">On days</label><div id="task-days" style="display:flex;gap:4px;flex-wrap:wrap;"></div></div>
             </div>
             <div style="display:flex;gap:8px;margin-top:16px;">
@@ -2905,7 +2905,7 @@ $('#add-row').onclick = () => { openM('#m-addcity'); renderPopular(); $('#city-s
             $('#task-name').value = '';
             $('#task-start').value = '09:00';
             $('#task-duration').value = '30';
-            $('#task-recurrence').value = 'none';
+            $('#task-recurrence').value = 'daily';
             selectedColor = TASK_COLORS[0];
         }
 
@@ -2922,8 +2922,9 @@ $('#add-row').onclick = () => { openM('#m-addcity'); renderPopular(); $('#city-s
 
         const daysWrap = $('#task-days-wrap');
         const updateDaysVisibility = () => { daysWrap.style.display = $('#task-recurrence').value === 'weekly' ? 'block' : 'none'; };
-        updateDaysVisibility();
-        $('#task-recurrence').onchange = updateDaysVisibility;
+        const updateRecurHint = () => { const h = $('#recur-hint'); if (h) h.textContent = $('#task-recurrence').value === 'none' ? 'This task is removed after today.' : ''; };
+        updateDaysVisibility(); updateRecurHint();
+        $('#task-recurrence').onchange = () => { updateDaysVisibility(); updateRecurHint(); };
 
         if ($('#task-recurrence').value === 'weekly') {
             const existing = editingTaskId ? (loadTasks().find(t => t.id === editingTaskId)?.days || []) : [];
