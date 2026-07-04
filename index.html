@@ -2555,11 +2555,12 @@ function unlockCourse(pw) {
                 _renderMeetingLinks(dd);
                 toggleMeetingLinks(true);
             })
-            .catch(() => {
+            .catch((err) => {
                 dd.classList.remove('loading');
+                const detail = err?.message || 'network error';
                 dd.innerHTML = '<div style="padding:10px 12px;font-size:0.72rem;color:var(--danger);display:flex;align-items:center;gap:8px;border-radius:8px;">'
                     + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-                    + '<span>Could not load meeting links.</span>'
+                    + '<span>Could not load meeting links (' + detail + ')</span>'
                     + '<button onclick="unlockCourse(\'' + (pw||'') + '\')" style="margin-left:auto;background:none;border:1px solid var(--danger);color:var(--danger);cursor:pointer;font-size:0.68rem;padding:3px 10px;border-radius:6px;font-weight:600;">Retry</button>'
                     + '</div>';
                 dd.classList.add('open');
