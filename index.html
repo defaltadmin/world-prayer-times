@@ -32,6 +32,9 @@
     <meta name="twitter:image" content="https://prayer.mscarabia.com/og.png">
     <link rel="canonical" href="https://prayer.mscarabia.com">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
 
@@ -853,6 +856,14 @@
         .privacy-section h3 { font-size: 0.78rem; font-weight: 700; color: var(--heading); margin-bottom: 6px; }
         .privacy-section p, .privacy-section li { font-size: 0.72rem; color: var(--muted); line-height: 1.6; }
         .privacy-section ul { padding-left: 16px; }
+
+        /* ── Empty state ──────────────────────────────── */
+        .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:48px 24px; text-align:center; color:var(--muted); animation:fadeInUp .4s ease-out; }
+        .empty-icon { font-size:2.5rem; opacity:.7; }
+        .empty-title { font-size:var(--fs-lg); font-weight:700; color:var(--heading); }
+        .empty-sub { font-size:var(--fs-sm); max-width:280px; }
+        .empty-state .btn-accent { margin-top:8px; }
+        @media (prefers-reduced-motion: reduce) { .empty-state { animation:none; } }
 
         /* ── Reduced motion ──────────────────────────────── */
         @media (prefers-reduced-motion: reduce) {
@@ -1810,6 +1821,21 @@ function renderClassesRow() {
     return row;
 }
 
+/* ── Empty state ──────────────────────────────────────────────── */
+function renderEmptyState() {
+    if (cities.length) return false;
+    const host = $('#rows');
+    if (!host) return false;
+    host.innerHTML = `
+        <div class="empty-state">
+            <div class="empty-icon">🕌</div>
+            <p class="empty-title">No cities yet</p>
+            <p class="empty-sub">Add a city to see prayer times on the timeline.</p>
+            <button class="btn btn-accent" onclick="document.getElementById('city-search')?.focus(); document.querySelector('.modal-bg#m-addcity')?.classList.add('open');">+ Add your first city</button>
+        </div>`;
+    return true;
+}
+
 /* ── Render: all rows ─────────────────────────────────────────────── */
 let _renderGen = 0;
 let _fallbackToasted = false;
@@ -1817,6 +1843,8 @@ async function renderAll() {
     const gen = ++_renderGen;
     const c = $('#rows');
     const sc = $('#tl-scroll'), pos = sc?.scrollLeft || 0;
+
+    if (renderEmptyState()) { hideLoader(); return; }
 
     // Show skeleton rows while loading
     const skeletonCount = Math.min(cities.length || 1, 5);
