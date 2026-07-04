@@ -3255,6 +3255,17 @@ updateEnrolled();
 updateUI();
 updateHeaderDate();
 setInterval(tickClocks, 1000);
+
+// Normalize donate pill — ensure fixed positioning works even if CSS selectors miss
+function normalizeDonatePill() {
+    const donate = Array.from(document.querySelectorAll('a'))
+        .find(a => /Keep Quran Classes Free/i.test(a.textContent || ''));
+    if (!donate) return;
+    donate.id = 'donate-pill';
+    donate.textContent = '♡ Keep Quran Classes Free →';
+}
+normalizeDonatePill();
+
 setTimeout(() => { if (notifEnabled && userCity?.lat) schedulePrayerNotifs(); }, 2000);
 
 // Pause NOW-line pulse when not visible (battery optimization)
