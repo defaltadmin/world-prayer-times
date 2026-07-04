@@ -37,8 +37,8 @@ self.addEventListener('message', e => {
     const timer = setTimeout(() => {
       self.registration.showNotification('Prayer reminder', {
         body: `${ev.name} in 5 minutes`,
-        icon: '/favicon.svg',
-        badge: '/favicon.svg',
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
         tag: `prayer-${ev.name}`,
         renotify: true,
         data: { url: '/' },
