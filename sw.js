@@ -1,5 +1,5 @@
 const CACHE_NAME = 'prayer-times-v2';
-const PRECACHE = ['/', '/index.html', '/manifest.json'];
+const PRECACHE = ['/', '/index.html', '/manifest.json', '/icon-192.png'];
 
 let notificationTimers = [];
 
@@ -35,6 +35,8 @@ self.addEventListener('message', e => {
     if (delay <= 0 || delay > 24 * 60 * 60 * 1000) continue;
 
     const timer = setTimeout(() => {
+      if (!self.registration || typeof self.registration.showNotification !== 'function') return;
+
       self.registration.showNotification('Prayer reminder', {
         body: `${ev.name} in 5 minutes`,
         icon: '/icon-192.png',
