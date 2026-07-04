@@ -1038,7 +1038,7 @@
         <div class="hero-prayer-name" id="hero-prayer-name"></div>
         <div class="hero-time" id="hero-time"></div>
         <div class="hero-city" id="hero-city"></div>
-        <div class="hero-hint" id="hero-hint" style="display:none;" onclick="$('#btn-location')?.click()">
+        <div class="hero-hint" id="hero-hint" style="display:none;">
             Tap the location button for your countdown →
         </div>
     </div>
@@ -1961,10 +1961,20 @@ function renderEmptyState() {
             <div class="empty-icon">🕌</div>
             <p class="empty-title">No cities yet</p>
             <p class="empty-sub">Add a city to see prayer times on the timeline.</p>
-            <button class="btn btn-accent" onclick="document.getElementById('city-search')?.focus(); document.querySelector('.modal-bg#m-addcity')?.classList.add('open');">+ Add your first city</button>
+            <button class="btn btn-accent" id="empty-add-btn">+ Add your first city</button>
         </div>`;
     return true;
 }
+
+// Wire up empty state button (delegated since it's dynamically created)
+document.addEventListener('click', e => {
+    if (e.target.id === 'empty-add-btn') {
+        openM('#m-addcity'); renderPopular(); $('#city-search')?.focus();
+    }
+    if (e.target.id === 'meeting-retry-btn') {
+        unlockCourse(e.target.dataset.retryPw || '');
+    }
+});
 
 /* ── Render: all rows ─────────────────────────────────────────────── */
 let _renderGen = 0;
@@ -2213,6 +2223,7 @@ async function updateCD() {
     const heroTime = $('#hero-time');
     const heroCity = $('#hero-city');
     const heroHint = $('#hero-hint');
+    if (heroHint) heroHint.onclick = () => $('#btn-location')?.click();
 
     // Fallback: use first city if no userCity set
     const city = userCity || cities[0];
@@ -2798,7 +2809,7 @@ function unlockCourse(pw) {
                 dd.innerHTML = '<div style="padding:10px 12px;font-size:0.72rem;color:var(--danger);display:flex;align-items:center;gap:8px;border-radius:8px;">'
                     + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
                     + '<span>Could not load meeting links (' + detail + ')</span>'
-                    + '<button onclick="unlockCourse(\'' + (pw||'') + '\')" style="margin-left:auto;background:none;border:1px solid var(--danger);color:var(--danger);cursor:pointer;font-size:0.68rem;padding:3px 10px;border-radius:6px;font-weight:600;">Retry</button>'
+                    + '<button id="meeting-retry-btn" data-retry-pw="' + (pw||'') + '" style="margin-left:auto;background:none;border:1px solid var(--danger);color:var(--danger);cursor:pointer;font-size:0.68rem;padding:3px 10px;border-radius:6px;font-weight:600;">Retry</button>'
                     + '</div>';
                 dd.classList.add('open');
                 toggle?.setAttribute('aria-expanded', 'true');
