@@ -1,0 +1,59 @@
+# Prayer Times
+
+> A multi-city Salah coordination app for finding prayer-safe meeting windows across timezones.
+
+Prayer Times is a production single-file web app at https://prayer.mscarabia.com. It shows prayer times for multiple cities on a 24-hour timeline, highlights conflicts, supports personal tasks, exports iCal calendars, and helps coordinate Quran class schedules around Salah.
+
+## Canonical URLs
+
+- Live app: https://prayer.mscarabia.com
+- Repository: https://github.com/defaltadmin/world-prayer-times
+
+## Current architecture
+
+- Main app: `index.html`
+- Service worker: `sw.js`
+- PWA manifest: `manifest.json`
+- Meeting links Worker: `worker/index.js`
+- Configuration/docs: `CONTEXT.md`, `PRD.md`
+
+## Product features
+
+- Multi-city prayer timeline
+- Aladhan API prayer times
+- Nominatim city search
+- Prayer-safe meeting-window selection
+- Conflict detection
+- Personal tasks on the timeline
+- LocalStorage persistence
+- iCal export with VTIMEZONE support
+- Quran class timetable
+- Password-gated Teams meeting links via Cloudflare Worker
+- Browser notification scheduling
+- Dark/light theme
+- Arabic RTL support
+- PWA install support
+
+## Security model
+
+Meeting links are stored in a Cloudflare Worker and returned only after the raw course password matches `env.COURSE_SECRET` using timing-safe comparison. The public frontend hash is only a local UI gate and is not the real authorization boundary.
+
+## Design system
+
+The app uses a teal/cyan prayer-time interface with IBM Plex Sans Arabic, JetBrains Mono for time values, glass panels, and a dark timeline optimized for fast scheduling.
+
+Primary palette:
+- Surface: `#091117`
+- Accent: `#2dd4bf`
+- Accent 2: `#06b6d4`
+- Safe: `#34d399`
+- Danger: `#f87171`
+
+## Quality checks
+
+For changes:
+- Test the app on desktop, tablet, and mobile widths
+- Verify city search and prayer API fetches
+- Verify iCal imports into Google Calendar and Outlook
+- Verify task CRUD persists after reload
+- Verify meeting links Worker returns links only with the active secret
