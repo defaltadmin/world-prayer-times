@@ -126,6 +126,19 @@ All timezone math uses these utilities. No inline offset subtraction remains.
 - Inline classes row at bottom of timeline
 - Prayer block click centers selection in user's timezone (converts through UTC)
 
+### Azkar Ticker (NEW)
+- Floating pill at bottom: glass morphism, centered, 520px max, rounded 16px
+- 32 adhkar (20 shared + 6 morning + 6 evening) with Arabic, transliteration, English
+- Controls: prev/next navigation, pause/play, counter (1/32), close
+- Toggle checkboxes: show/hide transliteration, show/hide translation (persisted to localStorage)
+- Auto-advance: reading-time-based (Arabic char count × 40ms, clamped 5–15s)
+- Cross-fade transitions with progress bar
+- aria-live gated to user-initiated only (no screen reader spam)
+- aria-hidden on collapsed tr/en divs
+- Dismiss time-scoped to 24h (re-appears next day)
+- Safe-area insets for iPhone home indicator
+- prefers-reduced-motion respected
+
 ### Course System
 - Password-gated (hash-based local check + Worker API for links)
 - Class timetable (13 slots/week, verified against TQG PDF)
@@ -178,6 +191,7 @@ All timezone math uses these utilities. No inline offset subtraction remains.
 
 | Version | Key Changes |
 |---------|-------------|
+| **1.28.0** | Azkar ticker: floating pill at bottom cycling 32 morning/evening adhkar (Arabic + transliteration + English), navigatable (prev/next), pauseable, toggle transliteration/translation, localStorage persistence, dismiss 24h, aria-live gated for screen readers, safe-area insets, reduced-motion support. Fixed: skeleton rows 290px empty space, geocoded cities tz mismatch, countdown pill removed. |
 | **1.27.2** | Folder cleanup: consolidate to single index.html, CLS fix (hero space reservation), tabular-nums countdown, staggered row entrance, reduced-motion hardening, prayer label no-wrap |
 | **1.27.1** | Round 2: hero never-empty, prayer short codes, tl-min floor, light contrast, 100dvh, loader timing |
 | **1.27.0** | Opus audit Phase 1-4: brand color unified (teal), hero countdown, prayer contrast 0.85, haptics, type scale tokens, theme transition, responsive (tablet/landscape/FAB safe-area), og:image, apple-touch-icon |
