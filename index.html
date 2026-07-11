@@ -2429,8 +2429,6 @@ const ADHKAR = {
       tr:'Astaghfirullāha wa atūbu ilayh.', en:'I seek Allah\'s forgiveness and repent to Him.', ref:'Bukhari / Muslim (100×)', repeat:100 },
     { ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ ، عَدَدَ خَلْقِهِ ، وَرِضَا نَفْسِهِ ، وَزِنَةَ عَرْشِهِ ، وَمِدَادَ كَلِمَاتِهِ',
       tr:'Subḥānallāhi wa biḥamdihi, \'adada khalqihi, wa riḍā nafsihī, wa zinata \'arshihī, wa midāda kalimātihī.', en:'Glory be to Allah and praise Him, as many times as His creation, as pleases His Self, as weighs His Throne, and as fills His words.', ref:'Nasai / Muslim', repeat:1 },
-    { ar:'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ',
-      tr:'A\'ūdhu bi kalimātillāhi at-tāmmāti min sharri mā khalaq.', en:'I seek refuge in the perfect words of Allah from the evil of that which He has created.', ref:'Muslim (3×)', repeat:3 },
     { ar:'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ',
       tr:'Bismillāhilladhī lā yaḍurru ma\'a ismihi shay\'un fī al-arḍi wa lā fī as-samā\', wa huwa as-Samī\'u al-\'Alīm.', en:'In the name of Allah, with whose name nothing on earth or in heaven causes harm, and He is the All-Hearing, the All-Knowing.', ref:'Tirmidhi / Abu Dawud / Nasai (3×)', repeat:3 },
   ],
@@ -2449,6 +2447,8 @@ const ADHKAR = {
       tr:'Allāhumma bika asbaḥnā, wa bika amsaynā, wa bika naḥyā, wa bika namūtu, wa ilayka an-nushūr.', en:'O Allah, by You we have entered the morning, by You we have entered the evening, by You we live, by You we die, and to You is the resurrection.', ref:'Tirmidhi', repeat:1 },
   ],
   evening: [
+    { ar:'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ',
+      tr:'A\'ūdhu bi kalimātillāhi at-tāmmāti min sharri mā khalaq.', en:'I seek refuge in the perfect words of Allah from the evil of that which He has created.', ref:'Muslim (3×)', repeat:3 },
     { ar:'اللَّهُمَّ مَا أَمْسَىٰ بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ ، فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ',
       tr:'Allāhumma mā amsā bī min ni\'mah aw bi aḥadin min khalqik, fa minka waḥdaka lā sharīka lak, fa laka al-ḥamdu wa laka ash-shukr.', en:'O Allah, whatever blessing I have reached in the evening — or any of Your creation — is from You alone, with no partner. So to You belongs all praise and all thanks.', ref:'Abu Dawud', repeat:1 },
     { ar:'أَمْسَيْنَا عَلَىٰ فِطْرَةِ الْإِسْلَامِ ، وَعَلَىٰ كَلِمَةِ الْإِخْلَاصِ ، وَعَلَىٰ دِينِ نَبِيِّنَا مُحَمَّدٍ ، وَعَلَىٰ مِلَّةِ أَبِينَا إِبْرَاهِيمَ حَنِيفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِينَ',
@@ -2533,13 +2533,19 @@ function startAzkarTicker() {
     if (off > Date.now()) return;
     const bar = $('#azkar-bar');
     if (!bar) return;
-    // Don't reset if already running
-    if (!bar.classList.contains('hidden')) return;
     const period = getAzkarPeriod();
-    // Always show: shared + (period-specific if in window, else all)
-    _azkarList = period
+    const newList = period
         ? [...ADHKAR.shared, ...ADHKAR[period]]
         : [...ADHKAR.shared, ...ADHKAR.morning, ...ADHKAR.evening];
+    // If already running, only rebuild list if period changed
+    if (!bar.classList.contains('hidden')) {
+        const newKey = JSON.stringify(newList.map(i => i.ar));
+        const oldKey = JSON.stringify(_azkarList.map(i => i.ar));
+        if (newKey === oldKey) return; // Same list, don't reset
+        _azkarList = newList;
+        return;
+    }
+    _azkarList = newList;
     _azkarIdx = 0;
     _azkarPaused = false;
     const pauseBtn = $('#azkar-pause');
@@ -2578,7 +2584,22 @@ function azkarTogglePause() {
         const pg = $('#azkar-progress');
         if (pg) pg.style.transition = 'none';
     } else {
-        showAzkar(true);
+        // Resume: restart timer for current adhkar without re-fading
+        const item = _azkarList[_azkarIdx % _azkarList.length];
+        if (item) {
+            const dur = getReadingTimeMs(item.ar);
+            const pg = $('#azkar-progress');
+            if (pg) {
+                pg.style.transition = 'none';
+                pg.style.width = '0%';
+                requestAnimationFrame(() => {
+                    pg.style.transition = `width ${dur}ms linear`;
+                    pg.style.width = '100%';
+                });
+            }
+            clearTimeout(_azkarTimer);
+            _azkarTimer = setTimeout(() => { _azkarIdx++; showAzkar(); }, dur);
+        }
     }
 }
 
@@ -2591,20 +2612,22 @@ $('#azkar-next')?.addEventListener('click', () => azkarNavigate(1));
 $('#azkar-pause')?.addEventListener('click', azkarTogglePause);
 $('#azkar-toggle-tr')?.addEventListener('change', (e) => {
     localStorage.setItem('wp_azkar_tr', e.target.checked ? '1' : '0');
-    $('#azkar-tr')?.classList.toggle('collapsed', !e.target.checked);
+    const el = $('#azkar-tr');
+    if (el) { el.classList.toggle('collapsed', !e.target.checked); el.setAttribute('aria-hidden', String(!e.target.checked)); }
 });
 $('#azkar-toggle-en')?.addEventListener('change', (e) => {
     localStorage.setItem('wp_azkar_en', e.target.checked ? '1' : '0');
-    $('#azkar-en')?.classList.toggle('collapsed', !e.target.checked);
+    const el = $('#azkar-en');
+    if (el) { el.classList.toggle('collapsed', !e.target.checked); el.setAttribute('aria-hidden', String(!e.target.checked)); }
 });
 // Restore toggle state from localStorage
 if (localStorage.getItem('wp_azkar_tr') === '0') {
     const tr = $('#azkar-toggle-tr'); if (tr) tr.checked = false;
-    $('#azkar-tr')?.classList.add('collapsed');
+    const el = $('#azkar-tr'); if (el) { el.classList.add('collapsed'); el.setAttribute('aria-hidden', 'true'); }
 }
 if (localStorage.getItem('wp_azkar_en') === '0') {
     const en = $('#azkar-toggle-en'); if (en) en.checked = false;
-    $('#azkar-en')?.classList.add('collapsed');
+    const el = $('#azkar-en'); if (el) { el.classList.add('collapsed'); el.setAttribute('aria-hidden', 'true'); }
 }
 
 // Check every minute
@@ -2701,6 +2724,8 @@ $('#ruler-scroll').addEventListener('scroll', () => syncScroll($('#ruler-scroll'
 // Keyboard controls: arrow keys move, [ ] resize
 document.addEventListener('keydown', e => {
     if (['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+    // Don't hijack arrows when focus is inside azkar bar
+    if (e.target.closest?.('#azkar-bar')) return;
     const sel = $('#sel');
     if (sel) sel.style.transition = 'none';
     const step = e.shiftKey ? 1 : 0.25;
