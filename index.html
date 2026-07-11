@@ -1377,7 +1377,7 @@
         </div>
         <div class="azkar-ar" id="azkar-ar" dir="rtl" aria-live="polite" aria-atomic="true"></div>
         <div class="azkar-tr" id="azkar-tr"></div>
-        <div class="azkar-en" id="azkar-en"></div>
+        <div class="azkar-en" id="azkar-en" aria-live="polite" aria-atomic="true"></div>
         <div class="azkar-ref" id="azkar-ref"></div>
     </div>
 
@@ -2473,7 +2473,7 @@ function getAzkarPeriod() {
     const ck = prayerCacheKey(city);
     const pd = cache[ck];
     if (!pd) return null;
-    const lh = getLocalHours(city.tz || 'UTC');
+    const lh = getLocalHours(pd.tz || city.tz || 'UTC');
     const { Fajr, Sunrise, Asr, Maghrib } = pd.loc;
     if (Fajr != null && Sunrise != null && lh >= Fajr && lh < Sunrise) return 'morning';
     if (Asr != null && Maghrib != null && lh >= Asr && lh < Maghrib) return 'evening';
@@ -2497,7 +2497,9 @@ function showAzkar(userInitiated = false) {
     const item = _azkarList[_azkarIdx % _azkarList.length];
     const bar = $('#azkar-bar');
     const ar = $('#azkar-ar');
+    const en = $('#azkar-en');
     if (ar) ar.setAttribute('aria-live', userInitiated ? 'polite' : 'off');
+    if (en) en.setAttribute('aria-live', userInitiated ? 'polite' : 'off');
     bar.classList.add('azkar-fade-out');
     _azkarFadeTimer = setTimeout(() => {
         $('#azkar-ar').textContent = item.ar;
@@ -2555,6 +2557,7 @@ function stopAzkarTicker() {
 }
 
 function azkarNavigate(dir) {
+    if (!_azkarList.length) return;
     clearTimeout(_azkarTimer);
     clearTimeout(_azkarFadeTimer);
     _azkarIdx = (_azkarIdx + dir + _azkarList.length) % _azkarList.length;
