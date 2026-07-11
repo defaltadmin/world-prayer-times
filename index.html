@@ -864,7 +864,8 @@
             line-height: 1; opacity: 0.5; transition: opacity 0.15s;
         }
         .azkar-close:hover { opacity: 1; color: var(--text); }
-        body.azkar-active .donate-bar { bottom: calc(80px + env(safe-area-inset-bottom)); }
+        body.azkar-active .donate-bar { display: none !important; }
+        body.azkar-active #app { padding-bottom: 90px; }
         @media (max-width: 640px) {
             .azkar-bar { padding: 10px 36px 10px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
             .azkar-ar { font-size: 0.88rem; }
