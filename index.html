@@ -364,7 +364,6 @@
         .header-date { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
         .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
         .countdown-pill { display: none; }
-        @media (min-width: 640px) { .countdown-pill { display: none; } }
 
         /* ── Icon buttons ────────────────────────────────── */
         .icon-btn {
@@ -818,7 +817,7 @@
 
         /* ── Azkar Ticker ────────────────────────────────── */
         .azkar-bar {
-            position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: max(16px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
             z-index: 30; width: min(520px, calc(100vw - 32px));
             background: linear-gradient(135deg, rgba(13,25,34,0.96), rgba(9,17,23,0.99));
             border: 1px solid var(--border); border-radius: 16px;
@@ -1124,7 +1123,6 @@
             </div>
         </div>
         <div class="header-right">
-            <span class="countdown-pill" id="countdown"><span id="cd-text">--</span></span>
             <button class="icon-btn" id="btn-menu" title="Menu" aria-label="Open menu" aria-expanded="false">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
@@ -1377,7 +1375,7 @@
             <label class="azkar-toggle"><input type="checkbox" id="azkar-toggle-tr" checked>Transliteration</label>
             <label class="azkar-toggle"><input type="checkbox" id="azkar-toggle-en" checked>Translation</label>
         </div>
-        <div class="azkar-ar" id="azkar-ar" dir="rtl"></div>
+        <div class="azkar-ar" id="azkar-ar" dir="rtl" aria-live="polite" aria-atomic="true"></div>
         <div class="azkar-tr" id="azkar-tr"></div>
         <div class="azkar-en" id="azkar-en"></div>
         <div class="azkar-ref" id="azkar-ref"></div>
@@ -2127,7 +2125,7 @@ async function renderAll() {
     for (let i = 0; i < skeletonCount; i++) {
         const sk = document.createElement('div');
         sk.className = 'city-row skeleton-row';
-        sk.innerHTML = '<div class="city-label"><span class="city-name" style="background:var(--border);border-radius:4px;width:60px;height:12px;display:inline-block;"></span></div><div style="flex:1;position:relative;"><div style="position:absolute;left:10%;width:15%;height:60%;top:15%;background:var(--border);border-radius:3px;opacity:0.3;"></div><div style="position:left:30%;width:12%;height:60%;top:15%;background:var(--border);border-radius:3px;opacity:0.2;"></div></div>';
+        sk.innerHTML = '<div class="city-label"><span class="city-name" style="background:var(--border);border-radius:4px;width:60px;height:12px;display:inline-block;"></span></div><div style="flex:1;position:relative;"><div style="position:absolute;left:10%;width:15%;height:60%;top:15%;background:var(--border);border-radius:3px;opacity:0.3;"></div><div style="position:absolute;left:30%;width:12%;height:60%;top:15%;background:var(--border);border-radius:3px;opacity:0.2;"></div></div>';
         c.appendChild(sk);
     }
     const all = [...cities];
@@ -2416,7 +2414,7 @@ const ADHKAR = {
     { ar:'اللَّهُمَّ عَافِنِي فِي بَدَنِي ، اللَّهُمَّ عَافِنِي فِي سَمْعِي ، اللَّهُمَّ عَافِنِي فِي بَصَرِي ، لَا إِلَٰهَ إِلَّا أَنْتَ ، اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ ، وَأَعُوذُ بِكَ مِنَ الْفَقْرِ ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ ، لَا إِلَٰهَ إِلَّا أَنْتَ',
       tr:'Allāhumma \'āfinī fī badanī, Allāhumma \'āfinī fī sam\'ī, Allāhumma \'āfinī fī baṣarī...', en:'O Allah, grant me health in my body. O Allah, grant me health in my hearing. O Allah, grant me health in my sight...', ref:'Ahmad', repeat:1 },
     { ar:'حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',
-      tr:'Ḥasbiyallāhu lā ilāha illā huw, \'alayhi tawakkaltu wa huwa rabbu al-\'arṣ al-\'aẓīm.', en:'Allah is sufficient for me. There is no god but Him. In Him I put my trust and He is the Lord of the Mighty Throne.', ref:'Abu Dawud', repeat:1 },
+      tr:'Ḥasbiyallāhu lā ilāha illā huw, \'alayhi tawakkaltu wa huwa rabbu al-\'arsh al-\'aẓīm.', en:'Allah is sufficient for me. There is no god but Him. In Him I put my trust and He is the Lord of the Mighty Throne.', ref:'Abu Dawud', repeat:1 },
     { ar:'رَضِيتُ بِاللَّهِ رَبًّا ، وَبِالْإِسْلَامِ دِينًا ، وَبِمُحَمَّدٍ نَبِيًّا',
       tr:'Raḍītu billāhi rabban, wa bil-Islāmi dīnan, wa bi Muḥammadin nabiyyan.', en:'I am content with Allah as Lord, Islam as religion, and Muhammad as Prophet.', ref:'Tirmidhi / Abu Dawud / Nasai', repeat:1 },
     { ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
@@ -2467,7 +2465,7 @@ const ADHKAR = {
 };
 
 /* ── Azkar Ticker ──────────────────────────────────────────────── */
-let _azkarTimer = null, _azkarIdx = 0, _azkarList = [], _azkarPaused = false;
+let _azkarTimer = null, _azkarFadeTimer = null, _azkarIdx = 0, _azkarList = [], _azkarPaused = false;
 
 function getAzkarPeriod() {
     const city = userCity || cities[0];
@@ -2496,8 +2494,9 @@ function showAzkar() {
     if (!_azkarList.length) return;
     const item = _azkarList[_azkarIdx % _azkarList.length];
     const bar = $('#azkar-bar');
+    clearTimeout(_azkarFadeTimer);
     bar.classList.add('azkar-fade-out');
-    setTimeout(() => {
+    _azkarFadeTimer = setTimeout(() => {
         $('#azkar-ar').textContent = item.ar;
         $('#azkar-tr').textContent = item.tr;
         $('#azkar-en').textContent = item.en;
@@ -2524,9 +2523,11 @@ function showAzkar() {
 
 function startAzkarTicker() {
     if (localStorage.getItem('wp_azkar_off')) return;
-    const period = getAzkarPeriod();
     const bar = $('#azkar-bar');
     if (!bar) return;
+    // Don't reset if already running
+    if (!bar.classList.contains('hidden')) return;
+    const period = getAzkarPeriod();
     // Always show: shared + (period-specific if in window, else all)
     _azkarList = period
         ? [...ADHKAR.shared, ...ADHKAR[period]]
@@ -2542,12 +2543,14 @@ function startAzkarTicker() {
 
 function stopAzkarTicker() {
     clearTimeout(_azkarTimer);
+    clearTimeout(_azkarFadeTimer);
     $('#azkar-bar')?.classList.add('hidden');
     document.body.classList.remove('azkar-active');
 }
 
 function azkarNavigate(dir) {
     clearTimeout(_azkarTimer);
+    clearTimeout(_azkarFadeTimer);
     _azkarIdx = (_azkarIdx + dir + _azkarList.length) % _azkarList.length;
     showAzkar();
 }
@@ -2562,6 +2565,7 @@ function azkarTogglePause() {
     }
     if (_azkarPaused) {
         clearTimeout(_azkarTimer);
+        clearTimeout(_azkarFadeTimer);
         const pg = $('#azkar-progress');
         if (pg) pg.style.transition = 'none';
     } else {
@@ -2577,11 +2581,22 @@ $('#azkar-prev')?.addEventListener('click', () => azkarNavigate(-1));
 $('#azkar-next')?.addEventListener('click', () => azkarNavigate(1));
 $('#azkar-pause')?.addEventListener('click', azkarTogglePause);
 $('#azkar-toggle-tr')?.addEventListener('change', (e) => {
+    localStorage.setItem('wp_azkar_tr', e.target.checked ? '1' : '0');
     $('#azkar-tr')?.classList.toggle('collapsed', !e.target.checked);
 });
 $('#azkar-toggle-en')?.addEventListener('change', (e) => {
+    localStorage.setItem('wp_azkar_en', e.target.checked ? '1' : '0');
     $('#azkar-en')?.classList.toggle('collapsed', !e.target.checked);
 });
+// Restore toggle state from localStorage
+if (localStorage.getItem('wp_azkar_tr') === '0') {
+    const tr = $('#azkar-toggle-tr'); if (tr) tr.checked = false;
+    $('#azkar-tr')?.classList.add('collapsed');
+}
+if (localStorage.getItem('wp_azkar_en') === '0') {
+    const en = $('#azkar-toggle-en'); if (en) en.checked = false;
+    $('#azkar-en')?.classList.add('collapsed');
+}
 
 // Check every minute
 setInterval(startAzkarTicker, 60_000);
