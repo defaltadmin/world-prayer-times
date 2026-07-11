@@ -2125,6 +2125,7 @@ async function renderAll() {
     const results = await Promise.allSettled(all.map(c => renderRow(c).finally(() => { done++; updLoad(); })));
     if (gen !== _renderGen) return;
     if (done >= total) hideLoader();
+    c.innerHTML = ''; // Remove skeleton rows
     results.forEach(r => { if (r.status === 'fulfilled' && r.value) c.appendChild(r.value); });
     // Classes row (inline timeline)
     const classesRow = renderClassesRow();
