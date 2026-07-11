@@ -827,50 +827,58 @@
             border-top: 1px solid var(--border);
             backdrop-filter: blur(14px) saturate(160%);
             -webkit-backdrop-filter: blur(14px) saturate(160%);
-            padding: 14px 40px 14px 16px;
-            padding-bottom: max(14px, env(safe-area-inset-bottom));
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            padding: 8px 16px 10px;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
         .azkar-bar.hidden { display: none; }
         .azkar-bar.azkar-fade-out { opacity: 0; transform: translateY(4px); }
         .azkar-bar.azkar-fade-in { opacity: 1; transform: translateY(0); }
+        .azkar-controls {
+            display: flex; align-items: center; gap: 6px;
+            width: 100%; justify-content: center; margin-bottom: 2px;
+        }
+        .azkar-btn {
+            background: none; border: 1px solid var(--border); color: var(--muted);
+            font-size: 0.85rem; cursor: pointer; padding: 2px 8px;
+            border-radius: 4px; line-height: 1; transition: all 0.15s;
+            min-width: 28px; min-height: 24px; display: flex; align-items: center; justify-content: center;
+        }
+        .azkar-btn:hover { color: var(--text); border-color: var(--accent); background: rgba(45,212,191,0.08); }
+        .azkar-btn.azkar-paused { color: var(--accent); border-color: var(--accent); }
+        .azkar-counter {
+            font-size: 0.65rem; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+            min-width: 40px; text-align: center;
+        }
         .azkar-ar {
-            font-size: 1.05rem; font-weight: 600; color: var(--heading);
-            text-align: center; direction: rtl; line-height: 1.8;
+            font-size: clamp(0.78rem, 1.5vw, 1rem); font-weight: 600; color: var(--heading);
+            text-align: center; direction: rtl; line-height: 1.7;
             max-width: 800px; letter-spacing: 0.01em;
         }
         .azkar-tr {
-            font-size: 0.72rem; color: var(--muted); font-style: italic;
-            text-align: center; max-width: 700px; line-height: 1.4;
+            font-size: clamp(0.58rem, 1vw, 0.72rem); color: var(--muted); font-style: italic;
+            text-align: center; max-width: 700px; line-height: 1.3;
         }
         .azkar-en {
-            font-size: 0.68rem; color: var(--accent); opacity: 0.8;
-            text-align: center; max-width: 700px; line-height: 1.4;
+            font-size: clamp(0.55rem, 0.9vw, 0.68rem); color: var(--accent); opacity: 0.8;
+            text-align: center; max-width: 700px; line-height: 1.3;
         }
         .azkar-ref {
-            font-size: 0.58rem; color: var(--border); text-align: center;
-            margin-top: 2px; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.55rem; color: var(--border); text-align: center;
+            margin-top: 1px; font-family: 'JetBrains Mono', monospace;
         }
         .azkar-progress {
             position: absolute; top: 0; left: 0; height: 2px;
             background: var(--accent); width: 0%; border-radius: 0 1px 1px 0;
             will-change: width;
         }
-        .azkar-close {
-            position: absolute; top: 8px; right: 10px;
-            background: none; border: none; color: var(--muted);
-            font-size: 1.2rem; cursor: pointer; padding: 4px 6px;
-            line-height: 1; opacity: 0.5; transition: opacity 0.15s;
-        }
-        .azkar-close:hover { opacity: 1; color: var(--text); }
+        .azkar-close { border: none; }
         body.azkar-active .donate-bar { display: none !important; }
-        body.azkar-active #app { padding-bottom: 90px; }
+        body.azkar-active #app { padding-bottom: 80px; }
         @media (max-width: 640px) {
-            .azkar-bar { padding: 10px 36px 10px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-            .azkar-ar { font-size: 0.88rem; }
-            .azkar-tr { font-size: 0.62rem; }
-            .azkar-en { font-size: 0.58rem; }
+            .azkar-bar { padding: 6px 10px 8px; }
+            .azkar-btn { padding: 2px 6px; font-size: 0.78rem; min-width: 24px; min-height: 22px; }
         }
         @media (prefers-reduced-motion: reduce) {
             .azkar-bar { transition: none !important; }
@@ -1344,9 +1352,15 @@
     </div>
 
     <!-- ══════════════ AZKAR TICKER ══════════════ -->
-    <div class="azkar-bar hidden" id="azkar-bar" role="complementary" aria-label="Morning and evening adhkar">
+    <div class="azkar-bar hidden" id="azkar-bar" role="complementary" aria-label="Adhkar remembrances">
         <div class="azkar-progress" id="azkar-progress"></div>
-        <button class="azkar-close" id="azkar-close" aria-label="Close adhkar">×</button>
+        <div class="azkar-controls">
+            <button class="azkar-btn" id="azkar-prev" aria-label="Previous adhkar" title="Previous">‹</button>
+            <span class="azkar-counter" id="azkar-counter"></span>
+            <button class="azkar-btn" id="azkar-pause" aria-label="Pause" title="Pause">⏸</button>
+            <button class="azkar-btn" id="azkar-next" aria-label="Next adhkar" title="Next">›</button>
+            <button class="azkar-btn azkar-close" id="azkar-close" aria-label="Close adhkar" title="Close">×</button>
+        </div>
         <div class="azkar-ar" id="azkar-ar" dir="rtl"></div>
         <div class="azkar-tr" id="azkar-tr"></div>
         <div class="azkar-en" id="azkar-en"></div>
@@ -2436,7 +2450,7 @@ const ADHKAR = {
 };
 
 /* ── Azkar Ticker ──────────────────────────────────────────────── */
-let _azkarTimer = null, _azkarIdx = 0, _azkarList = [];
+let _azkarTimer = null, _azkarIdx = 0, _azkarList = [], _azkarPaused = false;
 
 function getAzkarPeriod() {
     const city = userCity || cities[0];
@@ -2453,7 +2467,12 @@ function getAzkarPeriod() {
 
 function getReadingTimeMs(text) {
     const len = text.replace(/[\s\n]/g, '').length;
-    return Math.max(6000, Math.min(20000, len * 50));
+    return Math.max(5000, Math.min(15000, len * 40));
+}
+
+function updateAzkarCounter() {
+    const el = $('#azkar-counter');
+    if (el && _azkarList.length) el.textContent = `${(_azkarIdx % _azkarList.length) + 1}/${_azkarList.length}`;
 }
 
 function showAzkar() {
@@ -2465,36 +2484,40 @@ function showAzkar() {
         $('#azkar-ar').textContent = item.ar;
         $('#azkar-tr').textContent = item.tr;
         $('#azkar-en').textContent = item.en;
-        const refText = `— ${item.ref}`;
-        $('#azkar-ref').textContent = refText;
+        $('#azkar-ref').textContent = `— ${item.ref}`;
+        updateAzkarCounter();
         bar.classList.remove('azkar-fade-out');
         bar.classList.add('azkar-fade-in');
-        const dur = getReadingTimeMs(item.ar);
-        const pg = $('#azkar-progress');
-        if (pg) {
-            pg.style.transition = 'none';
-            pg.style.width = '0%';
-            requestAnimationFrame(() => {
-                pg.style.transition = `width ${dur}ms linear`;
-                pg.style.width = '100%';
-            });
+        if (!_azkarPaused) {
+            const dur = getReadingTimeMs(item.ar);
+            const pg = $('#azkar-progress');
+            if (pg) {
+                pg.style.transition = 'none';
+                pg.style.width = '0%';
+                requestAnimationFrame(() => {
+                    pg.style.transition = `width ${dur}ms linear`;
+                    pg.style.width = '100%';
+                });
+            }
+            clearTimeout(_azkarTimer);
+            _azkarTimer = setTimeout(() => { _azkarIdx++; showAzkar(); }, dur);
         }
-        clearTimeout(_azkarTimer);
-        _azkarTimer = setTimeout(() => { _azkarIdx++; showAzkar(); }, dur);
-    }, 300);
+    }, 250);
 }
 
 function startAzkarTicker() {
     if (localStorage.getItem('wp_azkar_off')) return;
     const period = getAzkarPeriod();
     const bar = $('#azkar-bar');
-    if (!period || !bar) {
-        bar?.classList.add('hidden');
-        document.body.classList.remove('azkar-active');
-        return;
-    }
-    _azkarList = [...ADHKAR.shared, ...ADHKAR[period]];
+    if (!bar) return;
+    // Always show: shared + (period-specific if in window, else all)
+    _azkarList = period
+        ? [...ADHKAR.shared, ...ADHKAR[period]]
+        : [...ADHKAR.shared, ...ADHKAR.morning, ...ADHKAR.evening];
     _azkarIdx = 0;
+    _azkarPaused = false;
+    const pauseBtn = $('#azkar-pause');
+    if (pauseBtn) { pauseBtn.textContent = '⏸'; pauseBtn.classList.remove('azkar-paused'); pauseBtn.setAttribute('aria-label', 'Pause'); }
     bar.classList.remove('hidden');
     document.body.classList.add('azkar-active');
     showAzkar();
@@ -2506,12 +2529,38 @@ function stopAzkarTicker() {
     document.body.classList.remove('azkar-active');
 }
 
+function azkarNavigate(dir) {
+    clearTimeout(_azkarTimer);
+    _azkarIdx = (_azkarIdx + dir + _azkarList.length) % _azkarList.length;
+    showAzkar();
+}
+
+function azkarTogglePause() {
+    _azkarPaused = !_azkarPaused;
+    const btn = $('#azkar-pause');
+    if (btn) {
+        btn.textContent = _azkarPaused ? '▶' : '⏸';
+        btn.classList.toggle('azkar-paused', _azkarPaused);
+        btn.setAttribute('aria-label', _azkarPaused ? 'Play' : 'Pause');
+    }
+    if (_azkarPaused) {
+        clearTimeout(_azkarTimer);
+        const pg = $('#azkar-progress');
+        if (pg) pg.style.transition = 'none';
+    } else {
+        showAzkar();
+    }
+}
+
 $('#azkar-close')?.addEventListener('click', () => {
     localStorage.setItem('wp_azkar_off', '1');
     stopAzkarTicker();
 });
+$('#azkar-prev')?.addEventListener('click', () => azkarNavigate(-1));
+$('#azkar-next')?.addEventListener('click', () => azkarNavigate(1));
+$('#azkar-pause')?.addEventListener('click', azkarTogglePause);
 
-// Check every minute if we're in an azkar window
+// Check every minute
 setInterval(startAzkarTicker, 60_000);
 // Initial start (delayed so prayer data is cached)
 setTimeout(startAzkarTicker, 2500);
