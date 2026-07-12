@@ -1,6 +1,6 @@
 # World Prayer Times — Full Context
 
-**Version:** 1.27.2 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
+**Version:** 1.28.0 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
 
 **Stack:** Single-file vanilla JS, Aladhan API, Nominatim, Cloudflare Pages + Worker
 
@@ -128,16 +128,21 @@ All timezone math uses these utilities. No inline offset subtraction remains.
 
 ### Azkar Ticker (NEW)
 - Floating pill at bottom: glass morphism, centered, 520px max, rounded 16px
-- 32 adhkar (20 shared + 6 morning + 6 evening) with Arabic, transliteration, English
-- Controls: prev/next navigation, pause/play, counter (1/32), close
+- 32 adhkar (19 shared + 6 morning + 7 evening) with Arabic, transliteration, English
+- A'udhu bi kalimat is evening-only (Ahmad/Nasai, Hisn #97)
+- Controls: prev/next navigation, pause/play, counter (1/N), close
 - Toggle checkboxes: show/hide transliteration, show/hide translation (persisted to localStorage)
 - Auto-advance: reading-time-based (Arabic char count × 40ms, clamped 5–15s)
+- Pause/resume: freezes current adhkar, resumes timer without re-fading
 - Cross-fade transitions with progress bar
-- aria-live gated to user-initiated only (no screen reader spam)
-- aria-hidden on collapsed tr/en divs
+- aria-live gated to user-initiated only (no screen reader spam) — both Arabic and English divs
+- aria-hidden on collapsed tr/en divs (prevents screen reader announcement of hidden content)
 - Dismiss time-scoped to 24h (re-appears next day)
 - Safe-area insets for iPhone home indicator
 - prefers-reduced-motion respected
+- Arrow key scope guard: global keydown skips when focus is inside azkar bar
+- Period re-evaluation: 60s interval compares list, rebuilds only if period changed
+- Geocoded cities: uses pd.tz from prayer cache (not city.tz which may be stale UTC)
 
 ### Course System
 - Password-gated (hash-based local check + Worker API for links)
@@ -191,7 +196,7 @@ All timezone math uses these utilities. No inline offset subtraction remains.
 
 | Version | Key Changes |
 |---------|-------------|
-| **1.28.0** | Azkar ticker: floating pill at bottom cycling 32 morning/evening adhkar (Arabic + transliteration + English), navigatable (prev/next), pauseable, toggle transliteration/translation, localStorage persistence, dismiss 24h, aria-live gated for screen readers, safe-area insets, reduced-motion support. Fixed: skeleton rows 290px empty space, geocoded cities tz mismatch, countdown pill removed. |
+| **1.28.0** | Azkar ticker: floating pill cycling 32 morning/evening adhkar (Arabic + transliteration + English), navigatable, pauseable, toggle transliteration/translation, localStorage persistence, dismiss 24h, aria-live gated, safe-area, reduced-motion. 5 Opus review rounds, 21 fixes: corrected 7 repeat counts, geocoded tz, aria-live English, navigate guard, pause/resume without re-fade, aria-hidden collapsed divs, arrow key scope guard, period re-evaluation, A'udhu bi kalimat moved to evening-only, skeleton rows, countdown pill removed, transliteration typo, timer race, state-stomp guard. |
 | **1.27.2** | Folder cleanup: consolidate to single index.html, CLS fix (hero space reservation), tabular-nums countdown, staggered row entrance, reduced-motion hardening, prayer label no-wrap |
 | **1.27.1** | Round 2: hero never-empty, prayer short codes, tl-min floor, light contrast, 100dvh, loader timing |
 | **1.27.0** | Opus audit Phase 1-4: brand color unified (teal), hero countdown, prayer contrast 0.85, haptics, type scale tokens, theme transition, responsive (tablet/landscape/FAB safe-area), og:image, apple-touch-icon |

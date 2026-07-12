@@ -2543,7 +2543,8 @@ function startAzkarTicker() {
         const oldKey = JSON.stringify(_azkarList.map(i => i.ar));
         if (newKey === oldKey) return; // Same list, don't reset
         _azkarList = newList;
-        _azkarIdx = _azkarIdx % newList.length; // Clamp to new list bounds
+        _azkarIdx = _azkarIdx % newList.length;
+        showAzkar(); // Refresh content/counter immediately on period change
         return;
     }
     _azkarList = newList;
