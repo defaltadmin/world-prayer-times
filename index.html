@@ -2494,7 +2494,8 @@ function showAzkar(userInitiated = false) {
     if (!_azkarList.length) return;
     clearTimeout(_azkarTimer);
     clearTimeout(_azkarFadeTimer);
-    const item = _azkarList[_azkarIdx % _azkarList.length];
+    _azkarIdx = _azkarIdx % _azkarList.length; // Clamp to list bounds
+    const item = _azkarList[_azkarIdx];
     const bar = $('#azkar-bar');
     const ar = $('#azkar-ar');
     const en = $('#azkar-en');
