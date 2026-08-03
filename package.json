@@ -1,6 +1,6 @@
 {
   "name": "world-prayer-times",
-  "version": "1.28.0",
+  "version": "1.28.1",
   "private": true,
   "scripts": {
     "dev": "wrangler pages dev .",

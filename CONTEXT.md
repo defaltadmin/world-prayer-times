@@ -1,6 +1,6 @@
 # World Prayer Times — Full Context
 
-**Version:** 1.28.0 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
+**Version:** 1.28.1 | **Live:** https://prayer.mscarabia.com | **Repo:** https://github.com/defaltadmin/world-prayer-times
 
 **Stack:** Single-file vanilla JS, Aladhan API, Nominatim, Cloudflare Pages + Worker
 

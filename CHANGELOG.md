@@ -2,6 +2,15 @@
 
 All notable changes to World Prayer Times are documented here.
 
+## [1.28.1] — 2026-08-03
+
+### Security
+- **CSP hardening (meta + `_headers`)** — Added `object-src 'none'` and `frame-ancestors 'none'`; `_headers` CSP now matches the meta tag (removed stale allowlisted domains: googletagmanager.com, static.cloudflareinsights.com, google-analytics.com, analytics.google.com — none are referenced by the app).
+- **Permissions-Policy lockdown (meta + `_headers`)** — `camera=(), microphone=(), payment=(), usb=()` in addition to `geolocation=(self), notifications=(self)`.
+
+### Accessibility
+- **Skip link** — New "Skip to content" link at top of body (off-screen until focused, keyboard-visible, reduced-motion aware, links to `#app`).
+
 ## [1.26.1] — 2026-06-23
 
 ### Fixed
